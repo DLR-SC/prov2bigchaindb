@@ -1,0 +1,263 @@
+{
+  "entity": {
+    "ul:master-thesis-stoffers": {
+      "prov:type": {
+        "$": "prov:Bundle",
+        "type": "prov:QUALIFIED_NAME"
+      }
+    }
+  },
+  "prefix": {
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "ul": "https://uni-leipzig.de/prov/",
+    "dlr": "https://dlr.de/prov/",
+    "pre_0": "https://www.w3.org/ns/prov#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "ex": "https://example.org/1/",
+    "default": "https://example.org/0/",
+    "tr": "https://www.w3.org/TR/2013/"
+  },
+  "bundle": {
+    "ul:master-thesis-stoffers": {
+      "wasAssociatedWith": {
+        "_:wAW4946": {
+          "prov:activity": "ex:print-thesis",
+          "prov:agent": "ex:print-shop"
+        },
+        "_:wAW4945": {
+          "prov:activity": "ul:worked-on-thesis",
+          "prov:agent": "ul:martin-stoffers",
+          "prov:plan": "ul:milestone-1"
+        }
+      },
+      "specializationOf": {
+        "_:sO17622": {
+          "prov:generalEntity": "ul:thesis-stoffers-finished",
+          "prov:specificEntity": "ul:thesis-stoffers-20170310"
+        },
+        "_:sO17621": {
+          "prov:generalEntity": "ul:thesis-stoffers-finished",
+          "prov:specificEntity": "ul:thesis-stoffers-20170316"
+        }
+      },
+      "wasInfluencedBy": {
+        "_:Infl63": {
+          "prov:influencer": "ul:michael-martin",
+          "prov:influencee": "ul:master-thesis-stoffers"
+        },
+        "_:Infl64": {
+          "prov:influencer": "dlr:andreas-schreiber",
+          "prov:influencee": "ul:master-thesis-stoffers"
+        }
+      },
+      "wasAttributedTo": {
+        "_:wAT7405": {
+          "prov:agent": "ul:university-leipzig",
+          "prov:entity": "ul:master-thesis-stoffers"
+        },
+        "_:wAT7404": {
+          "prov:agent": "ul:martin-stoffers",
+          "prov:entity": "ul:thesis-stoffers-20170316"
+        }
+      },
+      "entity": {
+        "ul:thesis-stoffers-versions": {
+          "prov:type": {
+            "$": "prov:Collection",
+            "type": "prov:QUALIFIED_NAME"
+          }
+        },
+        "ul:thesis-stoffers-20170310": {},
+        "ul:thesis-stoffers-finished": {
+          "prov:type": {
+            "$": "ul:mastersthesis",
+            "type": "xsd:string"
+          }
+        },
+        "ul:milestone-1": {
+          "prov:type": {
+            "$": "Plan",
+            "type": "xsd:string"
+          }
+        },
+        "tr:REC-prov-dm-20130430": {
+          "prov:label": "The PROV Data Model"
+        },
+        "ul:thesis-stoffers-20170316": {
+          "ul:title": {
+            "$": "Trustworthy Provenance...",
+            "type": "xsd:string"
+          }
+        }
+      },
+      "wasDerivedFrom": {
+        "_:wDF30664": {
+          "prov:generatedEntity": "ul:thesis-stoffers-20170316",
+          "prov:type": {
+            "$": "prov:Revision",
+            "type": "xsd:string"
+          },
+          "prov:usedEntity": "ul:thesis-stoffers-20170310"
+        }
+      },
+      "used": {
+        "_:u7697": {
+          "prov:activity": "tr:REC-prov-dm-20130430",
+          "prov:time": "2017-03-16T09:10:00.000Z",
+          "prov:entity": "ul:worked-on-thesis"
+        },
+        "_:u7698": {
+          "prov:activity": "ul:thesis-stoffers-20170316",
+          "prov:entity": "ex:print-thesis"
+        }
+      },
+      "agent": {
+        "dlr:dlr": {
+          "prov:type": {
+            "$": "prov:Organization",
+            "type": "prov:QUALIFIED_NAME"
+          }
+        },
+        "dlr:andreas-schreiber": {
+          "prov:type": {
+            "$": "prov:Person",
+            "type": "prov:QUALIFIED_NAME"
+          },
+          "ul:name": {
+            "$": "Andreas Schreiber",
+            "type": "xsd:string"
+          }
+        },
+        "ex:print-shop": {
+          "prov:type": {
+            "$": "prov:Organization",
+            "type": "prov:QUALIFIED_NAME"
+          }
+        },
+        "ul:martin-stoffers": {
+          "prov:type": {
+            "$": "prov:Person",
+            "type": "prov:QUALIFIED_NAME"
+          },
+          "ul:name": {
+            "$": "Martin Stoffers",
+            "type": "xsd:string"
+          },
+          "ul:regno": {
+            "$": "3748896",
+            "type": "xsd:string"
+          }
+        },
+        "ul:university-leipzig": {
+          "prov:type": {
+            "$": "prov:Organization",
+            "type": "prov:QUALIFIED_NAME"
+          }
+        },
+        "ul:michael-martin": {
+          "prov:type": {
+            "$": "prov:Person",
+            "type": "prov:QUALIFIED_NAME"
+          },
+          "ul:name": {
+            "$": "Michael Martin",
+            "type": "xsd:string"
+          }
+        }
+      },
+      "wasInvalidatedBy": {
+        "_:wIB155": {
+          "prov:activity": "ex:print-thesis",
+          "prov:entity": "ul:thesis-stoffers-20170316"
+        }
+      },
+      "actedOnBehalfOf": {
+        "_:aOBO592": {
+          "prov:activity": "ex:print-thesis",
+          "prov:delegate": "ex:print-shop",
+          "prov:responsible": "ul:martin-stoffers"
+        },
+        "_:aOBO593": {
+          "prov:delegate": "ul:michael-martin",
+          "prov:responsible": "ul:university-leipzig"
+        },
+        "_:aOBO594": {
+          "prov:delegate": "dlr:andreas-schreiber",
+          "prov:responsible": "dlr:dlr"
+        }
+      },
+      "wasInformedBy": {
+        "_:Infm2812": {
+          "prov:informant": "ul:worked-on-thesis",
+          "prov:informed": "ex:print-thesis"
+        }
+      },
+      "wasEndedBy": {
+        "_:wEB215": {
+          "prov:activity": "ex:print-thesis",
+          "prov:time": "2017-03-17T10:10:00.000Z",
+          "prov:trigger": "ul:thesis-stoffers-20170316",
+          "prov:ender": "ul:worked-on-thesis"
+        }
+      },
+      "hadMember": {
+        "_:hM3607": {
+          "prov:collection": "ul:thesis-stoffers-versions",
+          "prov:entity": [
+            "ul:thesis-stoffers-20170316"
+          ]
+        },
+        "_:hM3608": {
+          "prov:collection": "ul:thesis-stoffers-versions",
+          "prov:entity": [
+            "ul:thesis-stoffers-20170310"
+          ]
+        }
+      },
+      "prefix": {
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "prov": "http://www.w3.org/ns/prov#"
+      },
+      "wasGeneratedBy": {
+        "_:wGB7708": {
+          "prov:activity": "ex:print-thesis",
+          "prov:entity": "ul:thesis-stoffers-finished"
+        },
+        "_:wGB7707": {
+          "prov:activity": "ul:worked-on-thesis",
+          "prov:entity": "ul:thesis-stoffers-20170316"
+        }
+      },
+      "alternateOf": {
+        "_:aO244": {
+          "prov:alternate2": "ul:thesis-stoffers-20170316",
+          "prov:alternate1": "ul:thesis-stoffers-20170310"
+        }
+      },
+      "activity": {
+        "ex:print-thesis": {
+          "prov:type": {
+            "$": "ex:print",
+            "type": "prov:QUALIFIED_NAME"
+          }
+        },
+        "ul:worked-on-thesis": {
+          "prov:type": {
+            "$": "ul:edit",
+            "type": "prov:QUALIFIED_NAME"
+          },
+          "prov:startTime": "2017-10-03T09:00:00.000+01:00",
+          "prov:endTime": "2016-10-03T09:30:00.000+01:00"
+        }
+      },
+      "wasStartedBy": {
+        "_:wSB570": {
+          "prov:activity": "ex:print-thesis",
+          "prov:time": "2017-03-17T10:00:00.000Z",
+          "prov:trigger": "ul:thesis-stoffers-20170316",
+          "prov:starter": "ul:worked-on-thesis"
+        }
+      }
+    }
+  }
+}

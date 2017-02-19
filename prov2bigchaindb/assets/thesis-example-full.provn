@@ -1,0 +1,66 @@
+document
+   // Namespaces
+   default <https://example.org/0/>
+   prefix ex <https://example.org/1/>
+   prefix prov <https://www.w3.org/ns/prov#>
+   prefix ul <https://uni-leipzig.de/prov/>
+   prefix dlr <https://dlr.de/prov/>
+   prefix tr <https://www.w3.org/TR/2013/>
+   
+   // Component 4
+   entity(ul:master-thesis-stoffers, [ prov:type='prov:Bundle' ])
+   bundle ul:master-thesis-stoffers
+      
+      // Types
+      entity(ul:thesis-stoffers-finished, [ prov:type="ul:mastersthesis"])
+      entity(ul:thesis-stoffers-20170316, [ ul:title="Trustworthy Provenance..." ])
+      entity(ul:thesis-stoffers-20170310)
+      entity(ul:milestone-1, [ prov:type="Plan" ])
+      entity(tr:REC-prov-dm-20130430, [ prov:label="The PROV Data Model" ])
+      
+      activity(ul:worked-on-thesis, 2017-10-03T09:00:00, 2016-10-03T09:30:00, [ prov:type='ul:edit' ])
+      activity(ex:print-thesis, -, -, [ prov:type='ex:print' ])
+      
+      agent(ul:martin-stoffers, [ul:regno="3748896", ul:name="Martin Stoffers", prov:type='prov:Person' ])
+      agent(ul:michael-martin, [ul:name="Michael Martin", prov:type='prov:Person' ])
+      agent(ul:university-leipzig, [prov:type='prov:Organization' ])
+      agent(dlr:andreas-schreiber, [ul:name="Andreas Schreiber", prov:type='prov:Person' ])
+      agent(dlr:dlr, [prov:type='prov:Organization' ])
+      agent(ex:print-shop, [prov:type='prov:Organization' ])
+      
+      // Relations
+      // Component 1
+      wasGeneratedBy(ul:thesis-stoffers-20170316, ul:worked-on-thesis, -)
+      wasGeneratedBy(ul:thesis-stoffers-finished, ex:print-thesis, -)
+      used(tr:REC-prov-dm-20130430, ul:worked-on-thesis, 2017-03-16T09:10:00)
+      used(ul:thesis-stoffers-20170316, ex:print-thesis, -)
+      wasInformedBy(ex:print-thesis, ul:worked-on-thesis)
+      wasStartedBy(ex:print-thesis, ul:thesis-stoffers-20170316, ul:worked-on-thesis, 2017-03-17T10:00:00)
+      wasEndedBy(ex:print-thesis, ul:thesis-stoffers-20170316, ul:worked-on-thesis, 2017-03-17T10:10:00)
+      
+      // Component 2
+      wasInvalidatedBy(ul:thesis-stoffers-20170316, ex:print-thesis, -)
+      wasDerivedFrom(ul:thesis-stoffers-20170316, ul:thesis-stoffers-20170310, -, -, -, [ prov:type="prov:Revision" ])
+      
+      // Component 3
+      wasAttributedTo(ul:thesis-stoffers-20170316, ul:martin-stoffers)
+      wasAttributedTo(ul:master-thesis-stoffers, ul:university-leipzig, -)
+      wasAssociatedWith(ul:worked-on-thesis, ul:martin-stoffers, ul:milestone-1)
+      wasAssociatedWith(ex:print-thesis, ex:print-shop, -)
+      actedOnBehalfOf(ex:print-shop, ul:martin-stoffers, ex:print-thesis)
+      actedOnBehalfOf(ul:michael-martin, ul:university-leipzig)
+      wasInfluencedBy(ul:master-thesis-stoffers, ul:michael-martin, [prov:role="ul:Supervisior"])
+      actedOnBehalfOf(dlr:andreas-schreiber, dlr:dlr)
+      wasInfluencedBy(ul:master-thesis-stoffers, dlr:andreas-schreiber, [prov:role="ul:Supervisior"])
+      
+      // Component 5
+      specializationOf(ul:thesis-stoffers-20170316, ul:thesis-stoffers-finished)
+      specializationOf(ul:thesis-stoffers-20170310, ul:thesis-stoffers-finished)
+      alternateOf(ul:thesis-stoffers-20170316, ul:thesis-stoffers-20170310)
+
+      // Component 6
+      entity(ul:thesis-stoffers-versions, [prov:type='prov:Collection'])
+      hadMember(ul:thesis-stoffers-versions, ul:thesis-stoffers-20170316)
+      hadMember(ul:thesis-stoffers-versions, ul:thesis-stoffers-20170310)
+   endBundle
+endDocument

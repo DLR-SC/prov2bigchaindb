@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+.eggs/
+*$py.class
+prov2bigchaindb.egg-info/
+rethinkdb_data
+
+build/
+dist/
+
+# Unit test / coverage reports
+.coverage
+.cache
+
+#IDE
+.idea
+
+# Sphinx documentation
+docs/build/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+
+# Translations
+*.mo
+*.pot
+
+# virtualenv
+venv/
+env/
+ENV/
+
+# Rope project settings
+.ropeproject
+
+# Bigchain_DB Docker data
+bigchaindb_n1_docker/
+bigchaindb_n2_docker/
+bigchaindb_n3_docker/

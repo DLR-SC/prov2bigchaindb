@@ -1,0 +1,51 @@
+document
+  prefix userdata <http://software.dlr.de/qs/userdata/>
+  prefix qs <http://software.dlr.de/qs/>
+  prefix graphic <http://software.dlr.de/qs/graphic/>
+  prefix service <http://software.dlr.de/qs/service/>
+  prefix app <http://software.dlr.de/qs/app/>
+  prefix user <http://software.dlr.de/qs/user/>
+  prefix device <http://software.dlr.de/qs/device/>
+  prefix method <http://www.java.com/>
+  
+  wasGeneratedBy(userdata:bloodpressureRemote, method:requestUp, 2016-12-01T16:06:23+00:00, [prov:role="uploading"])
+  wasGeneratedBy(userdata:bloodpressureDownloaded, method:requestDown, 2016-12-01T17:06:20+00:00)
+  wasGeneratedBy(userdata:bloodpressureNow, method:input, 2016-12-01T16:06:22+00:00, [prov:role="updating"])
+  wasGeneratedBy(qs:graphic/diagram, method:visualize, 2016-12-01T17:06:22+00:00, [prov:role="displaying"])
+  activity(method:visualize, 2016-12-01T17:06:21+00:00, 2016-12-01T17:06:22+00:00)
+  activity(method:input, 2016-12-01T16:06:21+00:00, 2016-12-01T16:06:22+00:00)
+  activity(method:requestUp, 2016-12-01T16:06:23+00:00, 2016-12-01T16:06:24+00:00)
+  activity(method:requestDown, 2016-12-01T17:06:19+00:00, 2016-12-01T17:06:20+00:00)
+  alternateOf(userdata:bloodpressureDownloaded, userdata:bloodpressureRemote)
+  alternateOf(userdata:bloodpressureRemote, userdata:bloodpressureNow)
+  entity(userdata:bloodpressureNow, [prov:type="bloodpressure", prov:label="Blood pressure after input"])
+  entity(qs:graphic/diagram, [prov:type="barchart", prov:label="Bar chart"])
+  entity(userdata:bloodpressureThen, [prov:type="bloodpressure", prov:label="Blood pressure before input"])
+  entity(userdata:bloodpressureRemote, [prov:type="bloodpressure", prov:label="Remote blood pressure copy"])
+  entity(userdata:bloodpressureDownloaded, [prov:type="bloodpressure", prov:label="Downloaded blood pressure copy"])
+  agent(qs:app/mobilebloodpressureapp, [prov:type="prov:SoftwareAgent", qs:device="smartphone", prov:label="Blood Pressure App"])
+  agent(qs:app/pcbloodpressureapp, [prov:type="prov:SoftwareAgent", qs:device="computer", prov:label="Blood Pressure App"])
+  agent(qs:service/meditec, [prov:type="prov:Organization", prov:label="MediTec"])
+  agent(qs:user/regina@example.org, [prov:type="prov:Person", prov:label="Regina Struminski"])
+  wasAttributedTo(userdata:bloodpressureNow, qs:user/regina@example.org)
+  wasAttributedTo(userdata:bloodpressureRemote, qs:user/regina@example.org)
+  wasAttributedTo(userdata:bloodpressureThen, qs:user/regina@example.org)
+  wasAttributedTo(qs:graphic/diagram, qs:user/regina@example.org)
+  wasAttributedTo(userdata:bloodpressureRemote, qs:service/meditec)
+  wasAttributedTo(userdata:bloodpressureDownloaded, qs:user/regina@example.org)
+  actedOnBehalfOf(qs:app/mobilebloodpressureapp, qs:user/regina@example.org, -)
+  actedOnBehalfOf(qs:app/pcbloodpressureapp, qs:user/regina@example.org, -)
+  used(method:requestDown, userdata:bloodpressureRemote, 2016-12-01T16:06:23+00:00, [prov:role="downloading"])
+  used(method:requestUp, userdata:bloodpressureNow, 2016-12-01T16:06:23+00:00)
+  used(method:input, userdata:bloodpressureThen, 2016-12-01T16:06:21+00:00)
+  used(method:visualize, userdata:bloodpressureDownloaded, 2016-12-01T17:06:21+00:00)
+  wasDerivedFrom(userdata:bloodpressureNow, userdata:bloodpressureThen, -, -, -)
+  wasDerivedFrom(userdata:bloodpressureDownloaded, userdata:bloodpressureRemote, -, -, -)
+  wasDerivedFrom(userdata:bloodpressureRemote, userdata:bloodpressureNow, -, -, -)
+  wasDerivedFrom(qs:graphic/diagram, userdata:bloodpressureDownloaded, -, -, -)
+  wasAssociatedWith(method:visualize, qs:app/mobilebloodpressureapp, -)
+  wasAssociatedWith(method:requestDown, qs:app/mobilebloodpressureapp, -)
+  wasAssociatedWith(method:requestUp, qs:app/pcbloodpressureapp, -)
+  wasAssociatedWith(method:input, qs:app/pcbloodpressureapp, -)
+  wasAssociatedWith(method:input, qs:user/regina@example.org, -, [prov:role="providing input"])
+endDocument

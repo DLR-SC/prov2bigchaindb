@@ -1,0 +1,1 @@
+from prov2bigchaindb.adapter.bigchaindbadapter import BigchainDBAdapter
