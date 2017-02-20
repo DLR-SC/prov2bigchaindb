@@ -3,19 +3,54 @@ image: python:3.5.3
 services:
   - rethinkdb:latest
 
-test:
-  only:
-  - master
-  script:
+before_script:
   - apt-get update -qy
   - apt-get install -y libxml2-dev libxslt1-dev lib32z1-dev libpython3-dev python3-dev python3-pip python3-setuptools libffi-dev
   - pyvenv env
   - source env/bin/activate
   - pip3 install -U setuptools pip
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  only:
+  - master
+  - improve-ci
+  script:
   - pip install -e .[dev]
   - bigchaindb --dev-allow-temp-keypair start &
-  - sleep 5
-  - python setup.py test
+
+test:
+  stage: test
+  only:
+  - master
+  - improve-ci
+  script:
+  - pip install -e .[dev]
   - mkdir .cache
+  - bigchaindb --dev-allow-temp-keypair start &
+  - sleep 5
   - coverage run --source prov2bigchaindb setup.py test
   - coverage report -m
+  - coverage html
+  artifacts:
+    paths:
+      - .cache/html-coverage/
+      - .cache/
+
+pages:
+  stage: deploy
+  dependencies:
+    - test
+  script:
+    - mv .cache/html-coverage/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
