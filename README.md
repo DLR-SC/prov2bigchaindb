@@ -2,7 +2,7 @@
 
 
 [![build status](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/build.svg)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
-[![build status](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/coverage.svg)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
+[![build status](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/coverage.svg?job=test)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
 
 # Software Requirements
 
