@@ -4,8 +4,10 @@ from bigchaindb_driver.crypto import generate_keypair
 import logging
 
 from prov2bigchaindb.core.exceptions import CreateRecordException
+from prov2bigchaindb.core.utils import wait_until_valid
 
 log = logging.getLogger(__name__)
+
 
 
 class BaseAccount(object):
@@ -14,23 +16,21 @@ class BaseAccount(object):
     def __init__(self, account_id, account_db):
         self.account_db = account_db
         self.account_id = account_id
-        self.bdb_txid = None
         self.private_key, self.public_key = generate_keypair()
         try:
-            self.account_id, self.public_key, self.private_key, self.bdb_txid = self.account_db.getAccount(self.account_id)
+            self.account_id, self.public_key, self.private_key, self.txid = self.account_db.get_Account(self.account_id)
         except Exception:
             self.account_db.set_Account(self.account_id, self.public_key, self.private_key)
 
     def __str__(self):
-        tmp = "{} :\n".format(self.public_key)
+        tmp = "{} : {}\n".format(self.account_id, self.public_key)
         return tmp
 
     def get_Id(self):
+        return self.account_id
+
+    def get_Public_Key(self):
         return self.public_key
-
-    def get_TxId(self):
-        return self.bdb_txid
-
 
 
 class DocumentModelAccount(BaseAccount):
@@ -41,7 +41,7 @@ class DocumentModelAccount(BaseAccount):
 
     def save_asset(self, asset, bdb_connection):
 
-        prepared_creation_tx = bdb_connection.transactions.prepare(operation='CREATE', signers=self.public_key, asset=asset, metadata={'':''})
+        prepared_creation_tx = bdb_connection.transactions.prepare(operation='CREATE', signers=self.public_key, asset=asset, metadata={'account_id':self.account_id})
 
         # print(prepared_creation_tx)
         fulfilled_creation_tx = bdb_connection.transactions.fulfill(prepared_creation_tx, private_keys=self.private_key)
@@ -50,14 +50,12 @@ class DocumentModelAccount(BaseAccount):
         if fulfilled_creation_tx != sent_creation_tx:
             raise CreateRecordException()
 
-        trials = 0
-        while trials < 100:
-            try:
-                if bdb_connection.transactions.status(sent_creation_tx['id']).get('status') == 'valid':
-                    break
-            except NotFoundError:
-                trials += 1
+        # blocking method...
+        wait_until_valid(sent_creation_tx['id'], bdb_connection)
         return sent_creation_tx['id']
+
+    def get_asset(self, tx_id, bdb_connection):
+        return bdb_connection.transactions.retrieve(tx_id)
 
 
 class GraphModelAccount(BaseAccount):
@@ -65,13 +63,19 @@ class GraphModelAccount(BaseAccount):
 
     def __init__(self, account_id, prov_relations, namespaces, account_db):
         super().__init__(account_id, account_db)
+        self.txid = None
         self.prov_namespaces = namespaces
         self.prov_relations = prov_relations
+
+    def get_TxId(self):
+        return self.txid
+
 
 class RoleModelAccount(BaseAccount):
     """"""
     def __init__(self, account_id, prov_relations, namespaces, account_db):
         super().__init__(account_id, account_db)
+        self.txid = None
         self.prov_relations = prov_relations
         self.prov_namespaces = namespaces
 
@@ -80,6 +84,9 @@ class RoleModelAccount(BaseAccount):
         for k,v in self.prov_relations.items():
             tmp = tmp + str(k) + " => " + str(v) + "\n"
         return tmp
+
+    def get_TxId(self):
+        return self.txid
 
     def _create_class(self):
         doc = ProvDocument()
@@ -100,6 +107,6 @@ class RoleModelAccount(BaseAccount):
         return self._create_class()
 
     def get_relations(self):
-        if self.bdb_txid is None:
+        if self.txid is None:
             raise Exception()
         return self._create_relations()
