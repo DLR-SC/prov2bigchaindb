@@ -1,10 +1,7 @@
-import json
-
 from prov.graph import prov_to_graph
-from prov2bigchaindb.core import account, utils, exceptions
-from prov2bigchaindb.core.exceptions import CreateRecordException
+from prov.model import ProvDocument
+from prov2bigchaindb.core import accounts, utils
 from bigchaindb_driver import BigchainDB
-from bigchaindb_driver.exceptions import NotFoundError
 import logging
 
 
@@ -36,16 +33,20 @@ class DocumentModelClient(BaseClient):
 
     def __init__(self, account_id=None, host='0.0.0.0', port=9984):
         super().__init__(host, port)
-        self.account = account.DocumentModelAccount(account_id, self.accountstore)
-        self.txstore = utils.DocumentTxStore()
+        self.account = accounts.DocumentModelAccount(account_id, self.accountstore)
+        #self.documentstore = utils.DocumentModelMetaDataStore()
 
     def save(self, document):
         prov_document = utils.form_string(content=document)
 
         asset = {'data': {'prov': prov_document.serialize(format='json')}}
-        txid = self.account.save_asset(asset, self.connection)
-
+        txid = self.account.save_Asset(asset, self.connection)
+        #self.documentstore.set_Document_MetaData(txid, self.account.get_Public_Key(), self.account.get_Id())
         return txid
+
+    def get_document(self, tx_id):
+        tx = self.account.get_Asset(tx_id, self.connection)
+        return ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
 
 
 class GraphModelClient(BaseClient):

@@ -1,5 +1,9 @@
 # PROV 2 BigchainDB
 
+
+[![build status](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/build.svg)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
+[![build status](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/coverage.svg)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
+
 # Software Requirements
 
 * Python 3.4 or Python 3.5

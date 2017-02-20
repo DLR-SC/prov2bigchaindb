@@ -4,6 +4,8 @@ services:
   - rethinkdb:latest
 
 test:
+  only:
+  - master
   script:
   - apt-get update -qy
   - apt-get install -y libxml2-dev libxslt1-dev lib32z1-dev libpython3-dev python3-dev python3-pip python3-setuptools libffi-dev
@@ -14,3 +16,6 @@ test:
   - bigchaindb --dev-allow-temp-keypair start &
   - sleep 5
   - python setup.py test
+  - mkdir .cache
+  - coverage run --source prov2bigchaindb setup.py test
+  - coverage report -m

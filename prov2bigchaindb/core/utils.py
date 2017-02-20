@@ -1,11 +1,11 @@
 from functools import reduce
 from io import BufferedReader
-import pkg_resources
 import sqlite3
 
+from bigchaindb_driver import exceptions as bdb_exceptions
 from prov.model import ProvDocument, six
 
-from prov2bigchaindb.core.exceptions import ParseException
+from prov2bigchaindb.core import exceptions
 
 
 def form_string(content):
@@ -28,17 +28,16 @@ def form_string(content):
         elif content_str.find('document') > -1:
             return ProvDocument.deserialize(content=content, format='provn')
 
-    raise ParseException("Unsupported input type {}".format(type(content)))
+    raise exceptions.ParseException("Unsupported input type {}".format(type(content)))
 
-
-def setup_test_files():
-    test_resources = {
-        'simple': {'package': 'prov2bigchaindb', 'file': '/assets/example-abstract.json'},
-        'quantified': {'package': 'prov2bigchaindb', 'file': '/assets/quantified-self.json'},
-        'thesis': {'package': 'prov2bigchaindb', 'file': '/assets/thesis-example-full.json'}
-    }
-    return dict((key, pkg_resources.resource_stream(val['package'], val['file'])) for key, val in test_resources.items())
-
+def wait_until_valid(tx_id, bdb_connection):
+    trials = 0
+    while trials < 100:
+        try:
+            if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
+                break
+        except bdb_exceptions.NotFoundError:
+            trials += 1
 
 
 class LocalStore(object):
@@ -50,31 +49,48 @@ class LocalAccountStore(LocalStore):
     def __init__(self, db_name='config.db'):
         super().__init__(db_name)
         # Create table
-        self.conn.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id text, public_key text, private_key text, tx_id text, PRIMARY KEY (account_id, public_key))''')
+        with self.conn:
+            self.conn.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id text, public_key text, private_key text, tx_id text, PRIMARY KEY (account_id, public_key))''')
 
     def set_Account(self, account_id, public_key, private_key):
-        self.conn.execute('INSERT INTO accounts VALUES (?,?,?,?)', (account_id, public_key, private_key, None))
-        self.conn.commit()
+        with self.conn:
+            self.conn.execute('INSERT INTO accounts VALUES (?,?,?,?)', (account_id, public_key, private_key, None))
 
     def get_Account(self, account_id):
-        return self.conn.execute('SELECT * FROM accounts WHERE account_id=?', (account_id,))
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT public_key, private_key, tx_id FROM accounts WHERE account_id=?', (account_id,))
+        ret = cursor.fetchone()
+        return ret
 
 
-class DocumentTxStore(LocalStore):
+# class DocumentModelMetaDataStore(LocalStore):
+#     """"""
+#
+#     def __init__(self, db_name='config.db'):
+#         super().__init__(db_name)
+#         # Create table
+#         with self.conn:
+#             self.conn.execute('''CREATE TABLE IF NOT EXISTS document_metadata (tx_id text, public_key text, account_id text, PRIMARY KEY (tx_id, public_key))''')
+#
+#     def set_Document_MetaData(self, tx_id, public_key, account_id):
+#         with self.conn:
+#             self.conn.execute('INSERT INTO document_metadata VALUES (?,?,?)', (tx_id, public_key, account_id))
+#
+#     def get_Document_Metadata(self, tx_id):
+#         cursor = self.conn.cursor()
+#         cursor.execute('SELECT * FROM document_metadata WHERE tx_id=?', (tx_id,))
+#         ret = cursor.fetchone()
+#         return ret
+
+
+class GraphModelMetadataStore(LocalStore):
     """"""
 
     def __init__(self, db_name='config.db'):
         super().__init__(db_name)
 
 
-class GraphTxStore(LocalStore):
-    """"""
-
-    def __init__(self, db_name='config.db'):
-        super().__init__(db_name)
-
-
-class RoleTxStore(LocalStore):
+class RoleModelMetadataStore(LocalStore):
     """"""
 
     def __init__(self,db_name='config.db'):
