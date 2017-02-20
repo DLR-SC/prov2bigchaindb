@@ -6,17 +6,32 @@ Subpackages
 
 .. toctree::
 
-    prov2bigchaindb.adapter
-    prov2bigchaindb.exceptions
+    prov2bigchaindb.core
     prov2bigchaindb.tests
 
 Submodules
 ----------
 
-prov2bigchaindb.bigchaindbclient module
+prov2bigchaindb.documentmodelapp module
 ---------------------------------------
 
-.. automodule:: prov2bigchaindb.bigchaindbclient
+.. automodule:: prov2bigchaindb.documentmodelapp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+prov2bigchaindb.graphmodelapp module
+------------------------------------
+
+.. automodule:: prov2bigchaindb.graphmodelapp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+prov2bigchaindb.rolemodelapp module
+-----------------------------------
+
+.. automodule:: prov2bigchaindb.rolemodelapp
     :members:
     :undoc-members:
     :show-inheritance:
