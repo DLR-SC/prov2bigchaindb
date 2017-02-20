@@ -2,10 +2,10 @@ from functools import reduce
 from io import BufferedReader
 import sqlite3
 
-from bigchaindb_driver.exceptions import NotFoundError
+from bigchaindb_driver import exceptions as bdb_exceptions
 from prov.model import ProvDocument, six
 
-from prov2bigchaindb.core.exceptions import ParseException
+from prov2bigchaindb.core import exceptions
 
 
 def form_string(content):
@@ -28,7 +28,7 @@ def form_string(content):
         elif content_str.find('document') > -1:
             return ProvDocument.deserialize(content=content, format='provn')
 
-    raise ParseException("Unsupported input type {}".format(type(content)))
+    raise exceptions.ParseException("Unsupported input type {}".format(type(content)))
 
 def wait_until_valid(tx_id, bdb_connection):
     trials = 0
@@ -36,7 +36,7 @@ def wait_until_valid(tx_id, bdb_connection):
         try:
             if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
                 break
-        except NotFoundError:
+        except bdb_exceptions.NotFoundError:
             trials += 1
 
 
@@ -58,7 +58,7 @@ class LocalAccountStore(LocalStore):
 
     def get_Account(self, account_id):
         cursor = self.conn.cursor()
-        cursor.execute('SELECT * FROM accounts WHERE account_id=?', (account_id,))
+        cursor.execute('SELECT public_key, private_key, tx_id FROM accounts WHERE account_id=?', (account_id,))
         ret = cursor.fetchone()
         return ret
 

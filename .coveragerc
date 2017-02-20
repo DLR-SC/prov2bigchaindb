@@ -1,0 +1,10 @@
+[run]
+omit =  env/*
+        assets/*
+        tests/*
+        rethinkdb_data/*
+
+data_file = .cache/.coverage
+
+[html]
+directory=.cache/html-coverage

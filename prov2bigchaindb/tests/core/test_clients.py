@@ -4,8 +4,7 @@ from . import setup_test_files
 from bigchaindb_driver.crypto import generate_keypair
 from prov.graph import prov_to_graph
 
-from prov2bigchaindb.core import utils
-from prov2bigchaindb.core.client import DocumentModelClient
+from prov2bigchaindb.core import utils, clients
 
 TEST_DB_FILE = 'test.db'
 
@@ -23,7 +22,7 @@ class DocumentModelClientTest(unittest.TestCase):
     """Test BigchainDB Base Client"""
 
     def setUp(self):
-        self.instance = DocumentModelClient('document_model_test_user', host='127.0.0.1', port=9984)
+        self.instance = clients.DocumentModelClient('document_model_test_user', host='127.0.0.1', port=9984)
         self.private_key, self.public_key = generate_keypair()
         # open test files
         self.test_prov_files = setup_test_files()
