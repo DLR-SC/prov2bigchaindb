@@ -19,7 +19,6 @@ dist/
 # Sphinx documentation
 docs/build/
 .coverage.*
-.cache
 nosetests.xml
 coverage.xml
 *,cover
@@ -36,8 +35,3 @@ ENV/
 
 # Rope project settings
 .ropeproject
-
-# Bigchain_DB Docker data
-bigchaindb_n1_docker/
-bigchaindb_n2_docker/
-bigchaindb_n3_docker/
