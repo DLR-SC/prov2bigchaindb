@@ -12,6 +12,7 @@ class DocumentConceptTest(unittest.TestCase):
         self.account_id = 'Base_Client_Test'
 
     def tearDown(self):
+        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
         import os
         os.remove('config.db')
 

@@ -34,14 +34,14 @@ class DocumentConceptClient(BaseClient):
     def __init__(self, account_id=None, host='0.0.0.0', port=9984):
         super().__init__(host, port)
         self.account = accounts.DocumentConceptAccount(account_id, self.accountstore)
-        #self.documentstore = utils.DocumentModelMetaDataStore()
+        #self.store = utils.DocumentConceptMetaDataStore()
 
     def save(self, document):
         prov_document = utils.form_string(content=document)
 
         asset = {'data': {'prov': prov_document.serialize(format='json')}}
         txid = self.account.save_Asset(asset, self.connection)
-        #self.documentstore.set_Document_MetaData(txid, self.account.get_Public_Key(), self.account.get_Id())
+        #self.store.set_Document_MetaData(txid, self.account.get_Public_Key(), self.account.get_Id())
         return txid
 
     def get_document(self, tx_id):
@@ -52,22 +52,16 @@ class DocumentConceptClient(BaseClient):
 class GraphConceptClient(BaseClient):
     """"""
 
-    def __init__(self, host='0.0.0.0', port=9984):
+    def __init__(self, prov_identifier=None, host='0.0.0.0', port=9984):
         super().__init__(host, port)
+        self.account = accounts.GraphConceptAccount(prov_identifier, self.accountstore)
+        self.store = utils.GraphConceptMetadataStore()
 
     def save(self, document):
         # prov_document = utils.form_string(content=document)
         # g = prov_to_graph(prov_document)
         #
-        # bdb_users = []
-        # for node, nodes in g.adjacency_iter():
-        #     relations = {}
-        #     # print(node)
-        #     for n, rel in nodes.items():
-        #         # print("\t", n, rel)
-        #         relations[n] = rel[0]['relation']
-        #     bdb_u = DocumentModelAccount(node, relations, prov_document.get_registered_namespaces())
-        #     bdb_users.append(bdb_u)
+
         #
         # bdb = DocumentModelClient('127.0.0.1', port=59984)
         # print("============")

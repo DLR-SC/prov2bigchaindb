@@ -14,6 +14,7 @@ class BaseStoreTest(unittest.TestCase):
         self.mock_sqlite3 = self.patcher.start()
 
     def tearDown(self):
+        del self.mock_sqlite3
         self.patcher.stop()
 
     def test_init(self):
@@ -31,7 +32,9 @@ class LocalAccountStoreTest(unittest.TestCase):
         self.private_key = 'private'
 
     def tearDown(self):
-        pass
+        del self.account_id
+        del self.public_key
+        del self.private_key
 
     @mock.patch('prov2bigchaindb.core.utils.sqlite3')
     def test_init(self, mock_sqlite3):
@@ -73,3 +76,20 @@ class LocalAccountStoreTest(unittest.TestCase):
         self.assertEqual(ret, None)
         import os
         os.remove(TEST_DB_FILE)
+
+
+class GraphConceptMetadataStore(unittest.TestCase):
+
+    def setUp(self):
+        self.account_id = 'ex:Bob'
+        self.public_key = 'public'
+        self.private_key = 'private'
+
+    def tearDown(self):
+        del self.account_id
+        del self.public_key
+        del self.private_key
+
+    @unittest.skip("testing skipping")
+    def test_init(self):
+        pass

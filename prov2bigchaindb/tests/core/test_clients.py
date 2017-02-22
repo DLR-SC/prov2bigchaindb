@@ -15,7 +15,11 @@ class BaseClientTest(unittest.TestCase):
         self.port = 9984
 
     def tearDown(self):
-        pass
+        del self.account_id
+        del self.public_key
+        del self.private_key
+        del self.host
+        del self.port
 
     @mock.patch('prov2bigchaindb.core.utils.LocalAccountStore', autospec=True)
     @mock.patch('bigchaindb_driver.BigchainDB', autospec=True)
@@ -26,6 +30,7 @@ class BaseClientTest(unittest.TestCase):
         self.assertIsInstance(baseclient.node, str)
         self.assertEqual(baseclient.node, 'http://127.0.0.1:9984')
         #TODO Check Instance of account_db
+
 
 class DocumentConceptClientTest(unittest.TestCase):
     """Test BigchainDB Base Client"""
@@ -38,6 +43,15 @@ class DocumentConceptClientTest(unittest.TestCase):
         self.port = 9984
         self.test_prov_files = setup_test_files()
         self.prov_document = utils.form_string(content=self.test_prov_files["simple"])
+
+    def tearDown(self):
+        del self.account_id
+        del self.public_key
+        del self.private_key
+        del self.host
+        del self.port
+        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
+        del self.test_prov_files
 
     @mock.patch('prov2bigchaindb.core.utils.LocalAccountStore', autospec=True)
     @mock.patch('bigchaindb_driver.BigchainDB', autospec=True)
@@ -52,8 +66,6 @@ class DocumentConceptClientTest(unittest.TestCase):
         # TODO Check Instance of account_db
         # TODO Check Instance of account
 
-    def tearDown(self):
-        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
 
     @mock.patch('prov2bigchaindb.core.utils.LocalAccountStore', autospec=True)
     @mock.patch('bigchaindb_driver.BigchainDB', autospec=True)
@@ -82,3 +94,27 @@ class DocumentConceptClientTest(unittest.TestCase):
         self.assertIsInstance(a, str)
         self.assertEqual(a,'1')
 
+class GraphConceptClientTest(unittest.TestCase):
+    """Test BigchainDB Base Client"""
+
+    def setUp(self):
+        self.account_id = 'Base_Client_Test'
+        self.public_key = 'public'
+        self.private_key = 'private'
+        self.host = '127.0.0.1'
+        self.port = 9984
+        self.test_prov_files = setup_test_files()
+        self.prov_document = utils.form_string(content=self.test_prov_files["simple"])
+
+    def tearDown(self):
+        del self.account_id
+        del self.public_key
+        del self.private_key
+        del self.host
+        del self.port
+        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
+        del self.test_prov_files
+
+    @unittest.skip("testing skipping")
+    def test_save(self):
+        pass

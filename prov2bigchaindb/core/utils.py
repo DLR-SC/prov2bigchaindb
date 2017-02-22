@@ -4,7 +4,7 @@ import sqlite3
 
 from bigchaindb_driver import exceptions as bdb_exceptions
 from prov.model import ProvDocument, six
-
+from prov.graph import prov_to_graph
 from prov2bigchaindb.core import exceptions
 
 
@@ -41,6 +41,20 @@ def wait_until_valid(tx_id, bdb_connection):
             trials += 1
 
 
+def get_prov_element_list(prov_document):
+    namespaces = prov_document.get_registered_namespaces()
+    g = prov_to_graph(prov_document=prov_document)
+    elements = []
+    for node, nodes in g.adjacency_iter():
+        relations = {}
+        # print(node)
+        for n, rel in nodes.items():
+            # print("\t", n, rel)
+            relations[n] = rel[0]['relation']
+        elements.append((node, relations, namespaces))
+    return elements
+
+
 class BaseStore(object):
     def __init__(self, db_name='config.db'):
         self.conn = sqlite3.connect(db_name)
@@ -64,7 +78,7 @@ class LocalAccountStore(BaseStore):
         return ret
 
 
-# class DocumentModelMetaDataStore(LocalStore):
+# class DocumentConceptMetaDataStore(LocalStore):
 #     """"""
 #
 #     def __init__(self, db_name='config.db'):
@@ -84,14 +98,26 @@ class LocalAccountStore(BaseStore):
 #         return ret
 
 
-class GraphModelMetadataStore(BaseStore):
+class GraphConceptMetadataStore(BaseStore):
     """"""
 
     def __init__(self, db_name='config.db'):
         super().__init__(db_name)
+        # Create table
+        with self.conn:
+            self.conn.execute('''CREATE TABLE IF NOT EXISTS graph_metadata (tx_id TEXT, public_key TEXT, account_id TEXT, PRIMARY KEY (tx_id, public_key))''')
 
+    def set_Document_MetaData(self, tx_id, public_key, account_id):
+        with self.conn:
+            self.conn.execute('INSERT INTO graph_metadata VALUES (?,?,?)', (tx_id, public_key, account_id))
 
-class RoleModelMetadataStore(BaseStore):
+    def get_Document_Metadata(self, tx_id):
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT * FROM graph_metadata WHERE tx_id=?', (tx_id,))
+        ret = cursor.fetchone()
+        return ret
+
+class RoleConceptMetadataStore(BaseStore):
     """"""
 
     def __init__(self,db_name='config.db'):
