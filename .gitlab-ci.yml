@@ -54,3 +54,27 @@ pages:
     expire_in: 30 days
   only:
     - master
+
+build:
+  stage: build
+  only:
+  - master
+  - improve-ci
+  script:
+  - pip install -e .[dev]
+  - bigchaindb --dev-allow-temp-keypair start &
+
+manual_test:
+  script:
+  - pip install -e .[dev]
+  - mkdir .cache
+  - bigchaindb --dev-allow-temp-keypair start &
+  - sleep 5
+  - coverage run --source prov2bigchaindb setup.py test
+  - coverage report -m
+  - coverage html
+  artifacts:
+    paths:
+      - .cache/html-coverage/
+      - .cache/
+  when: manual
