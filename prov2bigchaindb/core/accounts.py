@@ -10,7 +10,7 @@ class BaseAccount(object):
 
     def __init__(self, account_id, account_db):
         assert isinstance(account_id,str)
-        assert isinstance(account_db,utils.LocalAccountStore)
+        assert isinstance(account_db, utils.LocalAccountStore)
         self.account_db = account_db
         self.account_id = account_id
         self.private_key, self.public_key = generate_keypair()
