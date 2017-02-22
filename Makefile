@@ -33,8 +33,7 @@ clean-pyc:
 	find . -name '*.pyo' -exec rm -f {} +
 
 run:
-	rm config.db
-	rm -r rethinkdb_data
+	rm -r rethinkdb_data || true
 	bigchaindb --dev-start-rethinkdb --dev-allow-temp-keypair start
 
 test:

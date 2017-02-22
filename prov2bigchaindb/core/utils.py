@@ -10,9 +10,10 @@ from prov2bigchaindb.core import exceptions
 
 def form_string(content):
     """
-    Take a string or BufferedReader as argument and transform the string into a ProvDocument
-    :param content: Takes a sting or BufferedReader
+    Takes a string or BufferedReader as argument and transforms the string into a ProvDocument
+    :param content: String or BufferedReader
     :return: ProvDocument
+    :rtype: ProvDocument
     """
     if isinstance(content, ProvDocument):
         return content
@@ -40,12 +41,12 @@ def wait_until_valid(tx_id, bdb_connection):
             trials += 1
 
 
-class LocalStore(object):
+class BaseStore(object):
     def __init__(self, db_name='config.db'):
         self.conn = sqlite3.connect(db_name)
 
 
-class LocalAccountStore(LocalStore):
+class LocalAccountStore(BaseStore):
     def __init__(self, db_name='config.db'):
         super().__init__(db_name)
         # Create table
@@ -83,14 +84,14 @@ class LocalAccountStore(LocalStore):
 #         return ret
 
 
-class GraphModelMetadataStore(LocalStore):
+class GraphModelMetadataStore(BaseStore):
     """"""
 
     def __init__(self, db_name='config.db'):
         super().__init__(db_name)
 
 
-class RoleModelMetadataStore(LocalStore):
+class RoleModelMetadataStore(BaseStore):
     """"""
 
     def __init__(self,db_name='config.db'):

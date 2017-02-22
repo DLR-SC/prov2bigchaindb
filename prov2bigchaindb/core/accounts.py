@@ -9,14 +9,14 @@ class BaseAccount(object):
     """ BigchainDB Base Account """
 
     def __init__(self, account_id, account_db):
-        assert isinstance(account_id,str)
+        assert isinstance(account_id, str)
         assert isinstance(account_db, utils.LocalAccountStore)
         self.account_db = account_db
         self.account_id = account_id
         self.private_key, self.public_key = generate_keypair()
         try:
             self.public_key, self.private_key, self.txid = self.account_db.get_Account(self.account_id)
-        except Exception:
+        except Exception as e:
             self.account_db.set_Account(self.account_id, self.public_key, self.private_key)
 
     def __str__(self):
@@ -30,7 +30,7 @@ class BaseAccount(object):
         return self.public_key
 
 
-class DocumentModelAccount(BaseAccount):
+class DocumentConceptAccount(BaseAccount):
     """"""
 
     def __init__(self, account_id, account_db):
@@ -49,11 +49,11 @@ class DocumentModelAccount(BaseAccount):
         utils.wait_until_valid(sent_creation_tx['id'], bdb_connection)
         return sent_creation_tx['id']
 
-    def get_Asset(self, tx_id, bdb_connection):
+    def query_Asset(self, tx_id, bdb_connection):
         return bdb_connection.transactions.retrieve(tx_id)
 
 
-# class GraphModelAccount(BaseAccount):
+# class GraphConceptAccount(BaseAccount):
 #     """"""
 #
 #     def __init__(self, account_id, prov_relations, namespaces, account_db):
@@ -66,7 +66,7 @@ class DocumentModelAccount(BaseAccount):
 #         return self.txid
 #
 #
-# class RoleModelAccount(BaseAccount):
+# class RoleConceptAccount(BaseAccount):
 #     """"""
 #     def __init__(self, account_id, prov_relations, namespaces, account_db):
 #         super().__init__(account_id, account_db)

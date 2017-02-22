@@ -28,12 +28,12 @@ class BaseClient(object):
         raise NotImplementedError("Abstract method")
 
 
-class DocumentModelClient(BaseClient):
+class DocumentConceptClient(BaseClient):
     """"""
 
     def __init__(self, account_id=None, host='0.0.0.0', port=9984):
         super().__init__(host, port)
-        self.account = accounts.DocumentModelAccount(account_id, self.accountstore)
+        self.account = accounts.DocumentConceptAccount(account_id, self.accountstore)
         #self.documentstore = utils.DocumentModelMetaDataStore()
 
     def save(self, document):
@@ -45,11 +45,11 @@ class DocumentModelClient(BaseClient):
         return txid
 
     def get_document(self, tx_id):
-        tx = self.account.get_Asset(tx_id, self.connection)
+        tx = self.account.query_Asset(tx_id, self.connection)
         return ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
 
 
-class GraphModelClient(BaseClient):
+class GraphConceptClient(BaseClient):
     """"""
 
     def __init__(self, host='0.0.0.0', port=9984):
@@ -99,7 +99,7 @@ class GraphModelClient(BaseClient):
         pass
 
 
-class RoleModelClient(BaseClient):
+class RoleConceptClient(BaseClient):
 
     def __init__(self, host='0.0.0.0', port=9984):
         super().__init__(host, port)
