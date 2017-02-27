@@ -4,6 +4,8 @@ from unittest import mock
 from prov.graph import prov_to_graph
 from prov2bigchaindb.core import utils, clients
 from prov2bigchaindb.tests.core import setup_test_files
+
+
 class BaseClientTest(unittest.TestCase):
     """Test BigchainDB Base Client"""
 
@@ -25,6 +27,8 @@ class BaseClientTest(unittest.TestCase):
     @mock.patch('bigchaindb_driver.BigchainDB', autospec=True)
     def test_positive_init_BaseClient(self, mock_bdb, mock_store):
         baseclient = clients.BaseClient(self.host, self.port)
+        baseclient.connection = mock_bdb
+        baseclient.accountstore = mock_store
         self.assertIsInstance(baseclient, clients.BaseClient)
         #self.assertIsInstance(baseclient.accountstore, utils.LocalAccountStore)
         self.assertIsInstance(baseclient.node, str)
@@ -36,7 +40,7 @@ class DocumentConceptClientTest(unittest.TestCase):
     """Test BigchainDB Base Client"""
 
     def setUp(self):
-        self.account_id = 'Base_Client_Test'
+        self.account_id = 'Document_Client_Test'
         self.public_key = 'public'
         self.private_key = 'private'
         self.host = '127.0.0.1'
@@ -89,8 +93,8 @@ class DocumentConceptClientTest(unittest.TestCase):
         doc_client.account = mock_account
         doc_client.connection = mock_dbd
 
-        a = doc_client.save(self.prov_document)
-        doc_client.account.save_Asset.assert_called_with({'data':{'prov':self.prov_document.serialize(format='json')}}, mock_dbd)
+        a = doc_client.save_document(self.prov_document)
+        doc_client.account.save_Asset.assert_called_with({'data': {'prov': self.prov_document.serialize(format='json')}}, mock_dbd)
         self.assertIsInstance(a, str)
         self.assertEqual(a,'1')
 
@@ -104,7 +108,8 @@ class GraphConceptClientTest(unittest.TestCase):
         self.host = '127.0.0.1'
         self.port = 9984
         self.test_prov_files = setup_test_files()
-        self.prov_document = utils.form_string(content=self.test_prov_files["simple"])
+        self.prov_document1 = utils.form_string(content=self.test_prov_files["simple"])
+        self.prov_document2 = utils.form_string(content=self.test_prov_files["thesis"])
 
     def tearDown(self):
         del self.account_id
@@ -115,6 +120,9 @@ class GraphConceptClientTest(unittest.TestCase):
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
         del self.test_prov_files
 
-    @unittest.skip("testing skipping")
-    def test_save(self):
-        pass
+    def test_save_document(self):
+        raise NotImplementedError()
+        #graph_client = clients.GraphConceptClient(self.host, self.port)
+        #graph_client.save_document(self.prov_document1)
+        #graph_client.save_document(self.prov_document2)
+

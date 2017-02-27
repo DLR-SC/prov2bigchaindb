@@ -23,11 +23,11 @@ def form_string(content):
     if type(content) is six.binary_type:
         content_str = content[0:15].decode()
         if content_str.find("{") > -1:
-            return ProvDocument.deserialize(content=content, format='json')
+            return ProvDocument.deserialize(content=content, format='json').flattened()
         if content_str.find('<?xml') > -1:
-            return ProvDocument.deserialize(content=content, format='xml')
+            return ProvDocument.deserialize(content=content, format='xml').flattened()
         elif content_str.find('document') > -1:
-            return ProvDocument.deserialize(content=content, format='provn')
+            return ProvDocument.deserialize(content=content, format='provn').flattened()
 
     raise exceptions.ParseException("Unsupported input type {}".format(type(content)))
 
@@ -76,6 +76,10 @@ class LocalAccountStore(BaseStore):
         cursor.execute('SELECT public_key, private_key, tx_id FROM accounts WHERE account_id=?', (account_id,))
         ret = cursor.fetchone()
         return ret
+
+    def set_Tx_Id(self, account_id, tx_id):
+        with self.conn:
+            self.conn.execute('UPDATE accounts SET tx_id=? WHERE account_id=? ', (tx_id, account_id))
 
 
 # class DocumentConceptMetaDataStore(LocalStore):

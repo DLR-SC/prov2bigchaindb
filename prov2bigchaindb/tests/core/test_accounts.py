@@ -166,30 +166,30 @@ class GraphConceptAccountTest(unittest.TestCase):
         self.account_db.configure_mock(**{'get_Account.return_value': None})
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.account_db)
         self.assertNotEqual(account.get_Public_Key(), self.public_key)
-        self.assertEqual(account.txid, None)
+        self.assertEqual(account.tx_id, None)
         self.assertEqual(account.prov_namespaces, self.prov_namespaces)
         self.assertEqual(account.prov_relations, self.prov_relations)
 
-    @unittest.skip("testing skipping")
-    def test__create_class(self):
-        pass
+    #@unittest.skip("testing skipping")
+    def test__create_instance(self):
+        raise NotImplementedError()
 
-    @unittest.skip("testing skipping")
+    #@unittest.skip("testing skipping")
     def test__create_relations(self):
-        pass
+        raise NotImplementedError()
 
     #@unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_positiv_save_Class_Asset(self, mock_wait):
         self.account_db.configure_mock(**{'get_Account.return_value': None})
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.account_db)
-        tx_id = account.save_Class_Asset(self.bdb_connection)
-        asset = {'data': {'prov': account._create_class_document().serialize(format='json')}}
+        tx_id = account.save_Instance_Asset(self.bdb_connection)
+        asset = {'data': {'prov': account._create_instance_document().serialize(format='json')}}
         self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
         self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1'}, private_keys=account.private_key)
         self.bdb_connection.transactions.send.assert_called_with({'id':'1'})
         self.assertEqual(tx_id, '1')
-        self.assertEqual(account.txid, '1')
+        self.assertEqual(account.tx_id, '1')
 
 
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
@@ -201,17 +201,17 @@ class GraphConceptAccountTest(unittest.TestCase):
                                                    'transactions.fulfill.return_value': {'id': '1'},
                                                    'transactions.send.return_value': {'id':'2'},
                                                    })
-        asset = {'data': {'prov': account._create_class_document().serialize(format='json')}}
+        asset = {'data': {'prov': account._create_instance_document().serialize(format='json')}}
         with self.assertRaises(exceptions.CreateRecordException):
-            account.save_Class_Asset(self.bdb_connection)
+            account.save_Instance_Asset(self.bdb_connection)
         self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
         self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1'}, private_keys=account.private_key)
         self.bdb_connection.transactions.send.assert_called_with({'id':'1'})
-        self.assertEqual(account.txid, None)
+        self.assertEqual(account.tx_id, None)
 
-    @unittest.skip("testing skipping")
+    #@unittest.skip("testing skipping")
     def test_save_Relations_Assets(self):
-        pass
+        raise NotImplementedError()
 
 # class RoleModelAccountTest(unittest.TestCase):
 #

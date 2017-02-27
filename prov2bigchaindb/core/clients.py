@@ -16,7 +16,7 @@ class BaseClient(object):
         self.connection = BigchainDB(self.node)
         self.accountstore = utils.LocalAccountStore()
 
-    def save(self, document):
+    def save_document(self, document):
         """
         Saves a entity, activity or entity into the database
 
@@ -36,7 +36,7 @@ class DocumentConceptClient(BaseClient):
         self.account = accounts.DocumentConceptAccount(account_id, self.accountstore)
         #self.store = utils.DocumentConceptMetaDataStore()
 
-    def save(self, document):
+    def save_document(self, document):
         prov_document = utils.form_string(content=document)
 
         asset = {'data': {'prov': prov_document.serialize(format='json')}}
@@ -52,44 +52,29 @@ class DocumentConceptClient(BaseClient):
 class GraphConceptClient(BaseClient):
     """"""
 
-    def __init__(self, prov_identifier=None, host='0.0.0.0', port=9984):
+    def __init__(self, host='0.0.0.0', port=9984):
         super().__init__(host, port)
-        self.account = accounts.GraphConceptAccount(prov_identifier, self.accountstore)
+        self.accounts = None
         self.store = utils.GraphConceptMetadataStore()
 
-    def save(self, document):
-        # prov_document = utils.form_string(content=document)
-        # g = prov_to_graph(prov_document)
-        #
+    def save_document(self, document):
+        prov_document = utils.form_string(content=document)
+        g = prov_to_graph(prov_document)
+        instance_list = utils.get_prov_element_list(prov_document)
 
-        #
-        # bdb = DocumentModelClient('127.0.0.1', port=59984)
-        # print("============")
-        # for u in bdb_users:
-        #     print(u, end="\n\n")
-        #     self.bdb_txid = self.driver.transactions.prepare(operation='CREATE', signers=, asset=asset,
-        #                                                         metadata=metadata)
-        #
-        #     tx = u.create_class(bdb)
-        # for u in bdb_users:
-        #     u.create_relations(bdb)
-        #
-        # asset = {'data': {'prov': attributes, 'map': metadata}}
-        # prepared_creation_tx = self.driver.
-        # # print(prepared_creation_tx)
-        # fulfilled_creation_tx = self.driver.transactions.fulfill(prepared_creation_tx, private_keys=private_key)
-        # sent_creation_tx = self.driver.transactions.send(fulfilled_creation_tx)
-        #
-        # if fulfilled_creation_tx != sent_creation_tx:
-        #     raise CreateRecordException()
-        # trials = 0
-        # while trials < 100:
-        #     try:
-        #         if self.driver.transactions.status(sent_creation_tx['id']).get('status') == 'valid':
-        #             break
-        #     except NotFoundError:
-        #         trials += 1
-        # return sent_creation_tx['id']
+        self.accounts = [accounts.GraphConceptAccount(prov_identifier, prov_relations, namespaces, self.accountstore)
+                         for prov_identifier, prov_relations, namespaces in instance_list
+        ]
+
+        document_tx_ids = []
+        for account in self.accounts:
+            tx_id = account.save_Instance_Asset(self.connection)
+            self.accountstore.set_Tx_Id(account.get_Id(), tx_id)
+            document_tx_ids.append(tx_id)
+        for account in self.accounts:
+            tx_id = account.save_Relation_Assets(self.connection)
+            self.store.set_Document_MetaData(tx_id, account.get_Public_Key(), account.get_Id())
+        return document_tx_ids
         pass
 
 
@@ -98,7 +83,7 @@ class RoleConceptClient(BaseClient):
     def __init__(self, host='0.0.0.0', port=9984):
         super().__init__(host, port)
 
-    def save(self, document):
+    def save_document(self, document):
         """
         Saves a entity, activity or entity into the database
 

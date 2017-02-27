@@ -19,6 +19,6 @@ class DocumentConceptTest(unittest.TestCase):
     def test_simple_prov_doc(self):
         prov_document = utils.form_string(content=self.test_prov_files["simple"])
         client = clients.DocumentConceptClient(account_id=self.account_id)
-        tx_id = client.save(prov_document)
+        tx_id = client.save_document(prov_document)
         ret_doc = client.get_document(tx_id)
         self.assertEqual(prov_document,ret_doc)

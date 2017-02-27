@@ -9,18 +9,23 @@ class GraphConceptTest(unittest.TestCase):
     """Test BigchainDB Base Client"""
 
     def setUp(self):
-        self.db_name = 'test_graph_concept.db'
-        self.account_id = 'Base_Client_Test'
-        self.public_key = 'public'
-        self.private_key = 'private'
-        self.host = '127.0.0.1'
-        self.port = 9984
+        self.test_prov_files = setup_test_files()
 
     def tearDown(self):
-        import os
-        os.remove(self.db_name)
+        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
+        #import os
+        #os.remove('config.db')
 
-    @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
-        pass
+        prov_document = utils.form_string(content=self.test_prov_files["simple"])
+        client = clients.GraphConceptClient()
+        tx_id = client.save_document(prov_document)
+        #ret_doc = client.get_document(tx_id)
+        #self.assertEqual(prov_document,ret_doc)
+
+        #prov_document = utils.form_string(content=self.test_prov_files["thesis"])
+        #client = clients.GraphConceptClient()
+        #tx_id = client.save_document(prov_document)
+        #ret_doc = client.get_document(tx_id)
+        #self.assertEqual(prov_document,ret_doc)
 
