@@ -16,6 +16,7 @@ class DocumentConceptTest(unittest.TestCase):
         import os
         os.remove('config.db')
 
+    @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.form_string(content=self.test_prov_files["simple"])
         client = clients.DocumentConceptClient(account_id=self.account_id)

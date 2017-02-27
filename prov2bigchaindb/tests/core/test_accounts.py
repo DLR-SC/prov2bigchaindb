@@ -16,8 +16,7 @@ class BaseAccountTest(unittest.TestCase):
         self.public_key = 'public'
         self.private_key = 'private'
 
-        self.account_negative_db = mock.Mock(spec=utils.BaseStore, account_id=self.account_id)
-        self.account_positive_db = mock.Mock(spec=utils.LocalAccountStore,
+        self.account_positive_db = mock.Mock(spec=utils.LocalStore,
                                              db_name=TEST_DB_FILE,
                                              account_id=self.account_id,
                                              **{'get_Account.return_value':(self.public_key,
@@ -31,13 +30,11 @@ class BaseAccountTest(unittest.TestCase):
         del self.account_id
         del self.public_key
         del self.private_key
-        del self.account_negative_db
         del self.account_positive_db
 
     def test_positive_init_BaseAccount(self):
         account = accounts.BaseAccount(self.account_id, self.account_positive_db)
         self.assertIsInstance(account, accounts.BaseAccount)
-        self.assertIsInstance(self.account_positive_db, utils.LocalAccountStore)
         self.assertIsInstance(account.public_key, str)
         self.assertIsInstance(account.private_key, str)
         self.assertEqual(account.get_Public_Key(), self.public_key)
@@ -50,8 +47,6 @@ class BaseAccountTest(unittest.TestCase):
     def test_negative_init_BaseAccount(self):
         with self.assertRaises(AssertionError):
             accounts.BaseAccount(self.account_id, None)
-        with self.assertRaises(AssertionError):
-            accounts.BaseAccount(self.account_id, self.account_negative_db)
 
     def test_positive_get_Id(self):
         account = accounts.BaseAccount(self.account_id, self.account_positive_db)
@@ -70,7 +65,7 @@ class DocumentConceptAccountTest(unittest.TestCase):
         self.account_id = 'Document_Concept_Account_Test'
         self.public_key = 'public'
         self.private_key = 'private'
-        self.account_db = mock.Mock(spec=utils.LocalAccountStore,
+        self.account_db = mock.Mock(spec=utils.LocalStore,
                                              db_name=TEST_DB_FILE,
                                              account_id=self.account_id,
                                              **{'get_Account.return_value':(
@@ -91,6 +86,8 @@ class DocumentConceptAccountTest(unittest.TestCase):
         del self.account_id
         del self.public_key
         del self.private_key
+        del self.account_db
+        del self.bdb_connection
 
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_positive_save_Asset(self, mock_wait):
@@ -124,7 +121,6 @@ class DocumentConceptAccountTest(unittest.TestCase):
         self.assertEqual(tx_id,'1')
 
 
-
 class GraphConceptAccountTest(unittest.TestCase):
 
     def setUp(self):
@@ -133,7 +129,7 @@ class GraphConceptAccountTest(unittest.TestCase):
         self.prov_element, self.prov_relations, self.prov_namespaces = utils.get_prov_element_list(self.prov_document)[0]
         self.public_key = 'public'
         self.private_key = 'private'
-        self.account_db = mock.Mock(spec=utils.LocalAccountStore,
+        self.store = mock.Mock(spec=utils.LocalStore,
                                     db_name=TEST_DB_FILE,
                                     account_id=self.prov_element,
                                     **{'get_Account.return_value':(
@@ -157,32 +153,31 @@ class GraphConceptAccountTest(unittest.TestCase):
         del self.prov_namespaces
         del self.public_key
         del self.private_key
-        del self.account_db
+        del self.store
         del self.bdb_connection
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
         del self.test_prov_files
 
     def test_positive_init_without_Account(self):
-        self.account_db.configure_mock(**{'get_Account.return_value': None})
-        account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.account_db)
+        self.store.configure_mock(**{'get_Account.return_value': None})
+        account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
         self.assertNotEqual(account.get_Public_Key(), self.public_key)
         self.assertEqual(account.tx_id, None)
         self.assertEqual(account.prov_namespaces, self.prov_namespaces)
         self.assertEqual(account.prov_relations, self.prov_relations)
 
-    #@unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test__create_instance(self):
         raise NotImplementedError()
 
-    #@unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test__create_relations(self):
         raise NotImplementedError()
 
-    #@unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_positiv_save_Class_Asset(self, mock_wait):
-        self.account_db.configure_mock(**{'get_Account.return_value': None})
-        account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.account_db)
+        self.store.configure_mock(**{'get_Account.return_value': None})
+        account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
         tx_id = account.save_Instance_Asset(self.bdb_connection)
         asset = {'data': {'prov': account._create_instance_document().serialize(format='json')}}
         self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
@@ -191,11 +186,10 @@ class GraphConceptAccountTest(unittest.TestCase):
         self.assertEqual(tx_id, '1')
         self.assertEqual(account.tx_id, '1')
 
-
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_negativ_save_Class_Asset(self, mock_wait):
-        self.account_db.configure_mock(**{'get_Account.return_value': None})
-        account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.account_db)
+        self.store.configure_mock(**{'get_Account.return_value': None})
+        account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
         self.bdb_connection.configure_mock(**{'transactions.retrieve.return_value':'1',
                                                    'transactions.prepare.return_value': {'id':'1'},
                                                    'transactions.fulfill.return_value': {'id': '1'},
@@ -209,7 +203,7 @@ class GraphConceptAccountTest(unittest.TestCase):
         self.bdb_connection.transactions.send.assert_called_with({'id':'1'})
         self.assertEqual(account.tx_id, None)
 
-    #@unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_save_Relations_Assets(self):
         raise NotImplementedError()
 

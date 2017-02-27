@@ -55,17 +55,13 @@ def get_prov_element_list(prov_document):
     return elements
 
 
-class BaseStore(object):
+class LocalStore(object):
+
     def __init__(self, db_name='config.db'):
         self.conn = sqlite3.connect(db_name)
-
-
-class LocalAccountStore(BaseStore):
-    def __init__(self, db_name='config.db'):
-        super().__init__(db_name)
         # Create table
-        with self.conn:
-            self.conn.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id text, public_key text, private_key text, tx_id text, PRIMARY KEY (account_id, public_key))''')
+        #with self.conn:
+        self.conn.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id text, public_key text, private_key text, tx_id text, PRIMARY KEY (account_id, public_key))''')
 
     def set_Account(self, account_id, public_key, private_key):
         with self.conn:
@@ -81,28 +77,7 @@ class LocalAccountStore(BaseStore):
         with self.conn:
             self.conn.execute('UPDATE accounts SET tx_id=? WHERE account_id=? ', (tx_id, account_id))
 
-
-# class DocumentConceptMetaDataStore(LocalStore):
-#     """"""
-#
-#     def __init__(self, db_name='config.db'):
-#         super().__init__(db_name)
-#         # Create table
-#         with self.conn:
-#             self.conn.execute('''CREATE TABLE IF NOT EXISTS document_metadata (tx_id text, public_key text, account_id text, PRIMARY KEY (tx_id, public_key))''')
-#
-#     def set_Document_MetaData(self, tx_id, public_key, account_id):
-#         with self.conn:
-#             self.conn.execute('INSERT INTO document_metadata VALUES (?,?,?)', (tx_id, public_key, account_id))
-#
-#     def get_Document_Metadata(self, tx_id):
-#         cursor = self.conn.cursor()
-#         cursor.execute('SELECT * FROM document_metadata WHERE tx_id=?', (tx_id,))
-#         ret = cursor.fetchone()
-#         return ret
-
-
-class GraphConceptMetadataStore(BaseStore):
+class GraphConceptMetadataStore(LocalStore):
     """"""
 
     def __init__(self, db_name='config.db'):
@@ -121,7 +96,7 @@ class GraphConceptMetadataStore(BaseStore):
         ret = cursor.fetchone()
         return ret
 
-class RoleConceptMetadataStore(BaseStore):
+class RoleConceptMetadataStore(LocalStore):
     """"""
 
     def __init__(self,db_name='config.db'):

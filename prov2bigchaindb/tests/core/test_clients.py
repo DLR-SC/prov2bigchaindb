@@ -23,8 +23,8 @@ class BaseClientTest(unittest.TestCase):
         del self.host
         del self.port
 
-    @mock.patch('prov2bigchaindb.core.utils.LocalAccountStore', autospec=True)
-    @mock.patch('bigchaindb_driver.BigchainDB', autospec=True)
+    @mock.patch('prov2bigchaindb.core.utils.LocalStore')
+    @mock.patch('bigchaindb_driver.BigchainDB')
     def test_positive_init_BaseClient(self, mock_bdb, mock_store):
         baseclient = clients.BaseClient(self.host, self.port)
         baseclient.connection = mock_bdb
@@ -57,9 +57,9 @@ class DocumentConceptClientTest(unittest.TestCase):
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
         del self.test_prov_files
 
-    @mock.patch('prov2bigchaindb.core.utils.LocalAccountStore', autospec=True)
-    @mock.patch('bigchaindb_driver.BigchainDB', autospec=True)
-    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount', autospec=True)
+    @mock.patch('prov2bigchaindb.core.utils.LocalStore')
+    @mock.patch('bigchaindb_driver.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
     def test_positive_init_DocumentModelClient(self, mock_account, mock_dbd, mock_store):
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         self.assertIsInstance(doc_client, clients.DocumentConceptClient)
@@ -70,10 +70,9 @@ class DocumentConceptClientTest(unittest.TestCase):
         # TODO Check Instance of account_db
         # TODO Check Instance of account
 
-
-    @mock.patch('prov2bigchaindb.core.utils.LocalAccountStore', autospec=True)
-    @mock.patch('bigchaindb_driver.BigchainDB', autospec=True)
-    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount', autospec=True)
+    @mock.patch('prov2bigchaindb.core.utils.LocalStore')
+    @mock.patch('bigchaindb_driver.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
     def test_get_document(self, mock_account, mock_dbd, mock_store):
         mock_account.query_Asset.return_value = {'asset':{'data':{'prov':self.prov_document.serialize(format='json')}}}
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
@@ -84,9 +83,9 @@ class DocumentConceptClientTest(unittest.TestCase):
         doc_client.account.query_Asset.assert_called_with('1', mock_dbd)
         self.assertEqual(document, self.prov_document)
 
-    @mock.patch('prov2bigchaindb.core.utils.LocalAccountStore', autospec=True)
-    @mock.patch('bigchaindb_driver.BigchainDB', autospec=True)
-    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount', autospec=True)
+    @mock.patch('prov2bigchaindb.core.utils.LocalStore')
+    @mock.patch('bigchaindb_driver.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
     def test_save_document(self, mock_account, mock_dbd, mock_store):
         mock_account.save_Asset.return_value = '1'
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
@@ -120,6 +119,7 @@ class GraphConceptClientTest(unittest.TestCase):
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
         del self.test_prov_files
 
+    @unittest.skip("testing skipping")
     def test_save_document(self):
         raise NotImplementedError()
         #graph_client = clients.GraphConceptClient(self.host, self.port)

@@ -11,10 +11,10 @@ log = logging.getLogger(__name__)
 class BaseClient(object):
     """ BigchainDB Base Client """
 
-    def __init__(self, host='0.0.0.0', port=9984):
+    def __init__(self, host='0.0.0.0', port=9984, local_store=utils.LocalStore()):
         self.node = 'http://{}:{}'.format(host, str(port))
         self.connection = BigchainDB(self.node)
-        self.accountstore = utils.LocalAccountStore()
+        self.store = local_store
 
     def save_document(self, document):
         """
@@ -33,8 +33,7 @@ class DocumentConceptClient(BaseClient):
 
     def __init__(self, account_id=None, host='0.0.0.0', port=9984):
         super().__init__(host, port)
-        self.account = accounts.DocumentConceptAccount(account_id, self.accountstore)
-        #self.store = utils.DocumentConceptMetaDataStore()
+        self.account = accounts.DocumentConceptAccount(account_id, self.store)
 
     def save_document(self, document):
         prov_document = utils.form_string(content=document)
@@ -52,30 +51,29 @@ class DocumentConceptClient(BaseClient):
 class GraphConceptClient(BaseClient):
     """"""
 
-    def __init__(self, host='0.0.0.0', port=9984):
-        super().__init__(host, port)
-        self.accounts = None
-        self.store = utils.GraphConceptMetadataStore()
+    def __init__(self, host='0.0.0.0', port=9984, local_store=utils.GraphConceptMetadataStore()):
+        super().__init__(host, port, local_store=local_store)
+        self.accounts = []
+
 
     def save_document(self, document):
         prov_document = utils.form_string(content=document)
         g = prov_to_graph(prov_document)
         instance_list = utils.get_prov_element_list(prov_document)
 
-        self.accounts = [accounts.GraphConceptAccount(prov_identifier, prov_relations, namespaces, self.accountstore)
-                         for prov_identifier, prov_relations, namespaces in instance_list
-        ]
+        for prov_identifier, prov_relations, namespaces in instance_list:
+            ac = accounts.GraphConceptAccount(prov_identifier, prov_relations, namespaces, self.store)
+            self.accounts.append(ac)
 
         document_tx_ids = []
         for account in self.accounts:
             tx_id = account.save_Instance_Asset(self.connection)
-            self.accountstore.set_Tx_Id(account.get_Id(), tx_id)
             document_tx_ids.append(tx_id)
         for account in self.accounts:
-            tx_id = account.save_Relation_Assets(self.connection)
-            self.store.set_Document_MetaData(tx_id, account.get_Public_Key(), account.get_Id())
+            tx_list = account.save_Relation_Assets(self.connection)
+            for tx_id in tx_list:
+                document_tx_ids.append(tx_id)
         return document_tx_ids
-        pass
 
 
 class RoleConceptClient(BaseClient):
