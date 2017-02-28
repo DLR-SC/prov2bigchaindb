@@ -22,9 +22,9 @@ class LocalStoreTest(unittest.TestCase):
 
     @mock.patch('prov2bigchaindb.core.utils.sqlite3')
     def test_init(self, mock_sqlite3):
-        db = LocalStore(TEST_DB_FILE)
+        LocalStore(TEST_DB_FILE)
         mock_sqlite3.connect.assert_called_with(TEST_DB_FILE)
-        db = LocalStore()
+        LocalStore()
         mock_sqlite3.connect.assert_called_with('config.db')
         mock_sqlite3.connect().execute.assert_called_with('''CREATE TABLE IF NOT EXISTS accounts (account_id text, public_key text, private_key text, tx_id text, PRIMARY KEY (account_id, public_key))''')
 
@@ -42,14 +42,15 @@ class LocalStoreTest(unittest.TestCase):
 
     def test_live_set_Account(self):
         db = LocalStore(TEST_DB_FILE)
+        db.clean_tables()
         db.set_Account(self.account_id, self.public_key, self.private_key)
         with self.assertRaises(sqlite3.IntegrityError):
             db.set_Account(self.account_id, self.public_key, self.private_key)
-        import os
-        os.remove(TEST_DB_FILE)
+        db.clean_tables()
 
     def test_live_get_Account(self):
         db = LocalStore(TEST_DB_FILE)
+        db.clean_tables()
         db.set_Account(self.account_id, self.public_key, self.private_key)
         id, pub, priv, tx_id = db.get_Account(self.account_id)
         self.assertEqual(id, self.account_id)
@@ -59,8 +60,7 @@ class LocalStoreTest(unittest.TestCase):
 
         ret = db.get_Account('wrong_id')
         self.assertEqual(ret, None)
-        import os
-        os.remove(TEST_DB_FILE)
+        db.clean_tables()
 
 
 class GraphConceptMetadataStore(unittest.TestCase):

@@ -74,7 +74,7 @@ class DocumentConceptClientTest(unittest.TestCase):
     @mock.patch('bigchaindb_driver.BigchainDB')
     @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
     def test_get_document(self, mock_account, mock_dbd, mock_store):
-        mock_account.query_Asset.return_value = {'asset':{'data':{'prov':self.prov_document.serialize(format='json')}}}
+        mock_account.query_Asset.return_value = {'prov':self.prov_document.serialize(format='json')}
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         doc_client.account = mock_account
         doc_client.connection = mock_dbd
@@ -93,7 +93,7 @@ class DocumentConceptClientTest(unittest.TestCase):
         doc_client.connection = mock_dbd
 
         a = doc_client.save_document(self.prov_document)
-        doc_client.account.save_Asset.assert_called_with({'data': {'prov': self.prov_document.serialize(format='json')}}, mock_dbd)
+        doc_client.account.save_Asset.assert_called_with({'prov': self.prov_document.serialize(format='json')}, mock_dbd)
         self.assertIsInstance(a, str)
         self.assertEqual(a,'1')
 

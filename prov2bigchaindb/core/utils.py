@@ -45,7 +45,7 @@ def wait_until_valid(tx_id, bdb_connection):
                 break
         except bdb_exceptions.NotFoundError as e:
             trials += 1
-            log.warning("Wait until transaction is valid: trial %s/%s - %s", trials, trialsmax, tx_id)
+            log.debug("Wait until transaction is valid: trial %s/%s - %s", trials, trialsmax, tx_id)
 
 
 def get_prov_element_list(prov_document):
@@ -69,6 +69,11 @@ class LocalStore(object):
         # Create table
         #with self.conn:
         self.conn.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id text, public_key text, private_key text, tx_id text, PRIMARY KEY (account_id, public_key))''')
+
+    def clean_tables(self):
+        with self.conn:
+            tables = list(self.conn.execute('''select name from sqlite_master where type is "table"'''))
+            self.conn.cursor().executescript(';'.join(["DELETE FROM %s" %i for i in tables]))
 
     def set_Account(self, account_id, public_key, private_key):
         with self.conn:

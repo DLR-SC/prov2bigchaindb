@@ -22,8 +22,10 @@ class RoleConceptTest(unittest.TestCase):
         self.port = 9984
 
     def tearDown(self):
-        import os
-        os.remove(self.db_name)
+        #db = LocalStore()
+        #db.clean_tables()
+        #del db
+        pass
 
     @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):

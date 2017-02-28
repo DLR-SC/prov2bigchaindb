@@ -1,5 +1,7 @@
 import logging
 
+from prov2bigchaindb.core.utils import LocalStore
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
@@ -26,6 +28,9 @@ class GraphConceptTest(unittest.TestCase):
         tx_ids = client.save_document(prov_document)
         log.info("Saved %s Tx", len(tx_ids))
         log.info(tx_ids)
+        db = LocalStore()
+        db.clean_tables()
+        del db
         #ret_doc = client.get_document(tx_id)
         #self.assertEqual(prov_document,ret_doc)
 

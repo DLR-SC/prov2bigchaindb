@@ -1,5 +1,7 @@
 import logging
 
+from prov2bigchaindb.core.utils import LocalStore
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
@@ -18,6 +20,9 @@ class DocumentConceptTest(unittest.TestCase):
 
     def tearDown(self):
         del self.account_id
+        db = LocalStore()
+        db.clean_tables()
+        del db
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
 
     def test_simple_prov_doc(self):

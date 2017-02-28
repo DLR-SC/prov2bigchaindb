@@ -6,6 +6,7 @@ __pycache__/
 prov2bigchaindb.egg-info/
 rethinkdb_data
 config.db
+test.db
 
 build/
 dist/

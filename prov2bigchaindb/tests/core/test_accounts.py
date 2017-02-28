@@ -75,10 +75,10 @@ class DocumentConceptAccountTest(unittest.TestCase):
                                                 }
                                              )
         self.bdb_connection = mock.Mock(spec=bigchaindb_driver.BigchainDB,
-                                             **{'transactions.retrieve.return_value':'1',
-                                                'transactions.prepare.return_value': {'id':'1'},
-                                                'transactions.fulfill.return_value': {'id':'1'},
-                                                'transactions.send.return_value': {'id':'1'},
+                                             **{'transactions.retrieve.return_value':{'id':'1','asset':{'data':{'prov':'1'}}},
+                                                'transactions.prepare.return_value': {'id':'1','asset':{'data':{'prov':'1'}}},
+                                                'transactions.fulfill.return_value': {'id':'1','asset':{'data':{'prov':'1'}}},
+                                                'transactions.send.return_value': {'id':'1','asset':{'data':{'prov':'1'}}},
                                                 }
                                              )
 
@@ -94,31 +94,31 @@ class DocumentConceptAccountTest(unittest.TestCase):
         asset = {'data': {'prov': ''}}
         account = accounts.DocumentConceptAccount(self.account_id, self.account_db)
         tx_id = account.save_Asset(asset, self.bdb_connection)
-        self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=self.public_key, asset=asset, metadata={'account_id':self.account_id})
-        self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1'}, private_keys=self.private_key)
-        self.bdb_connection.transactions.send.assert_called_with({'id':'1'})
+        #self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=self.public_key, asset={'data':asset}, metadata={'account_id':self.account_id})
+        self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}}, private_keys=self.private_key)
+        self.bdb_connection.transactions.send.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}})
         self.assertEqual(tx_id, '1')
 
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_negative_save_Asset(self, mock_wait):
         asset = {'data': {'prov': ''}}
         account = accounts.DocumentConceptAccount(self.account_id, self.account_db)
-        self.bdb_connection.configure_mock(**{'transactions.retrieve.return_value':'1',
-                                                   'transactions.prepare.return_value': {'id':'1'},
-                                                   'transactions.fulfill.return_value': {'id': '1'},
-                                                   'transactions.send.return_value': {'id':'2'},
-                                                   })
+        self.bdb_connection.configure_mock(**{'transactions.retrieve.return_value':{'id':'1','asset':{'data':{'prov':'1'}}},
+                                              'transactions.prepare.return_value': {'id':'1','asset':{'data':{'prov':'1'}}},
+                                              'transactions.fulfill.return_value': {'id': '1','asset':{'data':{'prov':'1'}}},
+                                              'transactions.send.return_value': {'id':'2','asset':{'data':{'prov':'2'}}},
+                                              })
         with self.assertRaises(exceptions.CreateRecordException):
             account.save_Asset(asset, self.bdb_connection)
-        self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=self.public_key, asset=asset, metadata={'account_id':self.account_id})
-        self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1'}, private_keys=self.private_key)
-        self.bdb_connection.transactions.send.assert_called_with({'id':'1'})
+        #self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=self.public_key, asset={'data':asset}, metadata={'account_id':self.account_id})
+        self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}}, private_keys=self.private_key)
+        self.bdb_connection.transactions.send.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}})
 
     def test_positive_get_Asset(self):
         account = accounts.DocumentConceptAccount(self.account_id, self.account_db)
         tx_id = account.query_Asset(1, self.bdb_connection)
         self.bdb_connection.transactions.retrieve.assert_called_with(1)
-        self.assertEqual(tx_id,'1')
+        self.assertEqual(tx_id,{'prov':'1'})
 
 
 class GraphConceptAccountTest(unittest.TestCase):
@@ -139,10 +139,10 @@ class GraphConceptAccountTest(unittest.TestCase):
                                                 }
                                     )
         self.bdb_connection = mock.Mock(spec=bigchaindb_driver.BigchainDB,
-                                        **{'transactions.retrieve.return_value': '1',
-                                           'transactions.prepare.return_value': {'id': '1'},
-                                           'transactions.fulfill.return_value': {'id': '1'},
-                                           'transactions.send.return_value': {'id': '1'},
+                                        **{'transactions.retrieve.return_value': {'id':'1','asset':{'data':{'prov':'1'}}},
+                                           'transactions.prepare.return_value': {'id': '1','asset':{'data':{'prov':'1'}}},
+                                           'transactions.fulfill.return_value': {'id': '1','asset':{'data':{'prov':'1'}}},
+                                           'transactions.send.return_value': {'id': '1','asset':{'data':{'prov':'1'}}},
                                            }
                                         )
 
@@ -180,9 +180,9 @@ class GraphConceptAccountTest(unittest.TestCase):
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
         tx_id = account.save_Instance_Asset(self.bdb_connection)
         asset = {'data': {'prov': account._create_instance_document().serialize(format='json')}}
-        self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
-        self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1'}, private_keys=account.private_key)
-        self.bdb_connection.transactions.send.assert_called_with({'id':'1'})
+        #self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
+        self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}}, private_keys=account.private_key)
+        self.bdb_connection.transactions.send.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}})
         self.assertEqual(tx_id, '1')
         self.assertEqual(account.tx_id, '1')
 
@@ -190,17 +190,17 @@ class GraphConceptAccountTest(unittest.TestCase):
     def test_negativ_save_Class_Asset(self, mock_wait):
         self.store.configure_mock(**{'get_Account.return_value': None})
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
-        self.bdb_connection.configure_mock(**{'transactions.retrieve.return_value':'1',
-                                                   'transactions.prepare.return_value': {'id':'1'},
-                                                   'transactions.fulfill.return_value': {'id': '1'},
-                                                   'transactions.send.return_value': {'id':'2'},
+        self.bdb_connection.configure_mock(**{'transactions.retrieve.return_value': {'id':'1','asset':{'data':{'prov':'1'}}},
+                                                   'transactions.prepare.return_value': {'id':'1','asset':{'data':{'prov':'1'}}},
+                                                   'transactions.fulfill.return_value': {'id': '1','asset':{'data':{'prov':'1'}}},
+                                                   'transactions.send.return_value': {'id':'2','asset':{'data':{'prov':'2'}}},
                                                    })
         asset = {'data': {'prov': account._create_instance_document().serialize(format='json')}}
         with self.assertRaises(exceptions.CreateRecordException):
             account.save_Instance_Asset(self.bdb_connection)
-        self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
-        self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1'}, private_keys=account.private_key)
-        self.bdb_connection.transactions.send.assert_called_with({'id':'1'})
+        #self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
+        self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}}, private_keys=account.private_key)
+        self.bdb_connection.transactions.send.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}})
         self.assertEqual(account.tx_id, None)
 
     @unittest.skip("testing skipping")
@@ -214,7 +214,5 @@ class GraphConceptAccountTest(unittest.TestCase):
 #         self.instance = RoleModelAccount('Role_Model_Account_Test', {}, {}, self.account_db)
 #
 #     def tearDown(self):
-#         import os
-#         os.remove(TEST_DB_FILE)
 #         del self.instance
 #         del self.account_db

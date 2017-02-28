@@ -41,15 +41,14 @@ class DocumentConceptClient(BaseClient):
 
     def save_document(self, document):
         prov_document = utils.form_string(content=document)
-
-        asset = {'data': {'prov': prov_document.serialize(format='json')}}
+        asset = {'prov': prov_document.serialize(format='json')}
         txid = self.account.save_Asset(asset, self.connection)
         #self.store.set_Document_MetaData(txid, self.account.get_Public_Key(), self.account.get_Id())
         return txid
 
     def get_document(self, tx_id):
         asset  = self.account.query_Asset(tx_id, self.connection)
-        return ProvDocument.deserialize(content=asset, format='json')
+        return ProvDocument.deserialize(content=asset['prov'], format='json')
 
 
 class GraphConceptClient(BaseClient):
