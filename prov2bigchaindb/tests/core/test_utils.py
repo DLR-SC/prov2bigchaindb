@@ -38,7 +38,7 @@ class LocalStoreTest(unittest.TestCase):
     def test_get_Account(self, mock_sqlite3):
         db = LocalStore()
         db.get_Account(self.account_id)
-        mock_sqlite3.connect().cursor().execute.assert_called_with('SELECT public_key, private_key, tx_id FROM accounts WHERE account_id=?', (self.account_id,))
+        mock_sqlite3.connect().cursor().execute.assert_called_with('SELECT * FROM accounts WHERE account_id=?', (self.account_id,))
 
     def test_live_set_Account(self):
         db = LocalStore(TEST_DB_FILE)
@@ -51,7 +51,8 @@ class LocalStoreTest(unittest.TestCase):
     def test_live_get_Account(self):
         db = LocalStore(TEST_DB_FILE)
         db.set_Account(self.account_id, self.public_key, self.private_key)
-        pub, priv, tx_id = db.get_Account(self.account_id)
+        id, pub, priv, tx_id = db.get_Account(self.account_id)
+        self.assertEqual(id, self.account_id)
         self.assertEqual(pub, self.public_key)
         self.assertEqual(priv, self.private_key)
         self.assertEqual(tx_id, None)

@@ -1,3 +1,8 @@
+import logging
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 import unittest
 from unittest import mock
 from prov2bigchaindb.tests.core import setup_test_files
@@ -10,7 +15,7 @@ class RoleConceptTest(unittest.TestCase):
 
     def setUp(self):
         self.db_name = 'test_role_concept.db'
-        self.account_id = 'Base_Client_Test'
+        self.account_id = 'Role_Concept_Client_Test'
         self.public_key = 'public'
         self.private_key = 'private'
         self.host = '127.0.0.1'

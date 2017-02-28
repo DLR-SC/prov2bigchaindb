@@ -1,3 +1,8 @@
+import logging
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 from functools import reduce
 from io import BufferedReader
 import sqlite3
@@ -33,12 +38,14 @@ def form_string(content):
 
 def wait_until_valid(tx_id, bdb_connection):
     trials = 0
-    while trials < 100:
+    trialsmax = 100
+    while trials < trialsmax:
         try:
             if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
                 break
-        except bdb_exceptions.NotFoundError:
+        except bdb_exceptions.NotFoundError as e:
             trials += 1
+            log.warning("Wait until transaction is valid: trial %s/%s - %s", trials, trialsmax, tx_id)
 
 
 def get_prov_element_list(prov_document):
@@ -69,7 +76,7 @@ class LocalStore(object):
 
     def get_Account(self, account_id):
         cursor = self.conn.cursor()
-        cursor.execute('SELECT public_key, private_key, tx_id FROM accounts WHERE account_id=?', (account_id,))
+        cursor.execute('SELECT * FROM accounts WHERE account_id=?', (account_id,))
         ret = cursor.fetchone()
         return ret
 

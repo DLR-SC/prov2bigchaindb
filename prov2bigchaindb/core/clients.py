@@ -1,11 +1,15 @@
+import logging
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
+
 from prov.graph import prov_to_graph
 from prov.model import ProvDocument
 from prov2bigchaindb.core import accounts, utils
 from bigchaindb_driver import BigchainDB
-import logging
 
 
-log = logging.getLogger(__name__)
 
 
 class BaseClient(object):
@@ -44,8 +48,8 @@ class DocumentConceptClient(BaseClient):
         return txid
 
     def get_document(self, tx_id):
-        tx = self.account.query_Asset(tx_id, self.connection)
-        return ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
+        asset  = self.account.query_Asset(tx_id, self.connection)
+        return ProvDocument.deserialize(content=asset, format='json')
 
 
 class GraphConceptClient(BaseClient):

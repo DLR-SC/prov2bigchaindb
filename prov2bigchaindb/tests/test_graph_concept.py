@@ -1,3 +1,8 @@
+import logging
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 import unittest
 from unittest import mock
 from prov2bigchaindb.tests.core import setup_test_files
@@ -19,7 +24,8 @@ class GraphConceptTest(unittest.TestCase):
         prov_document = utils.form_string(content=self.test_prov_files["simple"])
         client = clients.GraphConceptClient()
         tx_ids = client.save_document(prov_document)
-        print(tx_ids)
+        log.info("Saved %s Tx", len(tx_ids))
+        log.info(tx_ids)
         #ret_doc = client.get_document(tx_id)
         #self.assertEqual(prov_document,ret_doc)
 

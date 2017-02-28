@@ -19,11 +19,10 @@ class BaseAccountTest(unittest.TestCase):
         self.account_positive_db = mock.Mock(spec=utils.LocalStore,
                                              db_name=TEST_DB_FILE,
                                              account_id=self.account_id,
-                                             **{'get_Account.return_value':(self.public_key,
-                                                               self.private_key,
-                                                               None
-                                                               )
-                                                }
+                                             **{'get_Account.return_value':(self.account_id,
+                                                                            self.public_key,
+                                                                            self.private_key,
+                                                                            None)}
                                              )
 
     def tearDown(self):
@@ -69,6 +68,7 @@ class DocumentConceptAccountTest(unittest.TestCase):
                                              db_name=TEST_DB_FILE,
                                              account_id=self.account_id,
                                              **{'get_Account.return_value':(
+                                                 self.account_id,
                                                  self.public_key,
                                                  self.private_key,
                                                  None)

@@ -1,12 +1,12 @@
-from bigchaindb_driver.crypto import generate_keypair
 import logging
 
-from prov.model import ProvDocument
-
-from prov2bigchaindb.core import utils, exceptions
-
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
+from prov.model import ProvDocument
+from bigchaindb_driver.crypto import generate_keypair
+from prov2bigchaindb.core import utils, exceptions
+from sqlite3 import IntegrityError
 
 class BaseAccount(object):
     """ BigchainDB Base Account """
@@ -19,13 +19,64 @@ class BaseAccount(object):
         self.tx_id = None
         self.private_key, self.public_key = generate_keypair()
         try:
-            self.public_key, self.private_key, self.tx_id = self.store.get_Account(self.account_id)
+            self.account_id, self.public_key, self.private_key, self.tx_id = self.store.get_Account(self.account_id)
+            log.info("Found account for %s with public_key %s", self.account_id, self.public_key)
         except Exception as e:
             self.store.set_Account(self.account_id, self.public_key, self.private_key)
+            log.info("New account for %s with public_key %s", self.account_id, self.public_key)
+
 
     def __str__(self):
         tmp = "{} : {}\n".format(self.account_id, self.public_key)
         return tmp
+
+    def _create_asset(self, bdb_connection, asset, metadata=None):
+        if metadata is None:
+            metadata = {}
+        prepared_creation_tx = bdb_connection.transactions.prepare(operation='CREATE',
+                                                                   signers=self.public_key,
+                                                                   asset=asset,
+                                                                   metadata=metadata)
+        fulfilled_creation_tx = bdb_connection.transactions.fulfill(prepared_creation_tx,
+                                                                    private_keys=self.private_key)
+        sent_creation_tx = bdb_connection.transactions.send(fulfilled_creation_tx)
+        if fulfilled_creation_tx != sent_creation_tx:
+            raise exceptions.CreateRecordException()
+        log.info("sent - waiting on: %s", sent_creation_tx['id'])
+        utils.wait_until_valid(sent_creation_tx['id'], bdb_connection)
+        return sent_creation_tx
+
+    def _transfer_asset(self, bdb_connection, recipient, tx, metadata=None):
+        if metadata is None:
+            metadata = {}
+        transfer_asset = {'id': tx['id']}
+        output_index = 0
+        output = tx['outputs'][output_index]
+        transfer_input = {
+            'fulfillment': output['condition']['details'],
+            'fulfills': {
+                'output': output_index,
+                'txid': tx['id']
+            },
+            'owners_before': output['public_keys']
+        }
+        prepared_transfer_tx = bdb_connection.transactions.prepare(
+            operation='TRANSFER',
+            asset=transfer_asset,
+            metadata=metadata,
+            inputs=transfer_input,
+            recipients=recipient[1]
+        )
+        fulfilled_transfer_tx = bdb_connection.transactions.fulfill(
+            prepared_transfer_tx,
+            private_keys=self.private_key,
+        )
+        sent_transfer_tx = bdb_connection.transactions.send(fulfilled_transfer_tx)
+        if fulfilled_transfer_tx != sent_transfer_tx:
+            raise exceptions.CreateRecordException()
+        log.info("transfer - waiting on: %s", sent_transfer_tx['id'])
+        utils.wait_until_valid(sent_transfer_tx['id'], bdb_connection)
+        return sent_transfer_tx
 
     def get_Id(self):
         return self.account_id
@@ -41,20 +92,15 @@ class DocumentConceptAccount(BaseAccount):
         super().__init__(account_id, store)
 
     def save_Asset(self, asset, bdb_connection):
-
-        prepared_creation_tx = bdb_connection.transactions.prepare(operation='CREATE', signers=self.public_key, asset=asset, metadata={'account_id':self.account_id})
-        # print(prepared_creation_tx)
-        fulfilled_creation_tx = bdb_connection.transactions.fulfill(prepared_creation_tx, private_keys=self.private_key)
-        sent_creation_tx = bdb_connection.transactions.send(fulfilled_creation_tx)
-
-        if fulfilled_creation_tx != sent_creation_tx:
-            raise exceptions.CreateRecordException()
-        # blocking method...
-        utils.wait_until_valid(sent_creation_tx['id'], bdb_connection)
-        return sent_creation_tx['id']
+        metadata = {'account_id': self.account_id}
+        tx = self._create_asset(bdb_connection, asset, metadata)
+        log.info("Created document: %s - %s", self.account_id, tx['id'])
+        return tx['id']
 
     def query_Asset(self, tx_id, bdb_connection):
-        return bdb_connection.transactions.retrieve(tx_id)
+        tx = bdb_connection.transactions.retrieve(tx_id)
+        asset = tx['asset']['data']['prov']
+        return asset
 
 
 class GraphConceptAccount(BaseAccount):
@@ -97,21 +143,11 @@ class GraphConceptAccount(BaseAccount):
         if self.tx_id is None:
             prov_document = self._create_instance_document()
             asset = {'data': {'prov': prov_document.serialize(format='json')}}
-            prepared_creation_tx = bdb_connection.transactions.prepare(operation='CREATE',
-                                                                       signers=self.public_key,
-                                                                       asset=asset,
-                                                                       metadata={'account_id':self.account_id})
-            # print(prepared_creation_tx)
-            fulfilled_creation_tx = bdb_connection.transactions.fulfill(prepared_creation_tx,
-                                                                        private_keys=self.private_key)
-            sent_creation_tx = bdb_connection.transactions.send(fulfilled_creation_tx)
-
-            if fulfilled_creation_tx != sent_creation_tx:
-                raise exceptions.CreateRecordException()
-            # blocking method...
-            utils.wait_until_valid(sent_creation_tx['id'], bdb_connection)
-            self.store.set_Tx_Id(self.account_id, sent_creation_tx['id'])
-            self.tx_id = sent_creation_tx['id']
+            metadata = {'account_id': self.account_id}
+            tx = self._create_asset(bdb_connection, asset, metadata)
+            self.store.set_Tx_Id(self.account_id, tx['id'])
+            self.tx_id = tx['id']
+            log.info("Created instance: %s - %s", self.account_id, tx['id'])
         return self.tx_id
 
     def save_Relation_Assets(self, bdb_connection):
@@ -119,64 +155,24 @@ class GraphConceptAccount(BaseAccount):
             raise Exception()
         tx_list = []
         for doc in self._create_relations_document():
-            print("sender ", self.tx_id, self.public_key, self.account_id)
             for records in doc.get_records():
                 recipient = self.store.get_Account(str(records.args[1]))
                 asset = {'data': {'prov': doc.serialize(format='json')}}
-
-                prepared_creation_tx = bdb_connection.transactions.prepare(operation='CREATE',
-                                                                           signers=self.public_key,
-                                                                           asset=asset,
-                                                                           metadata={'account_id': self.account_id})
-                fulfilled_creation_tx = bdb_connection.transactions.fulfill(prepared_creation_tx,
-                                                                            private_keys=self.private_key)
-                sent_creation_tx = bdb_connection.transactions.send(fulfilled_creation_tx)
-
-                if fulfilled_creation_tx != sent_creation_tx:
-                    raise exceptions.CreateRecordException()
-                # blocking method...
-                utils.wait_until_valid(sent_creation_tx['id'], bdb_connection)
-
-                # transfer
-                transfer_asset = {'id': fulfilled_creation_tx['id']}
-
-                output_index = 0
-                output = fulfilled_creation_tx['outputs'][output_index]
-                transfer_input = {
-                    'fulfillment': output['condition']['details'],
-                    'fulfills': {
-                        'output': output_index,
-                        'txid': fulfilled_creation_tx['id']
-                    },
-                    'owners_before': output['public_keys']
-                }
-
-                prepared_transfer_tx = bdb_connection.transactions.prepare(
-                    operation='TRANSFER',
-                    asset=transfer_asset,
-                    inputs=transfer_input,
-                    recipients=recipient[0]
-                )
-
-                fulfilled_transfer_tx = bdb_connection.transactions.fulfill(
-                    prepared_transfer_tx,
-                    private_keys=self.private_key,
-                )
-
-                sent_transfer_tx = bdb_connection.transactions.send(fulfilled_transfer_tx)
-
-                if fulfilled_transfer_tx != sent_transfer_tx:
-                    raise exceptions.CreateRecordException()
-                # blocking method...
-                utils.wait_until_valid(sent_transfer_tx['id'], bdb_connection)
+                metadata = {'account_id': self.account_id}
+                tx = self._create_asset(bdb_connection, asset, metadata)
+                metadata = {'account_id': recipient[0]}
+                tx = self._transfer_asset(bdb_connection, recipient, tx, metadata)
                 try:
-                    self.store.set_Document_MetaData(sent_transfer_tx['id'], recipient[0], str(records.args[1]))
-                except:
-                    print("\treceiver ", sent_transfer_tx['id'], recipient[0], str(records.args[1]))
-                    print(sent_transfer_tx)
-                    print("=======")
-
-                tx_list.append(sent_transfer_tx['id'])
+                    self.store.set_Document_MetaData(tx['id'], recipient[1], recipient[0] )
+                    log.info("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
+                    tx_list.append(tx['id'])
+                except IntegrityError as e:
+                    log.error("Failed relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
+                    log.error("Sender: %s %s - %s", self.account_id, self.public_key, self.tx_id)
+                    log.error("Receiver: %s %s - %s", recipient[0], recipient[1], tx['id'])
+                    log.error("Transfer-TX: %s", tx)
+                    log.error("Trace: %s", e)
+                    break
         return tx_list
 #
 # class RoleConceptAccount(BaseAccount):

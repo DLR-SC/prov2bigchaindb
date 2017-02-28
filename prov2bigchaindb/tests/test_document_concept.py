@@ -1,3 +1,8 @@
+import logging
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 import unittest
 from unittest import mock
 from prov.model import ProvDocument
@@ -9,14 +14,12 @@ class DocumentConceptTest(unittest.TestCase):
 
     def setUp(self):
         self.test_prov_files = setup_test_files()
-        self.account_id = 'Base_Client_Test'
+        self.account_id = 'Document_Concept_Client_Test'
 
     def tearDown(self):
+        del self.account_id
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
-        import os
-        os.remove('config.db')
 
-    @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.form_string(content=self.test_prov_files["simple"])
         client = clients.DocumentConceptClient(account_id=self.account_id)
