@@ -1,3 +1,7 @@
+import logging
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 import unittest
 from unittest import mock
 from . import setup_test_files

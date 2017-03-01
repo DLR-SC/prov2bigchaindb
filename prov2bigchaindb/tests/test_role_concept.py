@@ -4,11 +4,6 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 import unittest
-from unittest import mock
-from prov2bigchaindb.tests.core import setup_test_files
-
-from prov2bigchaindb.core import utils, clients
-from prov.model import ProvDocument
 
 class RoleConceptTest(unittest.TestCase):
     """Test BigchainDB Base Client"""

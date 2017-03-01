@@ -1,7 +1,6 @@
 import logging
-
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from prov.model import ProvDocument
 from bigchaindb_driver.crypto import generate_keypair
@@ -146,7 +145,7 @@ class GraphConceptAccount(BaseAccount):
             tx = self._create_asset(bdb_connection, asset, metadata)
             self.store.set_Tx_Id(self.account_id, tx['id'])
             self.tx_id = tx['id']
-            log.info("Created instance: %s - %s", self.account_id, tx['id'])
+            log.debug("Created instance: %s - %s", self.account_id, tx['id'])
         return self.tx_id
 
     def save_Relation_Assets(self, bdb_connection):
@@ -162,17 +161,18 @@ class GraphConceptAccount(BaseAccount):
                 utils.wait_until_valid(tx['id'], bdb_connection)
                 metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
                 tx = self._transfer_asset(bdb_connection, recipient, tx, metadata)
-                try:
-                    self.store.set_Document_MetaData(tx['id'], recipient[1], recipient[0] )
-                    log.info("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
-                    tx_list.append(tx['id'])
-                except IntegrityError as e:
-                    log.error("Failed relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
-                    log.error("Sender: %s %s - %s", self.account_id, self.public_key, self.tx_id)
-                    log.error("Receiver: %s %s - %s", recipient[0], recipient[1], recipient[3])
-                    log.error("Transfer-TX: %s", tx)
-                    log.error("Trace: %s", e)
-                    break
+                tx_list.append(tx['id'])
+                log.debug("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
+                # try:
+                #     self.store.set_Document_MetaData(tx['id'], recipient[1], recipient[0] )
+                #     log.info("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
+                # except IntegrityError as e:
+                #     log.error("Failed relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
+                #     log.error("Sender: %s %s - %s", self.account_id, self.public_key, self.tx_id)
+                #     log.error("Receiver: %s %s - %s", recipient[0], recipient[1], recipient[3])
+                #     log.error("Transfer-TX: %s", tx)
+                #     log.error("Trace: %s", e)
+                #     break
         return tx_list
 #
 # class RoleConceptAccount(BaseAccount):

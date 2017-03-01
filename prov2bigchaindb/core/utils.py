@@ -1,5 +1,4 @@
 import logging
-
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
@@ -42,15 +41,17 @@ def wait_until_valid(tx_id, bdb_connection):
     trialsmax = 100
     while trials < trialsmax:
         try:
-            if is_valid_tx(tx_id, bdb_connection):
+            if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
                 break
         except bdb_exceptions.NotFoundError as e:
             trials += 1
             log.debug("Wait until transaction is valid: trial %s/%s - %s", trials, trialsmax, tx_id)
 
 def is_valid_tx(tx_id, bdb_connection):
-    if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
+    status = bdb_connection.transactions.status(tx_id).get('status')
+    if  status == 'valid':
         return True
+    log.error("tx %s is %s", tx_id, status)
     return False
 
 def is_block_to_tx_valid(tx_id, bdb_connection):
@@ -59,6 +60,7 @@ def is_block_to_tx_valid(tx_id, bdb_connection):
     status = requests.get(api_url + 'statuses?block_id=' + block_id).json()['status']
     if status == 'valid':
         return True
+    log.error("Block %s is %s", block_id, status)
     return False
 
 def get_prov_element_list(prov_document):
@@ -102,27 +104,27 @@ class LocalStore(object):
         with self.conn:
             self.conn.execute('UPDATE accounts SET tx_id=? WHERE account_id=? ', (tx_id, account_id))
 
-class GraphConceptMetadataStore(LocalStore):
-    """"""
+# class GraphConceptMetadataStore(LocalStore):
+#     """"""
+#
+#     def __init__(self, db_name='config.db'):
+#         super().__init__(db_name)
+#         # Create table
+#         with self.conn:
+#             self.conn.execute('''CREATE TABLE IF NOT EXISTS graph_metadata (tx_id TEXT, public_key TEXT, account_id TEXT, PRIMARY KEY (tx_id, public_key))''')
+#
+#     def set_Document_MetaData(self, tx_id, public_key, account_id):
+#         with self.conn:
+#             self.conn.execute('INSERT INTO graph_metadata VALUES (?,?,?)', (tx_id, public_key, account_id))
+#
+#     def get_Document_Metadata(self, tx_id):
+#         cursor = self.conn.cursor()
+#         cursor.execute('SELECT * FROM graph_metadata WHERE tx_id=?', (tx_id,))
+#         ret = cursor.fetchone()
+#         return ret
 
-    def __init__(self, db_name='config.db'):
-        super().__init__(db_name)
-        # Create table
-        with self.conn:
-            self.conn.execute('''CREATE TABLE IF NOT EXISTS graph_metadata (tx_id TEXT, public_key TEXT, account_id TEXT, PRIMARY KEY (tx_id, public_key))''')
-
-    def set_Document_MetaData(self, tx_id, public_key, account_id):
-        with self.conn:
-            self.conn.execute('INSERT INTO graph_metadata VALUES (?,?,?)', (tx_id, public_key, account_id))
-
-    def get_Document_Metadata(self, tx_id):
-        cursor = self.conn.cursor()
-        cursor.execute('SELECT * FROM graph_metadata WHERE tx_id=?', (tx_id,))
-        ret = cursor.fetchone()
-        return ret
-
-class RoleConceptMetadataStore(LocalStore):
-    """"""
-
-    def __init__(self,db_name='config.db'):
-        super().__init__(db_name)
+# class RoleConceptMetadataStore(LocalStore):
+#     """"""
+#
+#     def __init__(self,db_name='config.db'):
+#         super().__init__(db_name)

@@ -1,6 +1,9 @@
+import logging
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 import unittest
 from unittest import mock
-
 import sqlite3
 
 from prov2bigchaindb.core.utils import LocalStore

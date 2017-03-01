@@ -1,8 +1,6 @@
 import logging
-
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-
 
 from prov.graph import prov_to_graph
 from prov.model import ProvDocument
@@ -21,13 +19,13 @@ class BaseClient(object):
 
     def _test_tx(self, tx):
         reason = "Yet not checked"
-
         if not utils.is_valid_tx(tx['id'], self.connection):
             reason = "TX is invalid"
         elif not utils.is_block_to_tx_valid(tx['id'], self.connection):
             reason = "Block is invalid"
         else:
             return
+        log.error("Test failed: %s", tx['id'])
         raise Exception(reason)
 
     def save_document(self, document):
@@ -57,6 +55,7 @@ class DocumentConceptClient(BaseClient):
         return txid
 
     def get_document(self, tx_id):
+        log.info("Retrieve and build document")
         tx = self.connection.transactions.retrieve(tx_id)
         self._test_tx(tx)
         return ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
@@ -65,12 +64,13 @@ class DocumentConceptClient(BaseClient):
 class GraphConceptClient(BaseClient):
     """"""
 
-    def __init__(self, host='0.0.0.0', port=9984, local_store=utils.GraphConceptMetadataStore()):
+    def __init__(self, host='0.0.0.0', port=9984, local_store=utils.LocalStore()):
         super().__init__(host, port, local_store=local_store)
         self.accounts = []
 
 
     def save_document(self, document):
+        log.info("Save document...")
         prov_document = utils.form_string(content=document)
         g = prov_to_graph(prov_document)
         instance_list = utils.get_prov_element_list(prov_document)
@@ -87,9 +87,11 @@ class GraphConceptClient(BaseClient):
             tx_list = account.save_Relation_Assets(self.connection)
             for tx_id in tx_list:
                 document_tx_ids.append(tx_id)
+        log.info("Saved document in %s Tx", len(document_tx_ids))
         return document_tx_ids
 
     def get_document(self, document_tx_ids):
+        log.info("Retrieve and rebuild document...")
         doc = ProvDocument()
         for i in document_tx_ids:
             tx = self.connection.transactions.get(asset_id=i)[0]
@@ -102,6 +104,7 @@ class GraphConceptClient(BaseClient):
                 doc.add_namespace(namespace)
             for record in tmp_doc.get_records():
                 doc.add_record(record=record)
+        log.info("Success")
         return doc
 
 class RoleConceptClient(BaseClient):

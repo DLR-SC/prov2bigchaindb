@@ -1,16 +1,13 @@
 import logging
 
-from prov2bigchaindb.core.utils import LocalStore
-
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+from prov2bigchaindb.core.utils import LocalStore
 import unittest
 from unittest import mock
 from prov2bigchaindb.tests.core import setup_test_files
-
 from prov2bigchaindb.core import utils, clients
-from prov.model import ProvDocument
 
 class GraphConceptTest(unittest.TestCase):
     """Test BigchainDB Base Client"""
@@ -21,12 +18,11 @@ class GraphConceptTest(unittest.TestCase):
     def tearDown(self):
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
 
-    @unittest.skip("testing skipping")
+    #@unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.form_string(content=self.test_prov_files["simple"])
         client = clients.GraphConceptClient()
         tx_ids = client.save_document(prov_document)
-        log.info("Saved %s Tx", len(tx_ids))
         doc = client.get_document(tx_ids)
         self.assertEqual(prov_document, doc)
 
