@@ -11,7 +11,6 @@ from bigchaindb_driver import BigchainDB
 
 
 
-
 class BaseClient(object):
     """ BigchainDB Base Client """
 
@@ -19,6 +18,17 @@ class BaseClient(object):
         self.node = 'http://{}:{}'.format(host, str(port))
         self.connection = BigchainDB(self.node)
         self.store = local_store
+
+    def _test_tx(self, tx):
+        reason = "Yet not checked"
+
+        if not utils.is_valid_tx(tx['id'], self.connection):
+            reason = "TX is invalid"
+        elif not utils.is_block_to_tx_valid(tx['id'], self.connection):
+            reason = "Block is invalid"
+        else:
+            return
+        raise Exception(reason)
 
     def save_document(self, document):
         """
@@ -47,8 +57,9 @@ class DocumentConceptClient(BaseClient):
         return txid
 
     def get_document(self, tx_id):
-        asset  = self.account.query_Asset(tx_id, self.connection)
-        return ProvDocument.deserialize(content=asset['prov'], format='json')
+        tx = self.connection.transactions.retrieve(tx_id)
+        self._test_tx(tx)
+        return ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
 
 
 class GraphConceptClient(BaseClient):
@@ -78,6 +89,20 @@ class GraphConceptClient(BaseClient):
                 document_tx_ids.append(tx_id)
         return document_tx_ids
 
+    def get_document(self, document_tx_ids):
+        doc = ProvDocument()
+        for i in document_tx_ids:
+            tx = self.connection.transactions.get(asset_id=i)[0]
+            self._test_tx(tx)
+            if 'id' in tx['asset'].keys():
+                tx = self.connection.transactions.get(asset_id=tx['asset']['id'])[0]
+                self._test_tx(tx)
+            tmp_doc = ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
+            for namespace in tmp_doc.get_registered_namespaces():
+                doc.add_namespace(namespace)
+            for record in tmp_doc.get_records():
+                doc.add_record(record=record)
+        return doc
 
 class RoleConceptClient(BaseClient):
 

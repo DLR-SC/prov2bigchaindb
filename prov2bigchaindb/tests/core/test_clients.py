@@ -4,6 +4,7 @@ from unittest import mock
 from prov.graph import prov_to_graph
 from prov2bigchaindb.core import utils, clients
 from prov2bigchaindb.tests.core import setup_test_files
+from time import sleep
 
 
 class BaseClientTest(unittest.TestCase):
@@ -70,17 +71,22 @@ class DocumentConceptClientTest(unittest.TestCase):
         # TODO Check Instance of account_db
         # TODO Check Instance of account
 
+    @mock.patch('prov2bigchaindb.core.utils.is_valid_tx')
+    @mock.patch('prov2bigchaindb.core.utils.is_block_to_tx_valid')
     @mock.patch('prov2bigchaindb.core.utils.LocalStore')
     @mock.patch('bigchaindb_driver.BigchainDB')
     @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
-    def test_get_document(self, mock_account, mock_dbd, mock_store):
-        mock_account.query_Asset.return_value = {'prov':self.prov_document.serialize(format='json')}
+    def test_get_document(self, mock_account, mock_dbd, mock_store, mock_test_block, mock_test_tx):
+        mock_dbd.transactions.retrieve.return_value = {'id':'1','asset':{'data':{'prov':self.prov_document.serialize(format='json')}}}
+        mock_test_block.return_value = True
+        mock_test_tx.return_value = True
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         doc_client.account = mock_account
         doc_client.connection = mock_dbd
         # Test
         document = doc_client.get_document('1')
-        doc_client.account.query_Asset.assert_called_with('1', mock_dbd)
+        sleep(1)
+        doc_client.connection.transactions.retrieve.assert_called_with('1')
         self.assertEqual(document, self.prov_document)
 
     @mock.patch('prov2bigchaindb.core.utils.LocalStore')

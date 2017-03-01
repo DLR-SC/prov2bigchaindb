@@ -114,13 +114,6 @@ class DocumentConceptAccountTest(unittest.TestCase):
         self.bdb_connection.transactions.fulfill.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}}, private_keys=self.private_key)
         self.bdb_connection.transactions.send.assert_called_with({'id':'1','asset':{'data':{'prov':'1'}}})
 
-    def test_positive_get_Asset(self):
-        account = accounts.DocumentConceptAccount(self.account_id, self.account_db)
-        tx_id = account.query_Asset(1, self.bdb_connection)
-        self.bdb_connection.transactions.retrieve.assert_called_with(1)
-        self.assertEqual(tx_id,{'prov':'1'})
-
-
 class GraphConceptAccountTest(unittest.TestCase):
 
     def setUp(self):

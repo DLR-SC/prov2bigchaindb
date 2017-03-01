@@ -101,11 +101,6 @@ class DocumentConceptAccount(BaseAccount):
         log.info("Created document: %s - %s", self.account_id, tx['id'])
         return tx['id']
 
-    def query_Asset(self, tx_id, bdb_connection):
-        tx = bdb_connection.transactions.retrieve(tx_id)
-        asset = tx['asset']['data']
-        return asset
-
 
 class GraphConceptAccount(BaseAccount):
     """"""
@@ -161,7 +156,6 @@ class GraphConceptAccount(BaseAccount):
         for doc in self._create_relations_document():
             for records in doc.get_records():
                 recipient = self.store.get_Account(str(records.args[1]))
-                utils.wait_until_valid(recipient[3], bdb_connection)
                 asset = {'data': {'prov': doc.serialize(format='json')}}
                 metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
                 tx = self._create_asset(bdb_connection, asset, metadata)

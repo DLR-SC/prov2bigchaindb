@@ -11,6 +11,7 @@ from bigchaindb_driver import exceptions as bdb_exceptions
 from prov.model import ProvDocument, six
 from prov.graph import prov_to_graph
 from prov2bigchaindb.core import exceptions
+import requests
 
 
 def form_string(content):
@@ -41,12 +42,24 @@ def wait_until_valid(tx_id, bdb_connection):
     trialsmax = 100
     while trials < trialsmax:
         try:
-            if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
+            if is_valid_tx(tx_id, bdb_connection):
                 break
         except bdb_exceptions.NotFoundError as e:
             trials += 1
             log.debug("Wait until transaction is valid: trial %s/%s - %s", trials, trialsmax, tx_id)
 
+def is_valid_tx(tx_id, bdb_connection):
+    if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
+        return True
+    return False
+
+def is_block_to_tx_valid(tx_id, bdb_connection):
+    api_url = bdb_connection.info()['_links']['api_v1']
+    block_id = requests.get(api_url + 'blocks?tx_id=' + tx_id).json()[0]
+    status = requests.get(api_url + 'statuses?block_id=' + block_id).json()['status']
+    if status == 'valid':
+        return True
+    return False
 
 def get_prov_element_list(prov_document):
     namespaces = prov_document.get_registered_namespaces()
