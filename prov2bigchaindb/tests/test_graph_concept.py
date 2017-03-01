@@ -1,7 +1,7 @@
 import logging
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from prov2bigchaindb.core.utils import LocalStore
 import unittest

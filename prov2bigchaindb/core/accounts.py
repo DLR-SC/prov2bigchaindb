@@ -43,11 +43,9 @@ class BaseAccount(object):
         sent_creation_tx = bdb_connection.transactions.send(fulfilled_creation_tx)
         if fulfilled_creation_tx != sent_creation_tx:
             raise exceptions.CreateRecordException()
-        #log.debug("sent - waiting on: %s", sent_creation_tx['id'])
-        #utils.wait_until_valid(sent_creation_tx['id'], bdb_connection)
         return sent_creation_tx
 
-    def _transfer_asset(self, bdb_connection, recipient, tx, metadata=None):
+    def _transfer_asset(self, bdb_connection, recipient_pub_key, tx, metadata=None):
         if metadata is None:
             metadata = {}
         metadata['timestamp'] = datetime.utcnow().timestamp()
@@ -67,7 +65,7 @@ class BaseAccount(object):
             asset=transfer_asset,
             metadata=metadata,
             inputs=transfer_input,
-            recipients=recipient[1]
+            recipients=recipient_pub_key
         )
         fulfilled_transfer_tx = bdb_connection.transactions.fulfill(
             prepared_transfer_tx,
@@ -76,8 +74,6 @@ class BaseAccount(object):
         sent_transfer_tx = bdb_connection.transactions.send(fulfilled_transfer_tx)
         if fulfilled_transfer_tx != sent_transfer_tx:
             raise exceptions.CreateRecordException()
-        #log.debug("transfer - waiting on: %s", sent_transfer_tx['id'])
-        #utils.wait_until_valid(sent_transfer_tx['id'], bdb_connection)
         return sent_transfer_tx
 
     def get_Id(self):
@@ -97,6 +93,8 @@ class DocumentConceptAccount(BaseAccount):
         asset = {'data':asset}
         metadata = {'account_id': self.account_id}
         tx = self._create_asset(bdb_connection, asset, metadata)
+        utils.wait_until_valid(tx['id'], bdb_connection)
+        tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
         log.info("Created document: %s - %s", self.account_id, tx['id'])
         return tx['id']
 
@@ -143,6 +141,8 @@ class GraphConceptAccount(BaseAccount):
             asset = {'data': {'prov': prov_document.serialize(format='json')}}
             metadata = {'instance': self.account_id}
             tx = self._create_asset(bdb_connection, asset, metadata)
+            utils.wait_until_valid(tx['id'], bdb_connection)
+            tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
             self.store.set_Tx_Id(self.account_id, tx['id'])
             self.tx_id = tx['id']
             log.debug("Created instance: %s - %s", self.account_id, tx['id'])
@@ -160,7 +160,7 @@ class GraphConceptAccount(BaseAccount):
                 tx = self._create_asset(bdb_connection, asset, metadata)
                 utils.wait_until_valid(tx['id'], bdb_connection)
                 metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
-                tx = self._transfer_asset(bdb_connection, recipient, tx, metadata)
+                tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
                 tx_list.append(tx['id'])
                 log.debug("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
                 # try:
