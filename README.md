@@ -74,3 +74,7 @@ make docs
 # License
 
 See [LICENSE](./LICENSE) file
+
+# Class Diagram
+
+![Core model](core.svg)
