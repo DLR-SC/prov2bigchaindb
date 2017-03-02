@@ -46,7 +46,6 @@ class GraphConceptTest(unittest.TestCase):
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-
     # @unittest.skip("testing skipping")
     def test_quantified_prov_doc(self):
         prov_document = utils.form_string(content=self.test_prov_files["quantified"])

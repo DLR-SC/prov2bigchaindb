@@ -32,7 +32,7 @@ class BaseAccountTest(unittest.TestCase):
         del self.private_key
         del self.account_positive_db
 
-    def test_positive_init_BaseAccount(self):
+    def test_positive_init(self):
         account = accounts.BaseAccount(self.account_id, self.account_positive_db)
         self.assertIsInstance(account, accounts.BaseAccount)
         self.assertIsInstance(account.public_key, str)
@@ -57,6 +57,14 @@ class BaseAccountTest(unittest.TestCase):
         account = accounts.BaseAccount(self.account_id, self.account_positive_db)
         self.assertIsInstance(account.get_public_key(), str)
         self.assertEqual(account.get_public_key(), self.public_key)
+
+    @unittest.skip("testing skipping")
+    def test__create_asset(self):
+        raise NotImplementedError()
+
+    @unittest.skip("testing skipping")
+    def test__transfer_asset(self):
+        raise NotImplementedError()
 
 
 class DocumentConceptAccountTest(unittest.TestCase):
@@ -193,17 +201,14 @@ class GraphConceptAccountTest(unittest.TestCase):
         self.store.configure_mock(**{'get_account.return_value': None})
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
         self.assertNotEqual(account.get_public_key(), self.public_key)
-        self.assertEqual(account.tx_id, None)
+        self.assertEqual(account.tx_id, '')
         self.assertEqual(account.prov_namespaces, self.prov_namespaces)
         self.assertEqual(account.prov_relations, self.prov_relations)
 
-    @unittest.skip("testing skipping")
-    def test__create_instance(self):
-        raise NotImplementedError()
-
-    @unittest.skip("testing skipping")
-    def test__create_relations(self):
-        raise NotImplementedError()
+    def test_get_tx_id(self):
+        account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
+        account.tx_id = '1'
+        self.assertEqual(account.get_tx_id(), '1')
 
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_positiv_save_instance_asset(self, mock_wait):
@@ -215,7 +220,7 @@ class GraphConceptAccountTest(unittest.TestCase):
         self.bdb_connection.transactions.fulfill.assert_called_with(self.return_value, private_keys=account.private_key)
         self.bdb_connection.transactions.send.assert_called_with(self.return_value)
         self.assertEqual(tx_id, '1')
-        self.assertEqual(account.tx_id, '1')
+        self.assertEqual(account.get_tx_id(), '1')
 
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_negativ_save_instance_asset(self, mock_wait):
@@ -233,10 +238,18 @@ class GraphConceptAccountTest(unittest.TestCase):
         # self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
         self.bdb_connection.transactions.fulfill.assert_called_with(self.return_value, private_keys=account.private_key)
         self.bdb_connection.transactions.send.assert_called_with(self.return_value)
-        self.assertEqual(account.tx_id, None)
+        self.assertEqual(account.tx_id, '')
 
     @unittest.skip("testing skipping")
     def test_save_relations_assets(self):
+        raise NotImplementedError()
+
+    @unittest.skip("testing skipping")
+    def test__create_instance_document(self):
+        raise NotImplementedError()
+
+    @unittest.skip("testing skipping")
+    def test__create_relations_document(self):
         raise NotImplementedError()
 
 # class RoleModelAccountTest(unittest.TestCase):

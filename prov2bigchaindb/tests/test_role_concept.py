@@ -12,7 +12,6 @@ logging.basicConfig(level=logging.DEBUG)
 class RoleConceptTest(unittest.TestCase):
     """Test BigchainDB Base Client"""
 
-
     def setUp(self):
         self.test_prov_files = setup_test_files()
 
@@ -30,7 +29,6 @@ class RoleConceptTest(unittest.TestCase):
         doc = client.get_document(tx_ids)
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
-
 
     @unittest.skip("testing skipping")
     def test_simple2_prov_doc(self):
@@ -58,4 +56,3 @@ class RoleConceptTest(unittest.TestCase):
         doc = client.get_document(tx_ids)
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
-
