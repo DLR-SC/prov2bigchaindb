@@ -1,12 +1,12 @@
 import logging
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
-
 from prov.model import ProvDocument
 from bigchaindb_driver.crypto import generate_keypair
 from prov2bigchaindb.core import utils, exceptions
-from sqlite3 import IntegrityError
 from datetime import datetime
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 
 class BaseAccount(object):
     """ BigchainDB Base Account """
@@ -19,12 +19,11 @@ class BaseAccount(object):
         self.tx_id = None
         self.private_key, self.public_key = generate_keypair()
         try:
-            self.account_id, self.public_key, self.private_key, self.tx_id = self.store.get_Account(self.account_id)
+            self.account_id, self.public_key, self.private_key, self.tx_id = self.store.get_account(self.account_id)
             log.debug("Found account for %s with public_key %s", self.account_id, self.public_key)
-        except Exception as e:
-            self.store.set_Account(self.account_id, self.public_key, self.private_key)
+        except Exception:
+            self.store.set_account(self.account_id, self.public_key, self.private_key)
             log.debug("New account for %s with public_key %s", self.account_id, self.public_key)
-
 
     def __str__(self):
         tmp = "{} : {}\n".format(self.account_id, self.public_key)
@@ -76,10 +75,10 @@ class BaseAccount(object):
             raise exceptions.CreateRecordException()
         return sent_transfer_tx
 
-    def get_Id(self):
+    def get_id(self):
         return self.account_id
 
-    def get_Public_Key(self):
+    def get_public_key(self):
         return self.public_key
 
 
@@ -89,8 +88,8 @@ class DocumentConceptAccount(BaseAccount):
     def __init__(self, account_id, store):
         super().__init__(account_id, store)
 
-    def save_Asset(self, asset, bdb_connection):
-        asset = {'data':asset}
+    def save_asset(self, asset, bdb_connection):
+        asset = {'data': asset}
         metadata = {'account_id': self.account_id}
         tx = self._create_asset(bdb_connection, asset, metadata)
         utils.wait_until_valid(tx['id'], bdb_connection)
@@ -111,12 +110,12 @@ class GraphConceptAccount(BaseAccount):
         self.prov_relations = prov_relations
         super().__init__(str(prov_element.identifier), store)
 
-    def get_TxId(self):
+    def get_tx_id(self):
         return self.tx_id
 
     def __str__(self):
         tmp = "{} :\n".format(self.account_id)
-        for k,v in self.prov_relations.items():
+        for k, v in self.prov_relations.items():
             tmp = tmp + str(k) + " => " + str(v) + "\n"
         return tmp
 
@@ -128,21 +127,21 @@ class GraphConceptAccount(BaseAccount):
         return doc
 
     def _create_relations_document(self):
-        for rel in self.prov_relations:
+        for relation in self.prov_relations:
             doc = ProvDocument()
             mapping = {}
-            for type, attr in rel.formal_attributes:
-                if attr:
-                    recipient = self.store.get_Account(str(attr))
+            for relation_type, relation_attr in relation.formal_attributes:
+                if relation_attr:
+                    recipient = self.store.get_account(str(relation_attr))
                     if recipient:
                         mapping[recipient[0]] = recipient[3]
 
             for n in self.prov_namespaces:
                 doc.add_namespace(n.prefix, n.uri)
-            doc.add_record(rel)
+            doc.add_record(relation)
             yield doc, mapping
 
-    def save_Instance_Asset(self, bdb_connection):
+    def save_instance_asset(self, bdb_connection):
         if self.tx_id is None:
             prov_document = self._create_instance_document()
             asset = {'data': {'prov': prov_document.serialize(format='json')}}
@@ -150,18 +149,18 @@ class GraphConceptAccount(BaseAccount):
             tx = self._create_asset(bdb_connection, asset, metadata)
             utils.wait_until_valid(tx['id'], bdb_connection)
             tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
-            self.store.set_Tx_Id(self.account_id, tx['id'])
+            self.store.set_tx_id(self.account_id, tx['id'])
             self.tx_id = tx['id']
             log.debug("Created instance: %s - %s", self.account_id, tx['id'])
         return self.tx_id
 
-    def save_Relation_Assets(self, bdb_connection):
+    def save_relation_assets(self, bdb_connection):
         if self.tx_id is None:
             raise Exception()
         tx_list = []
-        for doc, mapping  in self._create_relations_document():
+        for doc, mapping in self._create_relations_document():
             for records in doc.get_records():
-                recipient = self.store.get_Account(str(records.args[1]))
+                recipient = self.store.get_account(str(records.args[1]))
                 asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
                 metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
                 tx = self._create_asset(bdb_connection, asset, metadata)
@@ -171,6 +170,7 @@ class GraphConceptAccount(BaseAccount):
                 tx_list.append(tx['id'])
                 log.debug("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
         return tx_list
+
 #
 # class RoleConceptAccount(BaseAccount):
 #     """"""

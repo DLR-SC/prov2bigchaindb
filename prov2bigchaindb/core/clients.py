@@ -1,12 +1,10 @@
 import logging
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
-
-from prov.graph import prov_to_graph
-from prov.model import ProvDocument, ProvDelegation, ProvRecord
+from prov.model import ProvDocument
 from prov2bigchaindb.core import accounts, utils
 from bigchaindb_driver import BigchainDB
 
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class BaseClient(object):
@@ -18,12 +16,12 @@ class BaseClient(object):
         self.store = local_store
 
     def _test_tx(self, tx):
-        reason = "Yet not checked"
+        reason = None
         if not utils.is_valid_tx(tx['id'], self.connection):
             reason = "TX is invalid"
         elif not utils.is_block_to_tx_valid(tx['id'], self.connection):
             reason = "Block is invalid"
-        else:
+        if reason is None:
             return
         log.error("Test failed: %s", tx['id'])
         raise Exception(reason)
@@ -33,7 +31,6 @@ class BaseClient(object):
         Saves a entity, activity or entity into the database
 
         :param document: Document to save
-        :type attributes: str
         :return: document id
         :rtype: str
         """
@@ -50,13 +47,16 @@ class DocumentConceptClient(BaseClient):
     def save_document(self, document):
         prov_document = utils.form_string(content=document)
         asset = {'prov': prov_document.serialize(format='json')}
-        txid = self.account.save_Asset(asset, self.connection)
+        txid = self.account.save_asset(asset, self.connection)
         return txid
 
     def get_document(self, tx_id):
         log.info("Retrieve and build document")
         tx = self.connection.transactions.retrieve(tx_id)
         self._test_tx(tx)
+        if 'id' in tx['asset'].keys():
+            tx = self.connection.transactions.get(asset_id=tx['asset']['id'])[0]
+            self._test_tx(tx)
         return ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
 
 
@@ -66,7 +66,6 @@ class GraphConceptClient(BaseClient):
     def __init__(self, host='0.0.0.0', port=9984, local_store=utils.LocalStore()):
         super().__init__(host, port, local_store=local_store)
         self.accounts = []
-
 
     def save_document(self, document):
         log.info("Save document...")
@@ -79,10 +78,10 @@ class GraphConceptClient(BaseClient):
 
         document_tx_ids = []
         for account in self.accounts:
-            tx_id = account.save_Instance_Asset(self.connection)
+            tx_id = account.save_instance_asset(self.connection)
             document_tx_ids.append(tx_id)
         for account in self.accounts:
-            tx_list = account.save_Relation_Assets(self.connection)
+            tx_list = account.save_relation_assets(self.connection)
             document_tx_ids += tx_list
         log.info("Saved document in %s Tx", len(document_tx_ids))
         return document_tx_ids
@@ -104,8 +103,8 @@ class GraphConceptClient(BaseClient):
         log.info("Success")
         return doc
 
-class RoleConceptClient(BaseClient):
 
+class RoleConceptClient(BaseClient):
     def __init__(self, host='0.0.0.0', port=9984):
         super().__init__(host, port)
 
@@ -113,10 +112,8 @@ class RoleConceptClient(BaseClient):
         """
         Saves a entity, activity or entity into the database
 
-        :param attributes: Attributes as dict for the record. Be careful you have to encode the dict
-        :type attributes: dict
-        :param metadata: Metadata as dict for the record. Be careful you have to encode the dict but you can be sure that all meta keys are always there
-        :type metadata: dict
+        :param document:
+        :type document:
         :return: Record id
         :rtype: str
         """

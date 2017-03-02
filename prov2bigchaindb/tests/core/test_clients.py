@@ -1,14 +1,13 @@
 import logging
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
-
 import unittest
 from unittest import mock
 
-from prov.graph import prov_to_graph
 from prov2bigchaindb.core import utils, clients
 from prov2bigchaindb.tests.core import setup_test_files
 from time import sleep
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class BaseClientTest(unittest.TestCase):
@@ -30,15 +29,15 @@ class BaseClientTest(unittest.TestCase):
 
     @mock.patch('prov2bigchaindb.core.utils.LocalStore')
     @mock.patch('bigchaindb_driver.BigchainDB')
-    def test_positive_init_BaseClient(self, mock_bdb, mock_store):
+    def test_positive_init_baseclient(self, mock_bdb, mock_store):
         baseclient = clients.BaseClient(self.host, self.port)
         baseclient.connection = mock_bdb
         baseclient.accountstore = mock_store
         self.assertIsInstance(baseclient, clients.BaseClient)
-        #self.assertIsInstance(baseclient.accountstore, utils.LocalAccountStore)
+        # self.assertIsInstance(baseclient.accountstore, utils.LocalAccountStore)
         self.assertIsInstance(baseclient.node, str)
         self.assertEqual(baseclient.node, 'http://127.0.0.1:9984')
-        #TODO Check Instance of account_db
+        # TODO Check Instance of account_db
 
 
 class DocumentConceptClientTest(unittest.TestCase):
@@ -65,11 +64,11 @@ class DocumentConceptClientTest(unittest.TestCase):
     @mock.patch('prov2bigchaindb.core.utils.LocalStore')
     @mock.patch('bigchaindb_driver.BigchainDB')
     @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
-    def test_positive_init_DocumentModelClient(self, mock_account, mock_dbd, mock_store):
+    def test_positive_init_documentmodelclient(self, mock_account, mock_dbd, mock_store):
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         self.assertIsInstance(doc_client, clients.DocumentConceptClient)
-        #self.assertIsInstance(baseclient.accountstore, utils.LocalAccountStore)
-        #self.assertIsInstance(baseclient.account, accounts.DocumentModelAccount)
+        # self.assertIsInstance(baseclient.accountstore, utils.LocalAccountStore)
+        # self.assertIsInstance(baseclient.account, accounts.DocumentModelAccount)
         self.assertIsInstance(doc_client.node, str)
         self.assertEqual(doc_client.node, 'http://127.0.0.1:9984')
         # TODO Check Instance of account_db
@@ -81,7 +80,8 @@ class DocumentConceptClientTest(unittest.TestCase):
     @mock.patch('bigchaindb_driver.BigchainDB')
     @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
     def test_get_document(self, mock_account, mock_dbd, mock_store, mock_test_block, mock_test_tx):
-        mock_dbd.transactions.retrieve.return_value = {'id':'1','asset':{'data':{'prov':self.prov_document.serialize(format='json')}}}
+        mock_dbd.transactions.retrieve.return_value = {'id': '1', 'asset': {
+            'data': {'prov': self.prov_document.serialize(format='json')}}}
         mock_test_block.return_value = True
         mock_test_tx.return_value = True
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
@@ -97,15 +97,17 @@ class DocumentConceptClientTest(unittest.TestCase):
     @mock.patch('bigchaindb_driver.BigchainDB')
     @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
     def test_save_document(self, mock_account, mock_dbd, mock_store):
-        mock_account.save_Asset.return_value = '1'
+        mock_account.save_asset.return_value = '1'
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         doc_client.account = mock_account
         doc_client.connection = mock_dbd
 
         a = doc_client.save_document(self.prov_document)
-        doc_client.account.save_Asset.assert_called_with({'prov': self.prov_document.serialize(format='json')}, mock_dbd)
+        doc_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
+                                                         mock_dbd)
         self.assertIsInstance(a, str)
-        self.assertEqual(a,'1')
+        self.assertEqual(a, '1')
+
 
 class GraphConceptClientTest(unittest.TestCase):
     """Test BigchainDB Base Client"""
@@ -132,7 +134,6 @@ class GraphConceptClientTest(unittest.TestCase):
     @unittest.skip("testing skipping")
     def test_save_document(self):
         raise NotImplementedError()
-        #graph_client = clients.GraphConceptClient(self.host, self.port)
-        #graph_client.save_document(self.prov_document1)
-        #graph_client.save_document(self.prov_document2)
-
+        # graph_client = clients.GraphConceptClient(self.host, self.port)
+        # graph_client.save_document(self.prov_document1)
+        # graph_client.save_document(self.prov_document2)

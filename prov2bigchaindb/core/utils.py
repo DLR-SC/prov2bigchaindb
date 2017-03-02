@@ -1,16 +1,16 @@
 import logging
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
-
 from functools import reduce
 from io import BufferedReader
 import sqlite3
 
-from bigchaindb_driver import exceptions as bdb_exceptions
 from prov.model import ProvDocument, six
 from prov.graph import prov_to_graph
 from prov2bigchaindb.core import exceptions
+from bigchaindb_driver import exceptions as bdb_exceptions
 import requests
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def form_string(content):
@@ -36,6 +36,7 @@ def form_string(content):
 
     raise exceptions.ParseException("Unsupported input type {}".format(type(content)))
 
+
 def wait_until_valid(tx_id, bdb_connection):
     trials = 0
     trialsmax = 100
@@ -43,16 +44,18 @@ def wait_until_valid(tx_id, bdb_connection):
         try:
             if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
                 break
-        except bdb_exceptions.NotFoundError as e:
+        except bdb_exceptions.NotFoundError:
             trials += 1
             log.debug("Wait until transaction is valid: trial %s/%s - %s", trials, trialsmax, tx_id)
 
+
 def is_valid_tx(tx_id, bdb_connection):
     status = bdb_connection.transactions.status(tx_id).get('status')
-    if  status == 'valid':
+    if status == 'valid':
         return True
     log.error("tx %s is %s", tx_id, status)
     return False
+
 
 def is_block_to_tx_valid(tx_id, bdb_connection):
     api_url = bdb_connection.info()['_links']['api_v1']
@@ -62,6 +65,7 @@ def is_block_to_tx_valid(tx_id, bdb_connection):
         return True
     log.error("Block %s is %s", block_id, status)
     return False
+
 
 def get_prov_element_list(prov_document):
     namespaces = prov_document.get_registered_namespaces()
@@ -77,29 +81,29 @@ def get_prov_element_list(prov_document):
 
 
 class LocalStore(object):
-
     def __init__(self, db_name='config.db'):
         self.conn = sqlite3.connect(db_name)
         # Create table
-        #with self.conn:
-        self.conn.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id text, public_key text, private_key text, tx_id text, PRIMARY KEY (account_id, public_key))''')
+        # with self.conn:
+        self.conn.execute(
+            '''CREATE TABLE IF NOT EXISTS accounts (account_id TEXT, public_key TEXT, private_key TEXT, tx_id TEXT, PRIMARY KEY (account_id, public_key))''')
 
     def clean_tables(self):
         with self.conn:
-            tables = list(self.conn.execute('''select name from sqlite_master where type is "table"'''))
-            self.conn.cursor().executescript(';'.join(["DELETE FROM %s" %i for i in tables]))
+            tables = list(self.conn.execute('''SELECT name FROM sqlite_master WHERE type IS "table"'''))
+            self.conn.cursor().executescript(';'.join(["DELETE FROM %s" % i for i in tables]))
 
-    def set_Account(self, account_id, public_key, private_key):
+    def set_account(self, account_id, public_key, private_key):
         with self.conn:
             self.conn.execute('INSERT INTO accounts VALUES (?,?,?,?)', (account_id, public_key, private_key, None))
 
-    def get_Account(self, account_id):
+    def get_account(self, account_id):
         cursor = self.conn.cursor()
         cursor.execute('SELECT * FROM accounts WHERE account_id=?', (account_id,))
         ret = cursor.fetchone()
         return ret
 
-    def set_Tx_Id(self, account_id, tx_id):
+    def set_tx_id(self, account_id, tx_id):
         with self.conn:
             self.conn.execute('UPDATE accounts SET tx_id=? WHERE account_id=? ', (tx_id, account_id))
 
