@@ -1,7 +1,7 @@
 import logging
 import unittest
 
-from prov2bigchaindb.core import clients
+from prov2bigchaindb.core import clients, utils, local_stores
 from prov2bigchaindb.core import utils
 from prov2bigchaindb.tests.core import setup_test_files
 
@@ -16,7 +16,7 @@ class RoleConceptTest(unittest.TestCase):
         self.test_prov_files = setup_test_files()
 
     def tearDown(self):
-        db = utils.LocalStore()
+        db = local_stores.BaseStore()
         db.clean_tables()
         del db
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]

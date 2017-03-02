@@ -28,6 +28,14 @@ prov2bigchaindb.core.exceptions module
     :undoc-members:
     :show-inheritance:
 
+prov2bigchaindb.core.local_stores module
+----------------------------------------
+
+.. automodule:: prov2bigchaindb.core.local_stores
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 prov2bigchaindb.core.utils module
 ---------------------------------
 

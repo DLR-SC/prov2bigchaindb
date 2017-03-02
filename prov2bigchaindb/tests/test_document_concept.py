@@ -1,7 +1,7 @@
 import logging
 import unittest
 from prov2bigchaindb.tests.core import setup_test_files
-from prov2bigchaindb.core import utils, clients
+from prov2bigchaindb.core import utils, clients, local_stores
 from bigchaindb_driver import BigchainDB
 
 log = logging.getLogger(__name__)
@@ -18,13 +18,13 @@ class DocumentConceptTest(unittest.TestCase):
 
     def tearDown(self):
         del self.account_id
-        db = utils.LocalStore()
+        db = local_stores.BaseStore()
         db.clean_tables()
         del db
         del self.bdb_connection
         [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
 
-    # @unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.form_string(content=self.test_prov_files["simple"])
         client = clients.DocumentConceptClient(account_id=self.account_id)
@@ -44,7 +44,7 @@ class DocumentConceptTest(unittest.TestCase):
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-    # @unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_thesis_prov_doc(self):
         prov_document = utils.form_string(content=self.test_prov_files["thesis"])
         client = clients.DocumentConceptClient(account_id=self.account_id)
@@ -54,7 +54,7 @@ class DocumentConceptTest(unittest.TestCase):
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-    # @unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_quantified_prov_doc(self):
         prov_document = utils.form_string(content=self.test_prov_files["quantified"])
         client = clients.DocumentConceptClient(account_id=self.account_id)

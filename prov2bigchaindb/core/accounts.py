@@ -5,24 +5,25 @@ from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from prov.model import ProvDocument, ProvElement
 
-from prov2bigchaindb.core import utils, exceptions
-from prov2bigchaindb.core.utils import LocalStore
+from prov2bigchaindb.core import utils, exceptions, local_stores
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
 class BaseAccount(object):
-    """ BigchainDB Base Account """
+    """
+    BigchainDB Base Account
+    """
 
-    def __init__(self, account_id: str, store: LocalStore):
+    def __init__(self, account_id: str, store: local_stores.BaseStore):
         """
         Instantiate BaseAccount object
 
         :param account_id: Internal id of Account
         :type account_id: str
         :param store: Local database object
-        :type store: LocalStore
+        :type store: local_stores.BaseStore
         """
         assert account_id is not None
         assert store is not None
@@ -33,7 +34,7 @@ class BaseAccount(object):
         try:
             self.account_id, self.public_key, self.private_key, self.tx_id = self.store.get_account(self.account_id)
             log.debug("Found account for %s with public_key %s", self.account_id, self.public_key)
-        except Exception:
+        except exceptions.NoAccountException:
             self.store.write_account(self.account_id, self.public_key, self.private_key)
             log.debug("New account for %s with public_key %s", self.account_id, self.public_key)
 
@@ -133,16 +134,18 @@ class BaseAccount(object):
 
 
 class DocumentConceptAccount(BaseAccount):
-    """"""
+    """
+    BigchainDB Document Concept Account
+    """
 
-    def __init__(self, account_id: str, store: LocalStore):
+    def __init__(self, account_id: str, store: local_stores.BaseStore):
         """
         Instantiate Document Concept Account object
 
         :param account_id: Internal id of Account
         :type account_id: str
         :param store: Local database object
-        :type store: LocalStore
+        :type store: local_stores.BaseStore
         """
         super().__init__(account_id, store)
 
@@ -167,9 +170,11 @@ class DocumentConceptAccount(BaseAccount):
 
 
 class GraphConceptAccount(BaseAccount):
-    """"""
+    """
+    BigchainDB Graph Concept Account
+    """
 
-    def __init__(self, prov_element: ProvElement, prov_relations: dict, namespaces: list, store: LocalStore):
+    def __init__(self, prov_element: ProvElement, prov_relations: dict, namespaces: list, store: local_stores.BaseStore):
         """
         Instantiate Graph Concept Account object
 
@@ -180,7 +185,7 @@ class GraphConceptAccount(BaseAccount):
         :param namespaces: List of Prov Namespaces
         :type namespaces: list
         :param store: Local database object
-        :type store: LocalStore
+        :type store: local_stores.BaseStore
         """
         assert prov_element is not None
         assert prov_relations is not None
@@ -230,9 +235,11 @@ class GraphConceptAccount(BaseAccount):
             mapping = {}
             for relation_type, relation_attr in relation.formal_attributes:
                 if relation_attr:
-                    recipient = self.store.get_account(str(relation_attr))
-                    if recipient:
+                    try:
+                        recipient = self.store.get_account(str(relation_attr))
                         mapping[recipient[0]] = recipient[3]
+                    except exceptions.NoAccountException:
+                        pass
 
             for n in self.prov_namespaces:
                 doc.add_namespace(n.prefix, n.uri)
@@ -285,11 +292,3 @@ class GraphConceptAccount(BaseAccount):
                 log.debug("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
         return tx_list
 
-#
-# class RoleConceptAccount(BaseAccount):
-#     """"""
-#     def __init__(self, account_id, prov_relations, namespaces, account_db):
-#         super().__init__(account_id, account_db)
-#         self.txid = None
-#         self.prov_relations = prov_relations
-#         self.prov_namespaces = namespaces

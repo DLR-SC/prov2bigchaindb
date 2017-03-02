@@ -3,7 +3,7 @@ import unittest
 from unittest import mock
 from . import setup_test_files
 import bigchaindb_driver
-from prov2bigchaindb.core import accounts, utils, exceptions
+from prov2bigchaindb.core import accounts, utils, exceptions, local_stores
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -17,31 +17,31 @@ class BaseAccountTest(unittest.TestCase):
         self.public_key = 'public'
         self.private_key = 'private'
 
-        self.account_positive_db = mock.Mock(spec=utils.LocalStore,
-                                             db_name=TEST_DB_FILE,
-                                             account_id=self.account_id,
-                                             **{'get_account.return_value': (self.account_id,
+        self.store = mock.Mock(spec=local_stores.BaseStore,
+                               db_name=TEST_DB_FILE,
+                               account_id=self.account_id,
+                               **{'get_account.return_value': (self.account_id,
                                                                              self.public_key,
                                                                              self.private_key,
                                                                              None)}
-                                             )
+                               )
 
     def tearDown(self):
         del self.account_id
         del self.public_key
         del self.private_key
-        del self.account_positive_db
+        del self.store
 
     def test_positive_init(self):
-        account = accounts.BaseAccount(self.account_id, self.account_positive_db)
+        account = accounts.BaseAccount(self.account_id, self.store)
         self.assertIsInstance(account, accounts.BaseAccount)
         self.assertIsInstance(account.public_key, str)
         self.assertIsInstance(account.private_key, str)
         self.assertEqual(account.get_public_key(), self.public_key)
 
     def test_positive_init_without_Account(self):
-        self.account_positive_db.configure_mock(**{'get_account.return_value': None})
-        account = accounts.BaseAccount(self.account_id, self.account_positive_db)
+        self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountException()})
+        account = accounts.BaseAccount(self.account_id, self.store)
         self.assertNotEqual(account.get_public_key(), self.public_key)
 
     def test_negative_init_BaseAccount(self):
@@ -49,12 +49,12 @@ class BaseAccountTest(unittest.TestCase):
             accounts.BaseAccount(self.account_id, None)
 
     def test_positive_get_id(self):
-        account = accounts.BaseAccount(self.account_id, self.account_positive_db)
+        account = accounts.BaseAccount(self.account_id, self.store)
         self.assertIsInstance(account.get_id(), str)
         self.assertEqual(account.get_id(), self.account_id)
 
     def test_positive_get_public_Key(self):
-        account = accounts.BaseAccount(self.account_id, self.account_positive_db)
+        account = accounts.BaseAccount(self.account_id, self.store)
         self.assertIsInstance(account.get_public_key(), str)
         self.assertEqual(account.get_public_key(), self.public_key)
 
@@ -72,7 +72,7 @@ class DocumentConceptAccountTest(unittest.TestCase):
         self.account_id = 'Document_Concept_Account_Test'
         self.public_key = 'public'
         self.private_key = 'private'
-        self.account_db = mock.Mock(spec=utils.LocalStore,
+        self.account_db = mock.Mock(spec=local_stores.BaseStore,
                                     db_name=TEST_DB_FILE,
                                     account_id=self.account_id,
                                     **{'get_account.return_value': (
@@ -151,10 +151,11 @@ class GraphConceptAccountTest(unittest.TestCase):
             0]
         self.public_key = 'public'
         self.private_key = 'private'
-        self.store = mock.Mock(spec=utils.LocalStore,
+        self.store = mock.Mock(spec=local_stores.BaseStore,
                                db_name=TEST_DB_FILE,
                                account_id=self.prov_element,
                                **{'get_account.return_value': (
+                                   str(self.prov_element.identifier),
                                    self.public_key,
                                    self.private_key,
                                    None)})
@@ -198,7 +199,7 @@ class GraphConceptAccountTest(unittest.TestCase):
         del self.test_prov_files
 
     def test_positive_init_without_account(self):
-        self.store.configure_mock(**{'get_account.return_value': None})
+        self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountException()})
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
         self.assertNotEqual(account.get_public_key(), self.public_key)
         self.assertEqual(account.tx_id, '')
@@ -212,7 +213,7 @@ class GraphConceptAccountTest(unittest.TestCase):
 
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_positiv_save_instance_asset(self, mock_wait):
-        self.store.configure_mock(**{'get_account.return_value': None})
+        self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountException()})
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
         tx_id = account.save_instance_asset(self.bdb_connection)
         # asset = {'data': {'prov': account._create_instance_document().serialize(format='json')}}
@@ -224,7 +225,7 @@ class GraphConceptAccountTest(unittest.TestCase):
 
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_negativ_save_instance_asset(self, mock_wait):
-        self.store.configure_mock(**{'get_account.return_value': None})
+        self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountException()})
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
         negative_return = self.return_value['id'] = '2'
         self.bdb_connection.configure_mock(**{'transactions.retrieve.return_value': self.return_value,

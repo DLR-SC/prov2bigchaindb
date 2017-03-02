@@ -2,10 +2,9 @@ import logging
 from io import BufferedReader
 
 from prov.model import ProvDocument
-from prov2bigchaindb.core import accounts, utils
 from bigchaindb_driver import BigchainDB
 
-from prov2bigchaindb.core.utils import LocalStore
+from prov2bigchaindb.core import utils, local_stores, accounts
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -14,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 class BaseClient(object):
     """ BigchainDB Base Client """
 
-    def __init__(self, host: str = '0.0.0.0', port: int = 9984, local_store: LocalStore = utils.LocalStore()):
+    def __init__(self, host: str = '0.0.0.0', port: int = 9984, local_store: local_stores.BaseStore = local_stores.BaseStore()):
         """
         Instantiate Base Client object
 
@@ -23,7 +22,7 @@ class BaseClient(object):
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
         :param local_store: Local database object
-        :type local_store: LocalStore
+        :type local_store: BaseStore
         """
         self.node = 'http://{}:{}'.format(host, str(port))
         self.connection = BigchainDB(self.node)
@@ -63,7 +62,7 @@ class BaseClient(object):
 class DocumentConceptClient(BaseClient):
     """"""
 
-    def __init__(self, account_id: str = None, host: str = '0.0.0.0', port: int = 9984, local_store: LocalStore = utils.LocalStore()):
+    def __init__(self, account_id: str = None, host: str = '0.0.0.0', port: int = 9984, local_store: local_stores.BaseStore = local_stores.BaseStore()):
         """
         Instantiate Document Client object
 
@@ -72,7 +71,7 @@ class DocumentConceptClient(BaseClient):
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
         :param local_store: Local database object
-        :type local_store: LocalStore
+        :type local_store: BaseStore
         """
         super().__init__(host, port, local_store)
         self.account = accounts.DocumentConceptAccount(account_id, self.store)
@@ -114,7 +113,7 @@ class DocumentConceptClient(BaseClient):
 class GraphConceptClient(BaseClient):
     """"""
 
-    def __init__(self, host: str = '0.0.0.0', port: int = 9984, local_store: LocalStore = utils.LocalStore()):
+    def __init__(self, host: str = '0.0.0.0', port: int = 9984, local_store: local_stores.BaseStore = local_stores.BaseStore()):
         """
         Instantiate Graph Client object
 
@@ -123,7 +122,7 @@ class GraphConceptClient(BaseClient):
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
         :param local_store: Local database object
-        :type local_store: LocalStore
+        :type local_store: BaseStore
         """
         super().__init__(host, port, local_store=local_store)
         self.accounts = []
@@ -182,7 +181,7 @@ class GraphConceptClient(BaseClient):
 
 
 class RoleConceptClient(BaseClient):
-    def __init__(self, host: str = '0.0.0.0', port: int = 9984, local_store: LocalStore = utils.LocalStore()):
+    def __init__(self, host: str = '0.0.0.0', port: int = 9984, local_store: local_stores.BaseStore = local_stores.BaseStore()):
         """
         Instantiate Role Client object
 
@@ -191,7 +190,7 @@ class RoleConceptClient(BaseClient):
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
         :param local_store: Local database object
-        :type local_store: LocalStore
+        :type local_store: BaseStore
         """
         super().__init__(host, port, local_store=local_store)
         self.accounts = []
