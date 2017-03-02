@@ -128,12 +128,19 @@ class GraphConceptAccount(BaseAccount):
         return doc
 
     def _create_relations_document(self):
-        for to, rel in self.prov_relations.items():
+        for rel in self.prov_relations:
             doc = ProvDocument()
+            mapping = {}
+            for type, attr in rel.formal_attributes:
+                if attr:
+                    recipient = self.store.get_Account(str(attr))
+                    if recipient:
+                        mapping[recipient[0]] = recipient[3]
+
             for n in self.prov_namespaces:
                 doc.add_namespace(n.prefix, n.uri)
             doc.add_record(rel)
-            yield doc
+            yield doc, mapping
 
     def save_Instance_Asset(self, bdb_connection):
         if self.tx_id is None:
@@ -152,10 +159,10 @@ class GraphConceptAccount(BaseAccount):
         if self.tx_id is None:
             raise Exception()
         tx_list = []
-        for doc in self._create_relations_document():
+        for doc, mapping  in self._create_relations_document():
             for records in doc.get_records():
                 recipient = self.store.get_Account(str(records.args[1]))
-                asset = {'data': {'prov': doc.serialize(format='json')}}
+                asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
                 metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
                 tx = self._create_asset(bdb_connection, asset, metadata)
                 utils.wait_until_valid(tx['id'], bdb_connection)
@@ -163,16 +170,6 @@ class GraphConceptAccount(BaseAccount):
                 tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
                 tx_list.append(tx['id'])
                 log.debug("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
-                # try:
-                #     self.store.set_Document_MetaData(tx['id'], recipient[1], recipient[0] )
-                #     log.info("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
-                # except IntegrityError as e:
-                #     log.error("Failed relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
-                #     log.error("Sender: %s %s - %s", self.account_id, self.public_key, self.tx_id)
-                #     log.error("Receiver: %s %s - %s", recipient[0], recipient[1], recipient[3])
-                #     log.error("Transfer-TX: %s", tx)
-                #     log.error("Trace: %s", e)
-                #     break
         return tx_list
 #
 # class RoleConceptAccount(BaseAccount):

@@ -20,20 +20,21 @@ class GraphConceptTest(unittest.TestCase):
 
     #@unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
-        prov_document = utils.form_string(content=self.test_prov_files["simple"])
+        prov_document = utils.form_string(content=self.test_prov_files["simple2"])
         client = clients.GraphConceptClient()
         tx_ids = client.save_document(prov_document)
         doc = client.get_document(tx_ids)
-        self.assertEqual(prov_document, doc)
 
+        self.assertEqual(len(prov_document.get_records()),len(doc.get_records()))
+        self.assertEqual(prov_document, doc)
         db = LocalStore()
         db.clean_tables()
         del db
 
 
-        #prov_document = utils.form_string(content=self.test_prov_files["thesis"])
+        #prov_document = utils.form_string(content=self.test_prov_files["simple"])
         #client = clients.GraphConceptClient()
-        #tx_id = client.save_document(prov_document)
-        #ret_doc = client.get_document(tx_id)
+        #tx_ids = client.save_document(prov_document)
+        #ret_doc = client.get_document(tx_ids)
         #self.assertEqual(prov_document,ret_doc)
 

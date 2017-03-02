@@ -68,11 +68,10 @@ def get_prov_element_list(prov_document):
     g = prov_to_graph(prov_document=prov_document)
     elements = []
     for node, nodes in g.adjacency_iter():
-        relations = {}
-        # print(node)
-        for n, rel in nodes.items():
-            # print("\t", n, rel)
-            relations[n] = rel[0]['relation']
+        relations = []
+        for n, tmp_relations in nodes.items():
+            for relation in tmp_relations.values():
+                relations.append(relation['relation'])
         elements.append((node, relations, namespaces))
     return elements
 

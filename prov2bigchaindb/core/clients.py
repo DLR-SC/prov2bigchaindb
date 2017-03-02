@@ -3,7 +3,7 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 from prov.graph import prov_to_graph
-from prov.model import ProvDocument
+from prov.model import ProvDocument, ProvDelegation, ProvRecord
 from prov2bigchaindb.core import accounts, utils
 from bigchaindb_driver import BigchainDB
 
@@ -51,7 +51,6 @@ class DocumentConceptClient(BaseClient):
         prov_document = utils.form_string(content=document)
         asset = {'prov': prov_document.serialize(format='json')}
         txid = self.account.save_Asset(asset, self.connection)
-        #self.store.set_Document_MetaData(txid, self.account.get_Public_Key(), self.account.get_Id())
         return txid
 
     def get_document(self, tx_id):
@@ -72,7 +71,6 @@ class GraphConceptClient(BaseClient):
     def save_document(self, document):
         log.info("Save document...")
         prov_document = utils.form_string(content=document)
-        g = prov_to_graph(prov_document)
         instance_list = utils.get_prov_element_list(prov_document)
 
         for prov_identifier, prov_relations, namespaces in instance_list:
@@ -85,8 +83,7 @@ class GraphConceptClient(BaseClient):
             document_tx_ids.append(tx_id)
         for account in self.accounts:
             tx_list = account.save_Relation_Assets(self.connection)
-            for tx_id in tx_list:
-                document_tx_ids.append(tx_id)
+            document_tx_ids += tx_list
         log.info("Saved document in %s Tx", len(document_tx_ids))
         return document_tx_ids
 
