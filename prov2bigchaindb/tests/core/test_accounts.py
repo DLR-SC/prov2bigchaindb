@@ -48,6 +48,10 @@ class BaseAccountTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             accounts.BaseAccount(self.account_id, None)
 
+    def test__str__(self):
+        account = accounts.BaseAccount(self.account_id, self.store)
+        self.assertEqual(str(account), self.account_id +" : " +  self.public_key)
+
     def test_positive_get_id(self):
         account = accounts.BaseAccount(self.account_id, self.store)
         self.assertIsInstance(account.get_id(), str)
@@ -146,7 +150,7 @@ class DocumentConceptAccountTest(unittest.TestCase):
 class GraphConceptAccountTest(unittest.TestCase):
     def setUp(self):
         self.test_prov_files = setup_test_files()
-        self.prov_document = utils.form_string(content=self.test_prov_files["simple"])
+        self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
         self.prov_element, self.prov_relations, self.prov_namespaces = utils.get_prov_element_list(self.prov_document)[
             0]
         self.public_key = 'public'
@@ -195,7 +199,6 @@ class GraphConceptAccountTest(unittest.TestCase):
         del self.private_key
         del self.store
         del self.bdb_connection
-        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
         del self.test_prov_files
 
     def test_positive_init_without_account(self):
@@ -205,6 +208,10 @@ class GraphConceptAccountTest(unittest.TestCase):
         self.assertEqual(account.tx_id, '')
         self.assertEqual(account.prov_namespaces, self.prov_namespaces)
         self.assertEqual(account.prov_relations, self.prov_relations)
+
+    def test__str__(self):
+        account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)
+        self.assertEqual(str(account), str(self.prov_element.identifier) + " : " + self.public_key + "\n\t" + str(self.prov_relations))
 
     def test_get_tx_id(self):
         account = accounts.GraphConceptAccount(self.prov_element, self.prov_relations, self.prov_namespaces, self.store)

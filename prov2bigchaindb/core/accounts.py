@@ -39,7 +39,7 @@ class BaseAccount(object):
             log.debug("New account for %s with public_key %s", self.account_id, self.public_key)
 
     def __str__(self):
-        tmp = "{} : {}\n".format(self.account_id, self.public_key)
+        tmp = "{} : {}".format(self.account_id, self.public_key)
         return tmp
 
     def _create_asset(self, bdb_connection: BigchainDB, asset: dict, metadata: dict = None) -> dict:
@@ -180,8 +180,8 @@ class GraphConceptAccount(BaseAccount):
 
         :param prov_element: ProvElement related to account
         :type prov_element: ProvElement
-        :param prov_relations: Dictionary with a outgoing ProvRelations
-        :type prov_relations: dict
+        :param prov_relations: List including dictionaries of all outgoing ProvRelations
+        :type prov_relations: list
         :param namespaces: List of Prov Namespaces
         :type namespaces: list
         :param store: Local database object
@@ -192,7 +192,8 @@ class GraphConceptAccount(BaseAccount):
         assert namespaces is not None
         self.prov_element = prov_element
         self.prov_namespaces = namespaces
-        self.prov_relations = prov_relations
+        self.prov_independent_relations = prov_relations['independent']
+        self.prov_dependent_relations = prov_relations['dependent']
         super().__init__(str(prov_element.identifier), store)
 
     def get_tx_id(self) -> str:
@@ -205,10 +206,7 @@ class GraphConceptAccount(BaseAccount):
         return self.tx_id
 
     def __str__(self):
-        tmp = "{} :\n".format(self.account_id)
-        for k, v in self.prov_relations.items():
-            tmp = tmp + str(k) + " => " + str(v) + "\n"
-        return tmp
+        return "{} : {}\n\t{}".format(self.account_id, self.public_key , self.prov_relations)
 
     def __create_instance_document(self) -> ProvDocument:
         """
@@ -223,14 +221,14 @@ class GraphConceptAccount(BaseAccount):
         doc.add_record(self.prov_element)
         return doc
 
-    def __create_relations_document(self) -> (ProvDocument, map):
+    def __create_relations_document(self, relations) -> (str, ProvDocument, map):
         """
         Yields ProvDocument and mapping for each relations
         
         :return: Relation as ProvDocument and 
-        :rtype: (ProvDocument, map)
+        :rtype: (str, ProvDocument, map)
         """
-        for relation in self.prov_relations:
+        for relation in relations:
             doc = ProvDocument()
             mapping = {}
             for relation_type, relation_attr in relation.formal_attributes:
@@ -244,7 +242,7 @@ class GraphConceptAccount(BaseAccount):
             for n in self.prov_namespaces:
                 doc.add_namespace(n.prefix, n.uri)
             doc.add_record(relation)
-            yield doc, mapping
+            yield str(relation.identifier), doc, mapping
 
     def save_instance_asset(self, bdb_connection: BigchainDB) -> str:
         """
@@ -279,7 +277,7 @@ class GraphConceptAccount(BaseAccount):
         if self.tx_id == '':
             raise Exception()
         tx_list = []
-        for doc, mapping in self.__create_relations_document():
+        for identifier, id, doc, mapping in self.__create_relations_document():
             for records in doc.get_records():
                 recipient = self.store.get_account(str(records.args[1]))
                 asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}

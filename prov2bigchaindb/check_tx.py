@@ -1,5 +1,6 @@
 from bigchaindb_driver import BigchainDB
 from prov.model import ProvDocument
+from prov2bigchaindb.core import utils
 
 
 def main():
@@ -19,7 +20,7 @@ def main():
         print(tx)
         print()
 
-    doc = ProvDocument.deserialize(content=tx['asset']['data'].get('prov'), format='json')
+    doc = utils.to_prov_document(tx['asset']['data'].get('prov'))
     print()
     print(doc.get_provn())
     print()

@@ -4,7 +4,7 @@ from unittest import mock
 import sqlite3
 from prov2bigchaindb.core import local_stores, exceptions
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 TEST_DB_FILE = 'test.db'
 

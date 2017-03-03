@@ -7,7 +7,7 @@ from prov2bigchaindb.tests.core import setup_test_files
 from time import sleep
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class BaseClientTest(unittest.TestCase):
@@ -63,7 +63,7 @@ class DocumentConceptClientTest(unittest.TestCase):
         self.host = '127.0.0.1'
         self.port = 9984
         self.test_prov_files = setup_test_files()
-        self.prov_document = utils.form_string(content=self.test_prov_files["simple"])
+        self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
 
     def tearDown(self):
         del self.account_id
@@ -71,7 +71,6 @@ class DocumentConceptClientTest(unittest.TestCase):
         del self.private_key
         del self.host
         del self.port
-        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
         del self.test_prov_files
 
     @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
@@ -92,14 +91,14 @@ class DocumentConceptClientTest(unittest.TestCase):
     @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
     @mock.patch('bigchaindb_driver.BigchainDB')
     @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
-    def test_get_document(self, mock_account, mock_dbd, mock_store, mock_test_block, mock_test_tx):
-        mock_dbd.transactions.retrieve.return_value = {'id': '1', 'asset': {
+    def test_get_document(self, mock_account, mock_bdb, mock_store, mock_test_block, mock_test_tx):
+        mock_bdb.transactions.retrieve.return_value = {'id': '1', 'asset': {
             'data': {'prov': self.prov_document.serialize(format='json')}}}
         mock_test_block.return_value = True
         mock_test_tx.return_value = True
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         doc_client.account = mock_account
-        doc_client.connection = mock_dbd
+        doc_client.connection = mock_bdb
         # Test
         document = doc_client.get_document('1')
         sleep(1)
@@ -132,7 +131,7 @@ class GraphConceptClientTest(unittest.TestCase):
         self.host = '127.0.0.1'
         self.port = 9984
         self.test_prov_files = setup_test_files()
-        self.prov_document = utils.form_string(content=self.test_prov_files["simple"])
+        self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
 
     def tearDown(self):
         del self.account_id
@@ -204,7 +203,7 @@ class RoleConceptClientTest(unittest.TestCase):
         self.host = '127.0.0.1'
         self.port = 9984
         self.test_prov_files = setup_test_files()
-        self.prov_document = utils.form_string(content=self.test_prov_files["simple"])
+        self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
 
     def tearDown(self):
         del self.account_id

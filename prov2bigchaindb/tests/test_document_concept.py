@@ -5,7 +5,7 @@ from prov2bigchaindb.core import utils, clients, local_stores
 from bigchaindb_driver import BigchainDB
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class DocumentConceptTest(unittest.TestCase):
@@ -22,11 +22,10 @@ class DocumentConceptTest(unittest.TestCase):
         db.clean_tables()
         del db
         del self.bdb_connection
-        [self.test_prov_files[k].close() for k in self.test_prov_files.keys()]
 
     @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
-        prov_document = utils.form_string(content=self.test_prov_files["simple"])
+        prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
         client = clients.DocumentConceptClient(account_id=self.account_id)
         tx_id = client.save_document(prov_document)
         utils.wait_until_valid(tx_id, self.bdb_connection)
@@ -34,9 +33,9 @@ class DocumentConceptTest(unittest.TestCase):
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-    # @unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_simple2_prov_doc(self):
-        prov_document = utils.form_string(content=self.test_prov_files["simple2"])
+        prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
         client = clients.DocumentConceptClient(account_id=self.account_id)
         tx_id = client.save_document(prov_document)
         utils.wait_until_valid(tx_id, self.bdb_connection)
@@ -46,7 +45,7 @@ class DocumentConceptTest(unittest.TestCase):
 
     @unittest.skip("testing skipping")
     def test_thesis_prov_doc(self):
-        prov_document = utils.form_string(content=self.test_prov_files["thesis"])
+        prov_document = utils.to_prov_document(content=self.test_prov_files["thesis"])
         client = clients.DocumentConceptClient(account_id=self.account_id)
         tx_id = client.save_document(prov_document)
         utils.wait_until_valid(tx_id, self.bdb_connection)
@@ -56,7 +55,7 @@ class DocumentConceptTest(unittest.TestCase):
 
     @unittest.skip("testing skipping")
     def test_quantified_prov_doc(self):
-        prov_document = utils.form_string(content=self.test_prov_files["quantified"])
+        prov_document = utils.to_prov_document(content=self.test_prov_files["quantified"])
         client = clients.DocumentConceptClient(account_id=self.account_id)
         tx_id = client.save_document(prov_document)
         utils.wait_until_valid(tx_id, self.bdb_connection)

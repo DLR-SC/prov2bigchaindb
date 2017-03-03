@@ -76,16 +76,16 @@ class DocumentConceptClient(BaseClient):
         super().__init__(host, port, local_store)
         self.account = accounts.DocumentConceptAccount(account_id, self.store)
 
-    def save_document(self, document: str or BufferedReader or ProvDocument) -> str:
+    def save_document(self, document: str or bytes or ProvDocument) -> str:
         """
         Writes a document into BigchainDB
         :param document: Document as JSON/XML/PROVN
-        :type document: str or BufferedReader or ProvDocument
+        :type document: str or bytes or ProvDocument
         :return: Transaction id of document
         :rtype: str
         """
         log.info("Save document...")
-        prov_document = utils.form_string(content=document)
+        prov_document = utils.to_prov_document(content=document)
         asset = {'prov': prov_document.serialize(format='json')}
         tx_id = self.account.save_asset(asset, self.connection)
         log.info("Saved document in Tx with id: %s", tx_id)
@@ -107,7 +107,7 @@ class DocumentConceptClient(BaseClient):
             tx = self.connection.transactions.get(asset_id=tx['asset']['id'])[0]
             self.test_transaction(tx)
         log.info("Success")
-        return ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
+        return utils.to_prov_document(tx['asset']['data']['prov'])
 
 
 class GraphConceptClient(BaseClient):
@@ -125,7 +125,8 @@ class GraphConceptClient(BaseClient):
         :type local_store: BaseStore
         """
         super().__init__(host, port, local_store=local_store)
-        self.accounts = []
+        self.independent_accounts = []
+        self.dependent_accounts = []
 
     def save_document(self, document: str or BufferedReader or ProvDocument) -> list:
         """
@@ -137,20 +138,32 @@ class GraphConceptClient(BaseClient):
         :rtype: list
         """
         log.info("Save document...")
-        prov_document = utils.form_string(content=document)
-        instance_list = utils.get_prov_element_list(prov_document)
-
-        for prov_identifier, prov_relations, namespaces in instance_list:
-            ac = accounts.GraphConceptAccount(prov_identifier, prov_relations, namespaces, self.store)
-            self.accounts.append(ac)
-
+        prov_document = utils.to_prov_document(content=document)
+        instance_dict = utils.get_prov_element_list(prov_document)
         document_tx_ids = []
-        for account in self.accounts:
-            tx_id = account.save_instance_asset(self.connection)
+
+        log.info("Create and Save instances")
+        for prov_element, prov_relations, namespaces in instance_dict['dependent']:
+            ac = accounts.GraphConceptAccount(prov_element, prov_relations, namespaces, self.store)
+            self.dependent_accounts.append(ac)
+            tx_id = ac.save_instance_asset(self.connection)
             document_tx_ids.append(tx_id)
-        for account in self.accounts:
+        for prov_element, prov_relations, namespaces in instance_dict['independent']:
+            ac = accounts.GraphConceptAccount(prov_element, prov_relations, namespaces, self.store)
+            self.independent_accounts.append(ac)
+            tx_id = ac.save_instance_asset(self.connection)
+            document_tx_ids.append(tx_id)
+
+        log.info("Save dependent relations")
+        for account in self.dependent_accounts:
             tx_list = account.save_relation_assets(self.connection)
             document_tx_ids += tx_list
+
+        log.info("Save independent relations")
+        for account in self.independent_accounts:
+            tx_list = account.save_relation_assets(self.connection)
+            document_tx_ids += tx_list
+
         log.info("Saved document in %s Tx", len(document_tx_ids))
         return document_tx_ids
 
@@ -171,7 +184,7 @@ class GraphConceptClient(BaseClient):
             if 'id' in tx['asset'].keys():
                 tx = self.connection.transactions.get(asset_id=tx['asset']['id'])[0]
                 self.test_transaction(tx)
-            tmp_doc = ProvDocument.deserialize(content=tx['asset']['data']['prov'], format='json')
+            tmp_doc = utils.to_prov_document(tx['asset']['data']['prov'])
             for namespace in tmp_doc.get_registered_namespaces():
                 doc.add_namespace(namespace)
             for record in tmp_doc.get_records():

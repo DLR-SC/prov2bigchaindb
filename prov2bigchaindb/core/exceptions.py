@@ -12,3 +12,10 @@ class ParseException(Prov2BigchainDBException):
 
 class NoAccountException(Prov2BigchainDBException):
     pass
+
+
+class TransactionIdNotFound(Prov2BigchainDBException):
+    pass
+
+class BlockIdNotFound(Prov2BigchainDBException):
+    pass

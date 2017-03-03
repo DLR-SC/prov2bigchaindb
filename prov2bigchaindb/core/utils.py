@@ -1,42 +1,48 @@
+import json
 import logging
-from functools import reduce
-from io import BufferedReader
 
 import requests
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver import exceptions as bdb_exceptions
+from lxml import etree
 from prov.graph import prov_to_graph
-from prov.model import ProvDocument, six
-
+import prov
 from prov2bigchaindb.core import exceptions
-
+from prov import model
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-def form_string(content: str or BufferedReader or ProvDocument) -> ProvDocument:
+def to_prov_document(content: str or bytes or prov.model.ProvDocument) -> prov.model.ProvDocument:
     """
-    Takes a string or BufferedReader as argument and transforms the string into a ProvDocument
+    Takes a string, bytes or ProvDocument as argument and return a ProvDocument
+    The strings or bytes can contain JSON or XML representations of PROV
 
-    :param content: String or BufferedReader
+    :param content: String or BufferedReader or ProvDocument
     :return: ProvDocument
     :rtype: ProvDocument
     """
-    if isinstance(content, ProvDocument):
+    if isinstance(content, prov.model.ProvDocument):
         return content
-    elif isinstance(content, BufferedReader):
-        content = reduce(lambda total, a: total + a, content.readlines())
 
-    if type(content) is six.binary_type:
-        content_str = content[0:15].decode()
-        if content_str.find("{") > -1:
-            return ProvDocument.deserialize(content=content, format='json').flattened()
-        if content_str.find('<?xml') > -1:
-            return ProvDocument.deserialize(content=content, format='xml').flattened()
-        elif content_str.find('document') > -1:
-            return ProvDocument.deserialize(content=content, format='provn').flattened()
+    if isinstance(content, str):
+        content_bytes = str.encode(content)
+    else:
+        content_bytes = content
+    try:
+        if content_bytes.find(b"{") > -1:
+            return prov.model.ProvDocument.deserialize(content=content, format='json').flattened()
+        if content_bytes.find(b'<?xml') > -1:
+            return prov.model.ProvDocument.deserialize(content=content, format='xml').flattened()
+        elif content_bytes.find(b'document') > -1:
+            return prov.model.ProvDocument.deserialize(content=content, format='provn').flattened()
+        else:
+            raise exceptions.ParseException("Invalid PROV Document of type {}".format(type(content)))
 
-    raise exceptions.ParseException("Unsupported input type {}".format(type(content)))
+    except json.decoder.JSONDecodeError:
+        raise exceptions.ParseException("Invalid PROV-JSON of type {}".format(type(content)))
+    except etree.XMLSyntaxError:
+        raise exceptions.ParseException("Invalid PROV-XML of type {}".format(type(content)))
 
 
 def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
@@ -53,12 +59,15 @@ def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
     trialsmax = 100
     while trials < trialsmax:
         try:
-            if bdb_connection.transactions.status(tx_id).get('status') == 'valid':
+            result = bdb_connection.transactions.status(tx_id)
+            if result.get('status') == 'valid': # others: backlog, undecided
                 break
         except bdb_exceptions.NotFoundError:
             trials += 1
-            log.debug("Wait until transaction is valid: trial %s/%s - %s", trials, trialsmax, tx_id)
-
+            log.debug("Transaction %s not found in BigchainDB after %s tries out of %s", tx_id, trials, trialsmax)
+    if trials == trialsmax:
+        log.error("Transaction id %s not found affer %s tries", tx_id, trialsmax)
+        raise exceptions.TransactionIdNotFound(tx_id)
 
 def is_valid_tx(tx_id: str, bdb_connection: BigchainDB) -> bool:
     """
@@ -71,10 +80,14 @@ def is_valid_tx(tx_id: str, bdb_connection: BigchainDB) -> bool:
     :return: True if valid
     :rtype: bool
     """
-    status = bdb_connection.transactions.status(tx_id).get('status')
+    try:
+        status = bdb_connection.transactions.status(tx_id).get('status')
+    except bdb_exceptions.NotFoundError:
+        log.error("Transaction id %s was not found", tx_id)
+        raise exceptions.TransactionIdNotFound(tx_id)
     if status == 'valid':
         return True
-    log.error("tx %s is %s", tx_id, status)
+    log.warning("tx %s is %s", tx_id, status)
     return False
 
 
@@ -90,30 +103,50 @@ def is_block_to_tx_valid(tx_id: str, bdb_connection: BigchainDB) -> bool:
     :rtype: bool
     """
     api_url = bdb_connection.info()['_links']['api_v1']
-    block_id = requests.get(api_url + 'blocks?tx_id=' + tx_id).json()[0]
-    status = requests.get(api_url + 'statuses?block_id=' + block_id).json()['status']
+    res = requests.get(api_url + 'blocks?tx_id=' + tx_id)
+    block_id = res.json()
+    if len(block_id) < 1 or len(block_id) > 1:
+        raise exceptions.TransactionIdNotFound(tx_id)
+    res = requests.get(api_url + 'statuses?block_id=' + block_id[0])
+    if res.status_code != 200:
+        raise exceptions.BlockIdNotFound(block_id[0])
+    status = res.json()['status']
     if status == 'valid':
         return True
-    log.error("Block %s is %s", block_id, status)
     return False
 
 
-def get_prov_element_list(prov_document: ProvDocument) -> list:
+def get_prov_element_list(prov_document: prov.model.ProvDocument) -> dict:
     """
     Transforms a ProvDocument into a tuple including ProvElement, list of ProvRelation and list of Namespaces
 
     :param prov_document: Document to transform
     :type prov_document:
     :return:
-    :rtype: list
+    :rtype: dict
     """
+    SPECIAL_PROV_ATTR = ['prov:starter', 'prov:activity','prov:generation','prov:usage','prov:plan','prov:ender']
+
     namespaces = prov_document.get_registered_namespaces()
     g = prov_to_graph(prov_document=prov_document)
-    elements = []
+    elements = {'independent':[],'dependent':[]}
     for node, nodes in g.adjacency_iter():
-        relations = []
-        for n, tmp_relations in nodes.items():
+        relations = {'independent':[],'dependent':[]}
+        for tmp_relations in nodes.values():
             for relation in tmp_relations.values():
-                relations.append(relation['relation'])
-        elements.append((node, relations, namespaces))
+                relation = relation['relation']
+                #p = model.ProvRelation()
+                #print(type(relation.identifier))
+                for relation_type, relation_attr in relation.formal_attributes:
+                    if str(relation_type) in SPECIAL_PROV_ATTR and str(relation_attr) in [str(attr[1]) for attr in relation.formal_attributes[2:]] and relation_attr is not None:
+                        if relation_attr and relation not in relations['dependent']:
+                            relations['dependent'].append(relation)
+                            relations['independent'].remove(relation)
+                    elif relation not in relations['independent'] and relation not in relations['dependent']:
+                        relations['independent'].append(relation)
+
+        if relations['dependent']:
+            elements['dependent'].append((node, relations, namespaces))
+        else:
+            elements['independent'].append((node, relations, namespaces))
     return elements

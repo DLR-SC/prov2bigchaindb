@@ -9,5 +9,5 @@ def setup_test_files():
         'thesis': {'package': 'prov2bigchaindb', 'file': '/assets/thesis-example-full.json'}
     }
     return dict(
-        (key, pkg_resources.resource_stream(val['package'], val['file'])) for key, val in test_resources.items()
+        (key, pkg_resources.resource_string(val['package'], val['file'])) for key, val in test_resources.items()
     )
