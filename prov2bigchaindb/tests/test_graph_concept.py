@@ -15,9 +15,9 @@ class GraphConceptTest(unittest.TestCase):
 
     def tearDown(self):
         pass
-        #db = local_stores.BaseStore()
-        #db.clean_tables()
-        #del db
+        db = local_stores.BaseStore()
+        db.clean_tables()
+        del db
 
     @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):

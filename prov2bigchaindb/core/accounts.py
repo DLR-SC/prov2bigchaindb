@@ -206,7 +206,7 @@ class GraphConceptAccount(BaseAccount):
         return self.tx_id
 
     def __str__(self):
-        return "{} : {}\n\t{}".format(self.account_id, self.public_key , self.prov_relations)
+        return "{} : {}\n\t{}\n\t{}".format(self.account_id, self.public_key , self.prov_independent_relations, self.prov_dependent_relations)
 
     def __create_instance_document(self) -> ProvDocument:
         """

@@ -6,8 +6,6 @@ from prov2bigchaindb.core import local_stores, exceptions
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-TEST_DB_FILE = 'test.db'
-
 class LocalStoreTest(unittest.TestCase):
     def setUp(self):
         self.account_id = 'Local_Test_Account'
@@ -21,10 +19,8 @@ class LocalStoreTest(unittest.TestCase):
 
     @mock.patch('prov2bigchaindb.core.local_stores.sqlite3')
     def test_init(self, mock_sqlite3):
-        local_stores.BaseStore(TEST_DB_FILE)
-        mock_sqlite3.connect.assert_called_with(TEST_DB_FILE)
         local_stores.BaseStore()
-        mock_sqlite3.connect.assert_called_with('config.db')
+        mock_sqlite3.connect.assert_called_with(':memory:')
         mock_sqlite3.connect().execute.assert_called_with(
             '''CREATE TABLE IF NOT EXISTS accounts (account_id TEXT, public_key TEXT, private_key TEXT, tx_id TEXT, PRIMARY KEY (account_id, public_key))''')
 
@@ -43,7 +39,7 @@ class LocalStoreTest(unittest.TestCase):
                                                                    (self.account_id,))
 
     def test_live_write_account(self):
-        db = local_stores.BaseStore(TEST_DB_FILE)
+        db = local_stores.BaseStore()
         db.clean_tables()
         db.write_account(self.account_id, self.public_key, self.private_key)
         with self.assertRaises(sqlite3.IntegrityError):
@@ -51,7 +47,7 @@ class LocalStoreTest(unittest.TestCase):
         db.clean_tables()
 
     def test_live_get_account(self):
-        db = local_stores.BaseStore(TEST_DB_FILE)
+        db = local_stores.BaseStore()
         db.clean_tables()
         db.write_account(self.account_id, self.public_key, self.private_key)
         account_id, pub, priv, tx_id = db.get_account(self.account_id)
