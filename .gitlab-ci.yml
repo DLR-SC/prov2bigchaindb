@@ -20,6 +20,7 @@ build:
   only:
   - master
   - improve-ci
+  - develop
   script:
   - pip install -e .[dev]
   - bigchaindb --dev-allow-temp-keypair start &
@@ -29,6 +30,7 @@ test:
   only:
   - master
   - improve-ci
+  - develop
   script:
   - pip install -e .[dev]
   - mkdir .cache
@@ -54,15 +56,6 @@ pages:
     expire_in: 30 days
   only:
     - master
-
-build:
-  stage: build
-  only:
-  - master
-  - improve-ci
-  script:
-  - pip install -e .[dev]
-  - bigchaindb --dev-allow-temp-keypair start &
 
 manual_test:
   script:
