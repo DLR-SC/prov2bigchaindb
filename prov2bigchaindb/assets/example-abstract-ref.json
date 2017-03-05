@@ -1,35 +1,42 @@
 {
   "wasAssociatedWith": {
-    "_:wAW118": {
+    "_:wAW148": {
       "prov:activity": "ex:A1",
-      "prov:agent": "ex:Ag1"
+      "prov:agent": "ex:Ag1",
+      "prov:plan": "ex:P1"
     },
-    "_:wAW119": {
+    "_:wAW149": {
       "prov:activity": "ex:A2",
       "prov:agent": "ex:Ag2"
     }
   },
   "wasAttributedTo": {
-    "_:wAT758": {
+    "_:wAT788": {
       "prov:agent": "ex:Ag1",
       "prov:entity": "ex:E1"
     },
-    "_:wAT759": {
+    "_:wAT789": {
       "prov:agent": "ex:Ag2",
       "prov:entity": "ex:E2"
     }
   },
   "wasGeneratedBy": {
-    "_:wGB537": {
+    "ex:g1": {
       "prov:activity": "ex:A2",
       "prov:entity": "ex:E2"
     },
-    "_:wGB536": {
+    "_:wGB564": {
       "prov:activity": "ex:A1",
       "prov:entity": "ex:E1"
     }
   },
   "entity": {
+    "ex:P1": {
+      "prov:type": {
+        "$": "prov:Plan",
+        "type": "prov:QUALIFIED_NAME"
+      }
+    },
     "ex:E2": {},
     "ex:E1": {}
   },
@@ -39,8 +46,17 @@
     "prov": "http://www.w3.org/ns/prov#",
     "ex": "https://example.org/"
   },
+  "wasDerivedFrom": {
+    "_:wDF579": {
+      "prov:activity": "ex:A2",
+      "prov:generatedEntity": "ex:E2",
+      "prov:usage": "ex:u1",
+      "prov:generation": "ex:g1",
+      "prov:usedEntity": "ex:E1"
+    }
+  },
   "used": {
-    "_:u531": {
+    "ex:u1": {
       "prov:activity": "ex:A2",
       "prov:entity": "ex:E1"
     }
@@ -51,17 +67,25 @@
     "ex:Ag2": {}
   },
   "actedOnBehalfOf": {
-    "_:aOBO34": {
-      "prov:delegate": "ex:Ag2",
+    "_:aOBO63": {
+      "prov:delegate": "ex:Ag1",
       "prov:responsible": "ex:Ag0"
     },
-    "_:aOBO33": {
-      "prov:delegate": "ex:Ag1",
+    "_:aOBO64": {
+      "prov:activity": "ex:A1",
+      "prov:delegate": "ex:Ag2",
       "prov:responsible": "ex:Ag0"
     }
   },
   "activity": {
     "ex:A1": {},
     "ex:A2": {}
+  },
+  "wasStartedBy": {
+    "_:wSB11": {
+      "prov:activity": "ex:A2",
+      "prov:trigger": "ex:E1",
+      "prov:starter": "ex:A1"
+    }
   }
 }

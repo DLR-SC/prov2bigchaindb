@@ -74,3 +74,7 @@ make docs
 # License
 
 See [LICENSE](./LICENSE) file
+
+# Class Diagram
+
+[Core model](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/blob/graph-concept/core.svg)
