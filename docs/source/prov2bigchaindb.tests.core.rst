@@ -20,6 +20,14 @@ prov2bigchaindb.tests.core.test_clients module
     :undoc-members:
     :show-inheritance:
 
+prov2bigchaindb.tests.core.test_local_stores module
+---------------------------------------------------
+
+.. automodule:: prov2bigchaindb.tests.core.test_local_stores
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 prov2bigchaindb.tests.core.test_utils module
 --------------------------------------------
 

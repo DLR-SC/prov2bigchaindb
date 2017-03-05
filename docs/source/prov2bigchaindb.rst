@@ -12,26 +12,18 @@ Subpackages
 Submodules
 ----------
 
-prov2bigchaindb.documentmodelapp module
+prov2bigchaindb.alternation_test module
 ---------------------------------------
 
-.. automodule:: prov2bigchaindb.documentmodelapp
+.. automodule:: prov2bigchaindb.alternation_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-prov2bigchaindb.graphmodelapp module
-------------------------------------
+prov2bigchaindb.check_tx module
+-------------------------------
 
-.. automodule:: prov2bigchaindb.graphmodelapp
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-prov2bigchaindb.rolemodelapp module
------------------------------------
-
-.. automodule:: prov2bigchaindb.rolemodelapp
+.. automodule:: prov2bigchaindb.check_tx
     :members:
     :undoc-members:
     :show-inheritance:
