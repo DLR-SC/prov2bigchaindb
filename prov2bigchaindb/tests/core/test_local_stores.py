@@ -3,8 +3,10 @@ import unittest
 from unittest import mock
 import sqlite3
 from prov2bigchaindb.core import local_stores, exceptions
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
 
 class LocalStoreTest(unittest.TestCase):
     def setUp(self):
@@ -55,7 +57,7 @@ class LocalStoreTest(unittest.TestCase):
         self.assertEqual(pub, self.public_key)
         self.assertEqual(priv, self.private_key)
         self.assertEqual(tx_id, None)
-        with self.assertRaises(exceptions.NoAccountException):
+        with self.assertRaises(exceptions.NoAccountFoundException):
             ret = db.get_account('wrong_id')
             self.assertEqual(ret, None)
         db.clean_tables()

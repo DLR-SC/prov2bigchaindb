@@ -1,6 +1,7 @@
 import logging
 import unittest
 from unittest import mock
+from bigchaindb_driver import pool as bdpool
 
 from prov2bigchaindb.core import utils, clients, local_stores
 from prov2bigchaindb.tests.core import setup_test_files
@@ -27,8 +28,8 @@ class BaseClientTest(unittest.TestCase):
         del self.host
         del self.port
 
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
     def test_positive_init(self, mock_bdb, mock_store):
         baseclient = clients.BaseClient(self.host, self.port)
         baseclient.connection = mock_bdb
@@ -43,8 +44,8 @@ class BaseClientTest(unittest.TestCase):
     def test_test_transaction(self):
         raise NotImplementedError()
 
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
     def test_save_document(self, mock_bdb, mock_store):
         baseclient = clients.BaseClient(self.host, self.port)
         baseclient.connection = mock_bdb
@@ -73,9 +74,9 @@ class DocumentConceptClientTest(unittest.TestCase):
         del self.port
         del self.test_prov_files
 
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.DocumentConceptAccount')
     def test_positive_init(self, mock_account, mock_dbd, mock_store):
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         self.assertIsInstance(doc_client, clients.DocumentConceptClient)
@@ -86,11 +87,11 @@ class DocumentConceptClientTest(unittest.TestCase):
         # TODO Check Instance of account_db
         # TODO Check Instance of account
 
-    @mock.patch('prov2bigchaindb.core.utils.is_valid_tx')
-    @mock.patch('prov2bigchaindb.core.utils.is_block_to_tx_valid')
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
+    @mock.patch('prov2bigchaindb.core.clients.utils.is_valid_tx')
+    @mock.patch('prov2bigchaindb.core.clients.utils.is_block_to_tx_valid')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.DocumentConceptAccount')
     def test_get_document(self, mock_account, mock_bdb, mock_store, mock_test_block, mock_test_tx):
         mock_bdb.transactions.retrieve.return_value = {'id': '1', 'asset': {
             'data': {'prov': self.prov_document.serialize(format='json')}}}
@@ -98,25 +99,25 @@ class DocumentConceptClientTest(unittest.TestCase):
         mock_test_tx.return_value = True
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         doc_client.account = mock_account
-        doc_client.connection = mock_bdb
+        doc_client.connection_pool = bdpool.Pool([mock_bdb])
         # Test
         document = doc_client.get_document('1')
         sleep(1)
-        doc_client.connection.transactions.retrieve.assert_called_with('1')
+        doc_client._get_bigchain_connection().transactions.retrieve.assert_called_with('1')
         self.assertEqual(document, self.prov_document)
 
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.DocumentConceptAccount')
-    def test_save_document(self, mock_account, mock_dbd, mock_store):
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.DocumentConceptAccount')
+    def test_save_document(self, mock_account, mock_bdb, mock_store):
         mock_account.save_asset.return_value = '1'
         doc_client = clients.DocumentConceptClient(self.account_id, self.host, self.port)
         doc_client.account = mock_account
-        doc_client.connection = mock_dbd
+        doc_client.connection_pool = bdpool.Pool([mock_bdb])
 
         a = doc_client.save_document(self.prov_document)
         doc_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
-                                                         mock_dbd)
+                                                         mock_bdb)
         self.assertIsInstance(a, str)
         self.assertEqual(a, '1')
 
@@ -143,9 +144,9 @@ class GraphConceptClientTest(unittest.TestCase):
         del self.test_prov_files
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.GraphConceptAccount')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test_positive_init(self, mock_account, mock_dbd, mock_store):
         doc_client = clients.GraphConceptClient(self.host, self.port)
         self.assertIsInstance(doc_client, clients.GraphConceptClient)
@@ -157,11 +158,11 @@ class GraphConceptClientTest(unittest.TestCase):
         # TODO Check Instance of account
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.utils.is_valid_tx')
-    @mock.patch('prov2bigchaindb.core.utils.is_block_to_tx_valid')
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.GraphConceptAccount')
+    @mock.patch('prov2bigchaindb.core.clients.utils.is_valid_tx')
+    @mock.patch('prov2bigchaindb.core.clients.utils.is_block_to_tx_valid')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test_get_document(self, mock_account, mock_dbd, mock_store, mock_test_block, mock_test_tx):
         mock_dbd.transactions.retrieve.return_value = {'id': '1', 'asset': {
             'data': {'prov': self.prov_document.serialize(format='json')}}}
@@ -177,9 +178,9 @@ class GraphConceptClientTest(unittest.TestCase):
         self.assertEqual(document, self.prov_document)
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.GraphConceptAccount')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test_save_document(self, mock_account, mock_dbd, mock_store):
         mock_account.save_asset.return_value = '1'
         doc_client = clients.GraphConceptClient(self.host, self.port)
@@ -215,9 +216,9 @@ class RoleConceptClientTest(unittest.TestCase):
         del self.test_prov_files
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.RoleConceptAccount')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test_positive_init(self, mock_account, mock_dbd, mock_store):
         doc_client = clients.RoleConceptClient(self.host, self.port)
         self.assertIsInstance(doc_client, clients.RoleConceptClient)
@@ -229,11 +230,11 @@ class RoleConceptClientTest(unittest.TestCase):
         # TODO Check Instance of account
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.utils.is_valid_tx')
-    @mock.patch('prov2bigchaindb.core.utils.is_block_to_tx_valid')
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.RoleConceptAccount')
+    @mock.patch('prov2bigchaindb.core.clients.utils.is_valid_tx')
+    @mock.patch('prov2bigchaindb.core.clients.utils.is_block_to_tx_valid')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test_get_document(self, mock_account, mock_dbd, mock_store, mock_test_block, mock_test_tx):
         mock_dbd.transactions.retrieve.return_value = {'id': '1', 'asset': {
             'data': {'prov': self.prov_document.serialize(format='json')}}}
@@ -249,9 +250,9 @@ class RoleConceptClientTest(unittest.TestCase):
         self.assertEqual(document, self.prov_document)
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.local_stores.BaseStore')
-    @mock.patch('bigchaindb_driver.BigchainDB')
-    @mock.patch('prov2bigchaindb.core.accounts.RoleConceptAccount')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
+    @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test_save_document(self, mock_account, mock_dbd, mock_store):
         mock_account.save_asset.return_value = '1'
         doc_client = clients.RoleConceptClient(self.host, self.port)

@@ -9,6 +9,7 @@ from prov.graph import prov_to_graph
 import prov
 from prov2bigchaindb.core import exceptions
 from prov import model
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
@@ -60,7 +61,7 @@ def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
     while trials < trialsmax:
         try:
             result = bdb_connection.transactions.status(tx_id)
-            if result.get('status') == 'valid': # others: backlog, undecided
+            if result.get('status') == 'valid':  # others: backlog, undecided
                 break
         except bdb_exceptions.NotFoundError:
             trials += 1
@@ -68,6 +69,7 @@ def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
     if trials == trialsmax:
         log.error("Transaction id %s not found affer %s tries", tx_id, trialsmax)
         raise exceptions.TransactionIdNotFound(tx_id)
+
 
 def is_valid_tx(tx_id: str, bdb_connection: BigchainDB) -> bool:
     """
@@ -116,37 +118,32 @@ def is_block_to_tx_valid(tx_id: str, bdb_connection: BigchainDB) -> bool:
     return False
 
 
-def get_prov_element_list(prov_document: prov.model.ProvDocument) -> dict:
+def get_prov_element_list(prov_document: prov.model.ProvDocument) -> list:
     """
     Transforms a ProvDocument into a tuple including ProvElement, list of ProvRelation and list of Namespaces
 
     :param prov_document: Document to transform
     :type prov_document:
-    :return:
-    :rtype: dict
+    :return: List of tuples(element, relations, namespace)
+    :rtype: list
     """
-    SPECIAL_PROV_ATTR = ['prov:starter', 'prov:activity','prov:generation','prov:usage','prov:plan','prov:ender']
 
     namespaces = prov_document.get_registered_namespaces()
     g = prov_to_graph(prov_document=prov_document)
-    elements = {'independent':[],'dependent':[]}
+    elements = []
     for node, nodes in g.adjacency_iter():
-        relations = {'independent':[],'dependent':[]}
+        relations = {'with_id': [], 'without_id': []}
+        # print(node)
         for tmp_relations in nodes.values():
+            # print("\t",tmp_relations)
             for relation in tmp_relations.values():
                 relation = relation['relation']
-                #p = model.ProvRelation()
-                #print(type(relation.identifier))
-                for relation_type, relation_attr in relation.formal_attributes:
-                    if str(relation_type) in SPECIAL_PROV_ATTR and str(relation_attr) in [str(attr[1]) for attr in relation.formal_attributes[2:]] and relation_attr is not None:
-                        if relation_attr and relation not in relations['dependent']:
-                            relations['dependent'].append(relation)
-                            relations['independent'].remove(relation)
-                    elif relation not in relations['independent'] and relation not in relations['dependent']:
-                        relations['independent'].append(relation)
-
-        if relations['dependent']:
-            elements['dependent'].append((node, relations, namespaces))
-        else:
-            elements['independent'].append((node, relations, namespaces))
+                # print("\t\t", relation)
+                # print("\t\t\t", relation.identifier)
+                # print("\t\t\t", type(relation.identifier))
+                if relation.identifier:
+                    relations['with_id'].append(relation)
+                else:
+                    relations['without_id'].append(relation)
+        elements.append((node, relations, namespaces))
     return elements
