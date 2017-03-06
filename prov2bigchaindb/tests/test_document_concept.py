@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 class DocumentConceptTest(unittest.TestCase):
-    """Test BigchainDB Base Client"""
+    """Test BigchainDB Document Concept"""
 
     def setUp(self):
         self.bdb_connection = BigchainDB('http://127.0.0.1:9984')

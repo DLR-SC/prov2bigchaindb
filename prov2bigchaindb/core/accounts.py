@@ -342,3 +342,177 @@ class GraphConceptAccount(BaseAccount):
             self.tx_id = tx['id']
             log.debug("Created instance: %s - %s", self.account_id, tx['id'])
         return self.tx_id
+
+
+class RoleConceptAccount(BaseAccount):
+    """
+    BigchainDB Graph Concept Account
+    """
+
+    def __init__(self, prov_element: ProvElement, prov_relations: dict, id_mapping: dict, namespaces: list,
+                 store: local_stores.BaseStore = local_stores.BaseStore()):
+        """
+        Instantiate Graph Concept Account object
+
+        :param prov_element: ProvElement related to account
+        :type prov_element: ProvElement
+        :param prov_relations: List including dictionaries of all outgoing ProvRelations
+        :type prov_relations: list
+        :param namespaces: List of Prov Namespaces
+        :type namespaces: list
+        :param store: Local database object
+        :type store: local_stores.BaseStore
+        """
+        assert prov_element is not None
+        assert prov_relations is not None
+        assert namespaces is not None
+        self.prov_element = prov_element
+        self.prov_namespaces = namespaces
+        self.prov_relations_with_id = prov_relations['with_id']
+        self.id_mapping = id_mapping
+        self.prov_relations_without_id = prov_relations['without_id']
+        super().__init__(str(prov_element.identifier), store)
+
+    def get_tx_id(self) -> str:
+        """
+        Get tx_id that describes the account in BigchainDB
+
+        :return: Transaction id of account
+        :rtype: str
+        """
+        return self.tx_id
+
+    def has_relations_with_id(self) -> bool:
+        """
+        Indicates whether account has relation with ids
+        :return: True if one or more relation does have ids
+        :rtype: bool
+        """
+        return len(self.prov_relations_with_id) != 0
+
+    def has_relations_without_id(self) -> bool:
+        """
+        Indicates whether account has relation with ids
+        :return: True if one or more relation does have ids
+        :rtype: bool
+        """
+        return len(self.prov_relations_without_id) != 0
+
+    def __str__(self):
+        return "{} : {}\n\t{}\n\t{}".format(self.account_id, self.public_key, self.prov_relations_with_id,
+                                            self.prov_relations_without_id)
+
+    def __create_instance_document(self) -> ProvDocument:
+        """
+        Builds valid ProvDocument representation of account
+
+        :return: Representation of account as ProvDocument
+        :rtype: ProvDocument
+        """
+        doc = ProvDocument()
+        for n in self.prov_namespaces:
+            doc.add_namespace(n.prefix, n.uri)
+        doc.add_record(self.prov_element)
+        return doc
+
+    def __create_relation(self, relation) -> (ProvDocument, dict):
+        """
+        Yields ProvDocument and mapping for each relations
+
+        :return: Relation as ProvDocument and
+        :rtype: (str, ProvDocument, map)
+        """
+        doc = ProvDocument()
+        mapping = {}
+        relation = relation
+        for relation_type, relation_attr in relation.formal_attributes:
+            if relation_attr:
+                try:
+                    recipient = self.store.get_account(str(relation_attr))
+                    mapping[recipient[0]] = recipient[3]
+                except exceptions.NoAccountFoundException:
+                    try:
+                        recipient = self.id_mapping.get(str(relation_attr))
+                        mapping[str(relation_attr)] = recipient
+                    except exceptions.NoRelationFoundException:
+                        log.info("Found no tx for %s", relation_attr)
+
+        for n in self.prov_namespaces:
+            doc.add_namespace(n.prefix, n.uri)
+        doc.add_record(relation)
+        yield (doc, mapping)
+
+    def save_relations_with_ids(self, bdb_connection: BigchainDB) -> list:
+        """
+        Writes all relation assets to BigchainDB
+
+        :param bdb_connection: Connection object for BigchainDB
+        :type bdb_connection: BigchainDB
+        :return: Transactions ids of all relations
+        :rtype: list
+        """
+        if self.tx_id == '':
+            raise exceptions.AccountNotCreatedException("Account must be created before transactions")
+        tx_list = []
+        for relation in self.prov_relations_with_id:
+            for doc, mapping in self.__create_relation(relation):
+                for record in doc.get_records():
+                    recipient = self.store.get_account(str(record.args[1]))
+                    asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
+                    metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
+                    tx = self._create_asset(bdb_connection, asset, metadata)
+                    utils.wait_until_valid(tx['id'], bdb_connection)
+                    metadata = {'relation': str(record.identifier) + " - " + '->'.join([self.account_id, recipient[0]])}
+                    tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
+                    tx_list.append(tx['id'])
+                    self.id_mapping[str(record.identifier)] = tx['id']
+                    log.debug("Created relation %s: %s -> %s - %s", record.identifier, self.account_id, recipient[0],
+                              tx['id'])
+        return tx_list
+
+    def save_relations_without_ids(self, bdb_connection: BigchainDB) -> list:
+        """
+        Writes all relation assets to BigchainDB
+
+        :param bdb_connection: Connection object for BigchainDB
+        :type bdb_connection: BigchainDB
+        :return: Transactions ids of all relations
+        :rtype: list
+        """
+        if self.tx_id == '':
+            raise exceptions.AccountNotCreatedException("Account must be created before transactions")
+        tx_list = []
+        for relation in self.prov_relations_without_id:
+            for doc, mapping in self.__create_relation(relation):
+                for records in doc.get_records():
+                    recipient = self.store.get_account(str(records.args[1]))
+                    asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
+                    metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
+                    tx = self._create_asset(bdb_connection, asset, metadata)
+                    utils.wait_until_valid(tx['id'], bdb_connection)
+                    metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
+                    tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
+                    tx_list.append(tx['id'])
+                    log.debug("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
+        return tx_list
+
+    def save_instance_asset(self, bdb_connection: BigchainDB) -> str:
+        """
+        Writes instance asset to BigchainDB
+
+        :param bdb_connection: Connection object for BigchainDB
+        :type bdb_connection: BigchainDB
+        :return: Transactions id of instance
+        :rtype: str
+        """
+        if self.tx_id == '':
+            prov_document = self.__create_instance_document()
+            asset = {'data': {'prov': prov_document.serialize(format='json')}}
+            metadata = {'instance': self.account_id}
+            tx = self._create_asset(bdb_connection, asset, metadata)
+            utils.wait_until_valid(tx['id'], bdb_connection)
+            tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
+            self.store.write_tx_id(self.account_id, tx['id'])
+            self.tx_id = tx['id']
+            log.debug("Created instance: %s - %s", self.account_id, tx['id'])
+        return self.tx_id

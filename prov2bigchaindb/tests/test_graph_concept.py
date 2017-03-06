@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class GraphConceptTest(unittest.TestCase):
-    """Test BigchainDB Base Client"""
+    """Test BigchainDB Graph Concept"""
 
     def setUp(self):
         self.test_prov_files = setup_test_files()

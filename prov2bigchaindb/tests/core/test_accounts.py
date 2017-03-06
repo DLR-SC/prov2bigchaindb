@@ -1,9 +1,10 @@
 import logging
 import unittest
 from unittest import mock
+
 from . import setup_test_files
 import bigchaindb_driver
-from prov2bigchaindb.core import accounts, utils, exceptions, local_stores
+from prov2bigchaindb.core import clients, accounts, utils, exceptions, local_stores
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -145,7 +146,7 @@ class GraphConceptAccountTest(unittest.TestCase):
     def setUp(self):
         self.test_prov_files = setup_test_files()
         self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
-        self.prov_element, self.prov_relations, self.prov_namespaces = utils.get_prov_element_list(self.prov_document)[
+        self.prov_element, self.prov_relations, self.prov_namespaces = clients.GraphConceptClient.get_prov_element_list(self.prov_document)[
             0]
         self.id_mapping = {}
         for rel in self.prov_relations['with_id']:
