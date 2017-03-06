@@ -160,12 +160,8 @@ class GraphConceptClient(BaseClient):
             relations = {'with_id': [], 'without_id': []}
             # print(node)
             for tmp_relations in nodes.values():
-                # print("\t",tmp_relations)
                 for relation in tmp_relations.values():
                     relation = relation['relation']
-                    # print("\t\t", relation)
-                    # print("\t\t\t", relation.identifier)
-                    # print("\t\t\t", type(relation.identifier))
                     if relation.identifier:
                         relations['with_id'].append(relation)
                     else:

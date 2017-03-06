@@ -52,10 +52,10 @@ class LocalStoreTest(unittest.TestCase):
         db = local_stores.BaseStore()
         db.clean_tables()
         db.write_account(self.account_id, self.public_key, self.private_key)
-        account_id, pub, priv, tx_id = db.get_account(self.account_id)
+        account_id, public_key, private_key, tx_id = db.get_account(self.account_id)
         self.assertEqual(account_id, self.account_id)
-        self.assertEqual(pub, self.public_key)
-        self.assertEqual(priv, self.private_key)
+        self.assertEqual(public_key, self.public_key)
+        self.assertEqual(private_key, self.private_key)
         self.assertEqual(tx_id, None)
         with self.assertRaises(exceptions.NoAccountFoundException):
             ret = db.get_account('wrong_id')

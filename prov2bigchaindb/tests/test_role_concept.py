@@ -19,22 +19,23 @@ class RoleConceptTest(unittest.TestCase):
         db = local_stores.BaseStore()
         db.clean_tables()
         del db
+        del self.test_prov_files
 
     # @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
-        client = clients.GraphConceptClient()
-        tx_ids = client.save_document(prov_document)
-        doc = client.get_document(tx_ids)
+        role_client = clients.RoleConceptClient()
+        tx_ids = role_client.save_document(prov_document)
+        doc = role_client.get_document(tx_ids)
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
     # @unittest.skip("testing skipping")
     def test_simple2_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
-        client = clients.RoleConceptClient()
-        tx_ids = client.save_document(prov_document)
-        doc = client.get_document(tx_ids)
+        role_client = clients.RoleConceptClient()
+        tx_ids = role_client.save_document(prov_document)
+        doc = role_client.get_document(tx_ids)
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
         print(tx_ids)
@@ -42,17 +43,17 @@ class RoleConceptTest(unittest.TestCase):
     # @unittest.skip("testing skipping")
     def test_thesis_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["thesis"])
-        client = clients.RoleConceptClient()
-        tx_ids = client.save_document(prov_document)
-        doc = client.get_document(tx_ids)
+        role_client = clients.RoleConceptClient()
+        tx_ids = role_client.save_document(prov_document)
+        doc = role_client.get_document(tx_ids)
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
     # @unittest.skip("testing skipping")
     def test_quantified_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["quantified"])
-        client = clients.RoleConceptClient()
-        tx_ids = client.save_document(prov_document)
-        doc = client.get_document(tx_ids)
+        role_client = clients.RoleConceptClient()
+        tx_ids = role_client.save_document(prov_document)
+        doc = role_client.get_document(tx_ids)
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)

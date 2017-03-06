@@ -74,6 +74,7 @@ class DocumentConceptClientTest(unittest.TestCase):
         del self.host
         del self.port
         del self.test_prov_files
+        del self.prov_document
 
     @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
     @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
@@ -116,11 +117,11 @@ class DocumentConceptClientTest(unittest.TestCase):
         doc_client.account = mock_account
         doc_client.connection_pool = bdpool.Pool([mock_bdb])
 
-        a = doc_client.save_document(self.prov_document)
+        tx_id = doc_client.save_document(self.prov_document)
         doc_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
                                                          mock_bdb)
-        self.assertIsInstance(a, str)
-        self.assertEqual(a, '1')
+        self.assertIsInstance(tx_id, str)
+        self.assertEqual(tx_id, '1')
 
 
 class GraphConceptClientTest(unittest.TestCase):
@@ -142,24 +143,25 @@ class GraphConceptClientTest(unittest.TestCase):
         del self.host
         del self.port
         del self.test_prov_files
+        del self.prov_document
 
     @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
     @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test_positive_init(self, mock_account, mock_dbd, mock_store):
-        doc_client = clients.GraphConceptClient(self.host, self.port)
-        self.assertIsInstance(doc_client, clients.GraphConceptClient)
+        graph_client = clients.GraphConceptClient(self.host, self.port)
+        self.assertIsInstance(graph_client, clients.GraphConceptClient)
         # self.assertIsInstance(baseclient.accountstore, utils.LocalAccountStore)
         # self.assertIsInstance(baseclient.account, accounts.DocumentModelAccount)
-        self.assertIsInstance(doc_client.node, str)
-        self.assertEqual(doc_client.node, 'http://127.0.0.1:9984')
+        self.assertIsInstance(graph_client.node, str)
+        self.assertEqual(graph_client.node, 'http://127.0.0.1:9984')
 
     # @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
     @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test__get_prov_element_list(self, mock_account, mock_bdb):
-        doc_client = clients.GraphConceptClient(self.host, self.port)
+        graph_client = clients.GraphConceptClient(self.host, self.port)
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
         prov_records = prov_document.get_records()
         prov_namespaces = prov_document.get_registered_namespaces()
@@ -181,13 +183,13 @@ class GraphConceptClientTest(unittest.TestCase):
             'data': {'prov': self.prov_document.serialize(format='json')}}}
         mock_test_block.return_value = True
         mock_test_tx.return_value = True
-        doc_client = clients.GraphConceptClient(self.host, self.port)
-        doc_client.account = mock_account
-        doc_client.connection = mock_bdb
+        graph_client = clients.GraphConceptClient(self.host, self.port)
+        graph_client.account = mock_account
+        graph_client.connection = mock_bdb
         # Test
-        document = doc_client.get_document(['1'])
+        document = graph_client.get_document(['1'])
         sleep(1)
-        doc_client.connection.transactions.retrieve.assert_called_with('1')
+        graph_client.connection.transactions.retrieve.assert_called_with('1')
         self.assertEqual(document, self.prov_document)
 
     @unittest.skip("testing skipping")
@@ -196,15 +198,15 @@ class GraphConceptClientTest(unittest.TestCase):
     @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test_save_document(self, mock_account, mock_bdb, mock_store):
         mock_account.save_asset.return_value = '1'
-        doc_client = clients.GraphConceptClient(self.host, self.port)
-        doc_client.account = mock_account
-        doc_client.connection = mock_bdb
+        graph_client = clients.GraphConceptClient(self.host, self.port)
+        graph_client.account = mock_account
+        graph_client.connection = mock_bdb
 
-        a = doc_client.save_document(self.prov_document)
-        doc_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
+        tx_id = graph_client.save_document(self.prov_document)
+        graph_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
                                                          mock_bdb)
-        self.assertIsInstance(a, str)
-        self.assertEqual(a, '1')
+        self.assertIsInstance(tx_id, str)
+        self.assertEqual(tx_id, '1')
 
 
 class RoleConceptClientTest(unittest.TestCase):
@@ -226,18 +228,19 @@ class RoleConceptClientTest(unittest.TestCase):
         del self.host
         del self.port
         del self.test_prov_files
+        del self.prov_document
 
     @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
     @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test_positive_init(self, mock_account, mock_bdb, mock_store):
-        doc_client = clients.RoleConceptClient(self.host, self.port)
-        self.assertIsInstance(doc_client, clients.RoleConceptClient)
+        role_client = clients.RoleConceptClient(self.host, self.port)
+        self.assertIsInstance(role_client, clients.RoleConceptClient)
         # self.assertIsInstance(baseclient.accountstore, utils.LocalAccountStore)
         # self.assertIsInstance(baseclient.account, accounts.DocumentModelAccount)
-        self.assertIsInstance(doc_client.node, str)
-        self.assertEqual(doc_client.node, 'http://127.0.0.1:9984')
+        self.assertIsInstance(role_client.node, str)
+        self.assertEqual(role_client.node, 'http://127.0.0.1:9984')
         # TODO Check Instance of account_db
         # TODO Check Instance of account
 
@@ -245,7 +248,7 @@ class RoleConceptClientTest(unittest.TestCase):
     @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
     @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test__get_prov_element_list(self, mock_account, moch_bdb):
-        doc_client = clients.RoleConceptClient(self.host, self.port)
+        role_clien = clients.RoleConceptClient(self.host, self.port)
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
         prov_records = prov_document.get_records()
         prov_namespaces = prov_document.get_registered_namespaces()
@@ -267,13 +270,13 @@ class RoleConceptClientTest(unittest.TestCase):
             'data': {'prov': self.prov_document.serialize(format='json')}}}
         mock_test_block.return_value = True
         mock_test_tx.return_value = True
-        doc_client = clients.RoleConceptClient(self.host, self.port)
-        doc_client.account = mock_account
-        doc_client.connection = mock_bdb
+        role_client = clients.RoleConceptClient(self.host, self.port)
+        role_client.account = mock_account
+        role_client.connection = mock_bdb
         # Test
-        document = doc_client.get_document(['1'])
+        document = role_client.get_document(['1'])
         sleep(1)
-        doc_client.connection.transactions.retrieve.assert_called_with('1')
+        role_client.connection.transactions.retrieve.assert_called_with('1')
         self.assertEqual(document, self.prov_document)
 
     @unittest.skip("testing skipping")
@@ -282,12 +285,12 @@ class RoleConceptClientTest(unittest.TestCase):
     @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test_save_document(self, mock_account, mock_bdb, mock_store):
         mock_account.save_asset.return_value = '1'
-        doc_client = clients.RoleConceptClient(self.host, self.port)
-        doc_client.account = mock_account
-        doc_client.connection = mock_bdb
+        role_client = clients.RoleConceptClient(self.host, self.port)
+        role_client.account = mock_account
+        role_client.connection = mock_bdb
 
-        a = doc_client.save_document(self.prov_document)
-        doc_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
+        tx_id = role_client.save_document(self.prov_document)
+        role_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
                                                          mock_bdb)
-        self.assertIsInstance(a, str)
-        self.assertEqual(a, '1')
+        self.assertIsInstance(tx_id, str)
+        self.assertEqual(tx_id, '1')

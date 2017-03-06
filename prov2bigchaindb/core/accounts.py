@@ -39,8 +39,7 @@ class BaseAccount(object):
             log.debug("New account for %s with public_key %s", self.account_id, self.public_key)
 
     def __str__(self):
-        tmp = "{} : {}".format(self.account_id, self.public_key)
-        return tmp
+        return "{} : {}".format(self.account_id, self.public_key)
 
     def _create_asset(self, bdb_connection: BigchainDB, asset: dict, metadata: dict = None) -> dict:
         """
@@ -250,7 +249,6 @@ class GraphConceptAccount(BaseAccount):
         """
         doc = ProvDocument()
         mapping = {}
-        relation = relation
         for relation_type, relation_attr in relation.formal_attributes:
             if relation_attr:
                 try:
