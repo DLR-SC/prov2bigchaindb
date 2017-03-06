@@ -1,8 +1,14 @@
 # PROV 2 BigchainDB
 
+## Master branch
 
-[![build status](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/build.svg)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
-[![build status](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/coverage.svg?job=test)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
+[![build status master branch](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/build.svg)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
+[![coverage master branch](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/master/coverage.svg?job=test)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/master)
+
+## Develop branch
+
+[![build status develop branch](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/develop/build.svg)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/commits/develop)
+[![coverage develop branch](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/badges/develop/coverage.svg?job=test)](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/develop/master)
 
 # Software Requirements
 
