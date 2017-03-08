@@ -347,28 +347,27 @@ class RoleConceptAccount(BaseAccount):
     BigchainDB Graph Concept Account
     """
 
-    def __init__(self, prov_element: ProvElement, prov_relations: dict, id_mapping: dict, namespaces: list,
+    def __init__(self, prov_element: ProvElement, elements: dict, id_mapping: dict, namespaces: list,
                  store: local_stores.BaseStore = local_stores.BaseStore()):
         """
         Instantiate Graph Concept Account object
 
         :param prov_element: ProvElement related to account
         :type prov_element: ProvElement
-        :param prov_relations: List including dictionaries of all outgoing ProvRelations
-        :type prov_relations: list
         :param namespaces: List of Prov Namespaces
         :type namespaces: list
         :param store: Local database object
         :type store: local_stores.BaseStore
         """
         assert prov_element is not None
-        assert prov_relations is not None
+        assert elements is not None
         assert namespaces is not None
         self.prov_element = prov_element
         self.prov_namespaces = namespaces
-        self.prov_relations_with_id = prov_relations['with_id']
+        self.prov_elements_with_id = elements['with_id']
+        self.prov_elements_without_id = elements['without_id']
         self.id_mapping = id_mapping
-        self.prov_relations_without_id = prov_relations['without_id']
+
         super().__init__(str(prov_element.identifier), store)
 
     def get_tx_id(self) -> str:

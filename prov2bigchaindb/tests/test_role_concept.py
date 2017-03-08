@@ -21,7 +21,7 @@ class RoleConceptTest(unittest.TestCase):
         del db
         del self.test_prov_files
 
-    # @unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
         role_client = clients.RoleConceptClient()
@@ -30,7 +30,7 @@ class RoleConceptTest(unittest.TestCase):
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-    @unittest.skip("testing skipping")
+    # @unittest.skip("testing skipping")
     def test_simple2_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
         role_client = clients.RoleConceptClient()

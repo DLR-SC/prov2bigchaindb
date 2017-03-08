@@ -187,6 +187,8 @@ class GraphConceptClient(BaseClient):
         for prov_element, prov_relations, namespaces in elements:
             for rel in prov_relations['with_id']:
                 id_mapping[rel.identifier] = ''
+
+        for prov_element, prov_relations, namespaces in elements:
             account = accounts.GraphConceptAccount(prov_element, prov_relations, id_mapping, namespaces, self.store)
             self.accounts.append(account)
             tx_id = account.save_instance_asset(self._get_bigchain_connection())
@@ -257,28 +259,55 @@ class RoleConceptClient(BaseClient):
         :return: List of tuples(element, relations, namespace)
         :rtype: list
         """
-
         namespaces = prov_document.get_registered_namespaces()
         g = provgraph.prov_to_graph(prov_document=prov_document)
-        elements = []
-        agents = dict.fromkeys(list(filter(lambda agent: isinstance(agent, provmodel.ProvAgent),g.nodes_iter())), [])
-        #agent_relations = g.neighbors()
-        other_elements = dict.fromkeys(list(filter(lambda agent: not isinstance(agent, provmodel.ProvAgent),g.nodes_iter())), [])
+        agents = list(filter(lambda agent: isinstance(agent, provmodel.ProvAgent),g.nodes_iter()))
+        other_elements = list(filter(lambda agent: not isinstance(agent, provmodel.ProvAgent),g.nodes_iter())), []
+        for a in agents:
+            print("========")
+            print(a)
+            account = {a:[]}
+            edges_out = g.out_edges(a)
+            edges_in  = g.in_edges(a)
+            # connections to other agents
+            for u, v in edges_out:
+                print("\t", u, '==>', v)
+                print("\t\t", g.get_edge_data(u, v)[0]['relation'])
+                account[a].append(g.get_edge_data(u, v)[0]['relation'])
 
-        print(agents)
-        print(other_elements)
+            # other elements
+            elements = {'with_id': [], 'without_id': []}
+            for u,v  in edges_in:
+                # relations to agent
+                if not isinstance(u, provmodel.ProvAgent):
+                    for w,x in g.out_edges(u):
+                        relations_in = g.get_edge_data(w, x)[0]['relation']
+                        print("\t", w, '-->', x)
+                        print("\t\t", relations_in)
+                        if relations_in.identifier and relations_in not in elements['with_id']:
+                            elements['with_id'].append(relations_in)
+                        elif relations_in not in elements['without_id']:
+                            elements['without_id'].append(relations_in)
+                        else:
+                            print("xxxx:", relations_in)
+                            print("xxxx:", type(relations_in))
+                            print(elements)
+                            raise Exception("Da fehlt was")
+            print(account, elements, list(namespaces))
+            print("========")
+            print()
+            #agent_relations = g.neighbors()
+
         print()
 
-        print(g.neighbors(other_elements))
-
-        #for a in agents:
-        #    print(g.neighbors(a))
-        #    for o in other_elements:
-        #        #edges = list(filter(lambda edge: isinstance(edge[0], a) or isinstance(edge[1], a) ,g.edges(o)))
-        #        edges = list(filter(lambda edge: True ,g.edges(a)))
-        #        print(a, ' --> ', edges)
-        #        print()
-
+        #for a,rel in agents.items():
+        #    print(a)
+        #    for r in rel:
+        #        print("\t",r)
+        #print(agents)
+        #print()
+        #print(other_elements)
+        #print()
 
         raise Exception()
         # for node, nodes in g.adjacency_iter():
@@ -302,7 +331,10 @@ class RoleConceptClient(BaseClient):
         #                     relations['without_id'].append(relation)
         #
         #     elements.append((node, relations, namespaces))
-        return elements
+
+
+        #     type_instances.append((element, elements, namespaces))
+        return account_data
 
     def save_document(self, document: str or BufferedReader or provmodel.ProvDocument) -> list:
         """
@@ -316,14 +348,14 @@ class RoleConceptClient(BaseClient):
         log.info("Save document...")
         document_tx_ids = []
         prov_document = utils.to_prov_document(content=document)
-        elements = RoleConceptClient.get_prov_element_list(prov_document)
+        account_data = RoleConceptClient.get_prov_element_list(prov_document)
         id_mapping = {}
         log.info("Create and Save instances")
-        for prov_element, prov_relations, namespaces in elements:
+        for prov_element, elements, namespaces in account_data:
             if isinstance(prov_element, provmodel.ProvAgent):
-                for rel in prov_relations['with_id']:
+                for rel in elements['with_id']:
                     id_mapping[rel.identifier] = ''
-                account = accounts.RoleConceptAccount(prov_element, prov_relations, elements, id_mapping, namespaces, self.store)
+                account = accounts.RoleConceptAccount(prov_element, elements, id_mapping, namespaces, self.store)
                 self.accounts.append(account)
                 tx_id = account.save_instance_asset(self._get_bigchain_connection())
                 document_tx_ids.append(tx_id)
