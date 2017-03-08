@@ -261,21 +261,47 @@ class RoleConceptClient(BaseClient):
         namespaces = prov_document.get_registered_namespaces()
         g = provgraph.prov_to_graph(prov_document=prov_document)
         elements = []
-        for node, nodes in g.adjacency_iter():
-            relations = {'with_id': [], 'without_id': []}
-            # print(node)
-            for tmp_relations in nodes.values():
-                # print("\t",tmp_relations)
-                for relation in tmp_relations.values():
-                    relation = relation['relation']
-                    # print("\t\t", relation)
-                    # print("\t\t\t", relation.identifier)
-                    # print("\t\t\t", type(relation.identifier))
-                    if relation.identifier:
-                        relations['with_id'].append(relation)
-                    else:
-                        relations['without_id'].append(relation)
-            elements.append((node, relations, namespaces))
+        agents = dict.fromkeys(list(filter(lambda agent: isinstance(agent, provmodel.ProvAgent),g.nodes_iter())), [])
+        #agent_relations = g.neighbors()
+        other_elements = dict.fromkeys(list(filter(lambda agent: not isinstance(agent, provmodel.ProvAgent),g.nodes_iter())), [])
+
+        print(agents)
+        print(other_elements)
+        print()
+
+        print(g.neighbors(other_elements))
+
+        #for a in agents:
+        #    print(g.neighbors(a))
+        #    for o in other_elements:
+        #        #edges = list(filter(lambda edge: isinstance(edge[0], a) or isinstance(edge[1], a) ,g.edges(o)))
+        #        edges = list(filter(lambda edge: True ,g.edges(a)))
+        #        print(a, ' --> ', edges)
+        #        print()
+
+
+        raise Exception()
+        # for node, nodes in g.adjacency_iter():
+        #     if isinstance(node, provmodel.ProvAgent):
+        #         for tmp_relations in nodes.values():
+        #             for relation in tmp_relations.values():
+        #                 relation = relation['relation']
+        #                 if relation.identifier:
+        #                     relations['with_id'].append(relation)
+        #                 else:
+        #                     relations['without_id'].append(relation)
+        #         elements.append((node, relations, elements, namespaces))
+        #     else:
+        #         relations = {'with_id': [], 'without_id': []}
+        #         for tmp_relations in nodes.values():
+        #             for relation in tmp_relations.values():
+        #                 relation = relation['relation']
+        #                 if relation.identifier:
+        #                     relations['with_id'].append(relation)
+        #                 else:
+        #                     relations['without_id'].append(relation)
+        #
+        #     elements.append((node, relations, namespaces))
         return elements
 
     def save_document(self, document: str or BufferedReader or provmodel.ProvDocument) -> list:
@@ -294,12 +320,13 @@ class RoleConceptClient(BaseClient):
         id_mapping = {}
         log.info("Create and Save instances")
         for prov_element, prov_relations, namespaces in elements:
-            for rel in prov_relations['with_id']:
-                id_mapping[rel.identifier] = ''
-            account = accounts.RoleConceptAccount(prov_element, prov_relations, id_mapping, namespaces, self.store)
-            self.accounts.append(account)
-            tx_id = account.save_instance_asset(self._get_bigchain_connection())
-            document_tx_ids.append(tx_id)
+            if isinstance(prov_element, provmodel.ProvAgent):
+                for rel in prov_relations['with_id']:
+                    id_mapping[rel.identifier] = ''
+                account = accounts.RoleConceptAccount(prov_element, prov_relations, elements, id_mapping, namespaces, self.store)
+                self.accounts.append(account)
+                tx_id = account.save_instance_asset(self._get_bigchain_connection())
+                document_tx_ids.append(tx_id)
 
         log.info("Save relations with ids")
         for account in filter(lambda acc: acc.has_relations_without_id, self.accounts):
