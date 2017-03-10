@@ -276,40 +276,30 @@ class RoleConceptClient(BaseClient):
                 account[a].append(g.get_edge_data(u, v)[0]['relation'])
 
             # other elements
-            elements = {'with_id': [], 'without_id': []}
-            for u,v  in edges_in:
+            elements = {}
+            for s, t  in edges_in:
                 # relations to agent
-                if not isinstance(u, provmodel.ProvAgent):
-                    for w,x in g.out_edges(u):
-                        relations_in = g.get_edge_data(w, x)[0]['relation']
-                        print("\t", w, '-->', x)
-                        print("\t\t", relations_in)
-                        if relations_in.identifier and relations_in not in elements['with_id']:
-                            elements['with_id'].append(relations_in)
-                        elif relations_in not in elements['without_id']:
-                            elements['without_id'].append(relations_in)
-                        else:
-                            print("xxxx:", relations_in)
-                            print("xxxx:", type(relations_in))
-                            print(elements)
-                            raise Exception("Da fehlt was")
-            print(account, elements, list(namespaces))
-            print("========")
-            print()
-            #agent_relations = g.neighbors()
+                if not isinstance(s, provmodel.ProvAgent):
+                    out = set(g.out_edges(s))
+                    rels = {'with_id': [], 'without_id': []}
+                    for w,x in out:
+                        data = g.get_edge_data(w, x)
+                        for relation in data.values():
+                            relations_in = relation['relation']
+                            print("\t", w, '-->', x)
+                            print("\t\t", relations_in)
+                            if relations_in.identifier and relations_in not in rels['with_id']:
+                                rels['with_id'].append(relations_in)
+                            elif relations_in not in rels['without_id']:
+                                rels['without_id'].append(relations_in)
+                            else:
+                                print("xxxx:", relations_in)
+                                print("xxxx:", type(relations_in))
+                                print(elements)
+                                raise Exception("Da fehlt was")
+                    elements[s] = rels
+            yield (account, elements, namespaces)
 
-        print()
-
-        #for a,rel in agents.items():
-        #    print(a)
-        #    for r in rel:
-        #        print("\t",r)
-        #print(agents)
-        #print()
-        #print(other_elements)
-        #print()
-
-        raise Exception()
         # for node, nodes in g.adjacency_iter():
         #     if isinstance(node, provmodel.ProvAgent):
         #         for tmp_relations in nodes.values():
@@ -334,7 +324,7 @@ class RoleConceptClient(BaseClient):
 
 
         #     type_instances.append((element, elements, namespaces))
-        return account_data
+        #return account_data
 
     def save_document(self, document: str or BufferedReader or provmodel.ProvDocument) -> list:
         """
