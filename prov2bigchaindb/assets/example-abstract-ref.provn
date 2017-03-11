@@ -21,6 +21,7 @@ document
     wasGeneratedBy(ex:g1; ex:E2, ex:A2, -)
 
     wasAttributedTo(ex:E1, ex:Ag1)
+    wasAttributedTo(ex:P1, ex:Ag1)
     wasAttributedTo(ex:E2, ex:Ag2)
 
     wasAssociatedWith(ex:A1, ex:Ag1, ex:P1)
