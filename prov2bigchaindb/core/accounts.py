@@ -352,8 +352,8 @@ class RoleConceptAccount(BaseAccount):
         """
         Instantiate Graph Concept Account object
 
-        :param prov_element: ProvElement related to account
-        :type prov_element: ProvElement
+        :param agent: ProvAgent related to account
+        :type agent: ProvAgent
         :param namespaces: List of Prov Namespaces
         :type namespaces: list
         :param store: Local database object
@@ -365,8 +365,7 @@ class RoleConceptAccount(BaseAccount):
         self.prov_agent = agent
         self.prov_agent_relations = relations
         self.prov_namespaces = namespaces
-        self.prov_elements_with_id = elements['with_id']
-        self.prov_elements_without_id = elements['without_id']
+        self.prov_elements = elements
         self.id_mapping = id_mapping
 
         super().__init__(str(agent.identifier), store)
@@ -380,27 +379,9 @@ class RoleConceptAccount(BaseAccount):
         """
         return self.tx_id
 
-    def has_relations_with_id(self) -> bool:
-        """
-        Indicates whether account has relation with ids
-        :return: True if one or more relation does have ids
-        :rtype: bool
-        """
-        t = len(self.prov_elements_with_id) != 0
-        print(t)
-        return len(self.prov_elements_with_id) != 0
-
-    def has_relations_without_id(self) -> bool:
-        """
-        Indicates whether account has relation with ids
-        :return: True if one or more relation does have ids
-        :rtype: bool
-        """
-        return len(self.prov_elements_without_id) != 0
-
     def __str__(self):
-        return "{} : {}\n\t{}\n\t{}".format(self.account_id, self.public_key, self.prov_relations_with_id,
-                                            self.prov_relations_without_id)
+        return "{} : {}\n\t{}\n\t{}".format(self.account_id, self.public_key,
+                                            self.prov_agent_relations, self.prov_elements)
 
     def __create_document(self, element, relations) -> tuple:
         """
@@ -428,9 +409,9 @@ class RoleConceptAccount(BaseAccount):
             for n in self.prov_namespaces:
                 doc.add_namespace(n.prefix, n.uri)
             doc.add_record(relation)
-        return (doc, mapping)
+        return doc, mapping
 
-    def save_elements_with_ids(self, bdb_connection: BigchainDB) -> list:
+    def save_elements(self, bdb_connection: BigchainDB) -> list:
         """
         Writes all relation assets to BigchainDB
 
@@ -442,46 +423,21 @@ class RoleConceptAccount(BaseAccount):
         if self.tx_id == '':
             raise exceptions.AccountNotCreatedException("Account must be created before transactions")
         tx_list = []
-        for element, relations in self.prov_elements_with_id.items():
-            doc, mapping = self.__create_document(element, relations)
-            print(doc.get_provn())
-            print(mapping)
-            asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
-            metadata = {'instance': self.account_id}
-            tx = self._create_asset(bdb_connection, asset, metadata)
-            utils.wait_until_valid(tx['id'], bdb_connection)
-            tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
-            self.store.write_tx_id(self.account_id, tx['id'])
-            tx_list.append(tx['id'])
-            self.id_mapping[str(element.identifier)] = tx['id']
-            log.debug("Created element %s: %s - %s", element.identifier, self.account_id, tx['id'])
-        return tx_list
-
-    def save_elements_without_ids(self, bdb_connection: BigchainDB) -> list:
-        """
-        Writes all relation assets to BigchainDB
-
-        :param bdb_connection: Connection object for BigchainDB
-        :type bdb_connection: BigchainDB
-        :return: Transactions ids of all relations
-        :rtype: list
-        """
-        if self.tx_id == '':
-            raise exceptions.AccountNotCreatedException("Account must be created before transactions")
-        tx_list = []
-        for element, relations in self.prov_elements_without_id.items():
-            doc, mapping = self.__create_document(element, relations)
-            print(doc.get_provn())
-            print(mapping)
-            asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
-            metadata = {'instance': self.account_id}
-            tx = self._create_asset(bdb_connection, asset, metadata)
-            utils.wait_until_valid(tx['id'], bdb_connection)
-            tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
-            self.store.write_tx_id(self.account_id, tx['id'])
-            tx_list.append(tx['id'])
-            #self.id_mapping[str(element.identifier)] = tx['id']
-            log.debug("Created element %s: %s - %s", element.identifier, self.account_id, tx['id'])
+        for ordered_element in self.prov_elements.values():
+            for element, relations in ordered_element.items():
+                doc, mapping = self.__create_document(element, relations)
+                asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
+                metadata = {'instance': self.account_id}
+                tx = self._create_asset(bdb_connection, asset, metadata)
+                utils.wait_until_valid(tx['id'], bdb_connection)
+                tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
+                self.store.write_account(str(element.identifier), '', '', tx['id'])
+                tx_list.append(tx['id'])
+                # for id, tx_id in mapping.items():
+                #    if not tx_id:
+                #        self.id_mapping[id] = tx['id']
+                # self.id_mapping[str(element.identifier)] = tx['id']
+                log.debug("Created element %s related to %s - %s", element.identifier, self.account_id, tx['id'])
         return tx_list
 
     def save_instance_asset(self, bdb_connection: BigchainDB) -> str:
@@ -501,6 +457,7 @@ class RoleConceptAccount(BaseAccount):
             utils.wait_until_valid(tx['id'], bdb_connection)
             tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
             self.store.write_tx_id(self.account_id, tx['id'])
+            self.id_mapping[self.account_id] = tx['id']
             self.tx_id = tx['id']
             log.debug("Created agent: %s - %s", self.account_id, tx['id'])
         return self.tx_id

@@ -1,10 +1,14 @@
 import logging
 from io import BufferedReader
 
-import prov.model as provmodel
-import prov.graph as provgraph
 import bigchaindb_driver as bd
+import prov.graph as provgraph
+import prov.model as provmodel
 from bigchaindb_driver import pool as bdpool
+from networkx import is_directed_acyclic_graph
+from networkx import isolates
+from networkx import topological_sort
+
 from prov2bigchaindb.core import utils, local_stores, accounts
 
 log = logging.getLogger(__name__)
@@ -14,7 +18,8 @@ logging.basicConfig(level=logging.DEBUG)
 class BaseClient(object):
     """ BigchainDB Base Client """
 
-    def __init__(self, host: str = '0.0.0.0', port: int = 9984, num_connections: int = 5, local_store: local_stores.BaseStore = local_stores.BaseStore()):
+    def __init__(self, host: str = '0.0.0.0', port: int = 9984,
+                 num_connections: int = 5, local_store: local_stores.BaseStore = local_stores.BaseStore()):
         """
         Instantiate Base Client object
 
@@ -259,42 +264,47 @@ class RoleConceptClient(BaseClient):
         :return: List of tuples(element, elements, namespace)
         :rtype: list
         """
+
         namespaces = prov_document.get_registered_namespaces()
         g = provgraph.prov_to_graph(prov_document=prov_document)
-        agents = list(filter(lambda agent: isinstance(agent, provmodel.ProvAgent),g.nodes_iter()))
+        sorted_nodes = topological_sort(g, reverse=True)
+        agents = list(filter(lambda elem: isinstance(elem, provmodel.ProvAgent), sorted_nodes))
+        elements = list(filter(lambda elem: not isinstance(elem, provmodel.ProvAgent), sorted_nodes))
+
+        # print("all: ", sorted_nodes)
+        # print("agents:", agents)
+        # print("elements:", elements)
+        # print("=================\n")
+
+        # Check on compatibility
+        if not is_directed_acyclic_graph(g):
+            raise Exception("Provenance graph is not acyclic")
+        if isolates(g):
+            raise Exception("Provenance not compatible with role-based concept. Has isolated Elements")
+        for element in elements:
+            if provmodel.ProvAgent not in [type(n) for n in g.neighbors(element)]:
+                raise Exception("Provenance not compatible with role-based concept. Element {} has not relation to any agent".format(element))
+
         accounts = []
         for agent in agents:
+            # find out going relations from agent
             agent_relations = []
-            edges_out = g.out_edges(agent)
-            edges_in  = g.in_edges(agent)
-            # edges upwards to other agents
-            for u, v in edges_out:
+            for u, v in g.out_edges(agent):
                 # Todo check if filter does not left out some info
                 agent_relations.append(g.get_edge_data(u, v)[0]['relation'])
 
-            # find related elements
-            elements = {'with_id': {}, 'without_id': {}}
-            for s, t  in edges_in:
-                # not relation back to same agent
-                if not isinstance(s, provmodel.ProvAgent):
-                    relations = []
-                    #  get all outgoing edges per element
-                    flag = False
-                    for w,x in set(g.out_edges(s)):
-                        data = g.get_edge_data(w, x)
-                        # single relations
-                        for relation in data.values():
-                            relation = relation['relation']
-                            relations.append(relation)
-                            if relation.identifier:
-                                flag = True
-                    if flag and relations not in elements['with_id'].values():
-                        elements['with_id'][s] = relations
-                    elif not flag and relations not in elements['without_id'].values():
-                        elements['without_id'][s] = relations
-                    else:
-                        raise Exception("Da fehlt was")
-            accounts.append((agent, agent_relations, elements, namespaces))
+            agent_elements = {}
+            i = 0
+            for element in elements:
+                element_relations = []
+                if g.has_edge(element, agent):
+                    for u, v in set(g.out_edges(element)):
+                        for relation in g[u][v].values():
+                            element_relations.append(relation['relation'])
+                    agent_elements[i] = {element: element_relations}
+                    i += 1
+
+            accounts.append((agent, agent_relations, agent_elements, namespaces))
         return accounts
 
     def save_document(self, document: str or BufferedReader or provmodel.ProvDocument) -> list:
@@ -314,22 +324,14 @@ class RoleConceptClient(BaseClient):
         id_mapping = {}
         log.info("Create and Save instances")
         for agent, relations, elements, namespaces in account_data:
-            for elements_with_id in elements['with_id'].keys():
-                id_mapping[str(elements_with_id.identifier)] = ''
-
-        for agent, relations, elements, namespaces in account_data:
-            account = accounts.RoleConceptAccount(agent, relations, elements, id_mapping, namespaces, self.store)
-            self.accounts.append(account)
-            tx_id = account.save_instance_asset(self._get_bigchain_connection())
-            document_tx_ids.append(tx_id)
+                account = accounts.RoleConceptAccount(agent, relations, elements, id_mapping, namespaces, self.store)
+                self.accounts.append(account)
+                tx_id = account.save_instance_asset(self._get_bigchain_connection())
+                document_tx_ids.append(tx_id)
 
         log.info("Save elements with ids")
-        for account in filter(lambda acc: acc.has_relations_without_id, self.accounts):
-            document_tx_ids += account.save_elements_with_ids(self._get_bigchain_connection())
-
-        log.info("Save elements without ids")
-        for account in filter(lambda acc: acc.has_relations_without_id, self.accounts):
-            document_tx_ids += account.save_elements_without_ids(self._get_bigchain_connection())
+        for account in self.accounts:
+            document_tx_ids += account.save_elements(self._get_bigchain_connection())
 
         log.info("Saved document in %s Tx", len(document_tx_ids))
         return document_tx_ids

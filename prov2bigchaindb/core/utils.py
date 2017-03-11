@@ -1,12 +1,11 @@
 import json
 import logging
 
-import prov
-from prov import model
 import requests
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver import exceptions as bdb_exceptions
 from lxml import etree
+from prov import model
 
 from prov2bigchaindb.core import exceptions
 

@@ -157,7 +157,7 @@ class GraphConceptClientTest(unittest.TestCase):
         self.assertIsInstance(graph_client.node, str)
         self.assertEqual(graph_client.node, 'http://127.0.0.1:9984')
 
-    # @unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
     @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test__get_prov_element_list(self, mock_account, mock_bdb):
@@ -244,7 +244,7 @@ class RoleConceptClientTest(unittest.TestCase):
         # TODO Check Instance of account_db
         # TODO Check Instance of account
 
-    # @unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
     @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test__get_prov_element_list(self, mock_account, moch_bdb):

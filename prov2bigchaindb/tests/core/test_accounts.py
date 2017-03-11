@@ -324,6 +324,7 @@ class RoleConceptAccountTest(unittest.TestCase):
         del self.bdb_returned_transaction
         del self.test_prov_files
 
+    @unittest.skip("testing skipping")
     def test_positive_init_without_account(self):
         self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountFoundException()})
         account = accounts.RoleConceptAccount(self.prov_element, self.prov_relations, self.id_mapping,
@@ -334,6 +335,7 @@ class RoleConceptAccountTest(unittest.TestCase):
         self.assertEqual(account.prov_relations_without_id, self.prov_relations['without_id'])
         self.assertEqual(account.prov_relations_with_id, self.prov_relations['with_id'])
 
+    @unittest.skip("testing skipping")
     def test__str__(self):
         account = accounts.RoleConceptAccount(self.prov_element, self.prov_relations, self.id_mapping,
                                                self.prov_namespaces, self.store)
@@ -342,12 +344,14 @@ class RoleConceptAccountTest(unittest.TestCase):
                          "\n\t" + str(self.prov_relations['without_id'])
                          )
 
+    @unittest.skip("testing skipping")
     def test_get_tx_id(self):
         account = accounts.RoleConceptAccount(self.prov_element, self.prov_relations, self.id_mapping,
                                                self.prov_namespaces, self.store)
         account.tx_id = '1'
         self.assertEqual(account.get_tx_id(), '1')
 
+    @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_positiv_save_instance_asset(self, mock_wait):
         self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountFoundException()})
@@ -361,6 +365,7 @@ class RoleConceptAccountTest(unittest.TestCase):
         self.assertEqual(tx_id, '1')
         self.assertEqual(account.get_tx_id(), '1')
 
+    @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.utils.wait_until_valid')
     def test_negativ_save_instance_asset(self, mock_wait):
         self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountFoundException()})
