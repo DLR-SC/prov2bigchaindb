@@ -21,7 +21,7 @@ class RoleConceptTest(unittest.TestCase):
         del db
         del self.test_prov_files
 
-    # @unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
         role_client = clients.RoleConceptClient()

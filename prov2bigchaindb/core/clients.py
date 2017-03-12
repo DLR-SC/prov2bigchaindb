@@ -340,7 +340,7 @@ class RoleConceptClient(BaseClient):
                 tx_id = account.save_instance_asset(self._get_bigchain_connection())
                 document_tx_ids.append(tx_id)
 
-        log.info("Save elements with ids")
+        log.info("Save elements")
         for account in self.accounts:
             document_tx_ids += account.save_elements(self._get_bigchain_connection())
 
