@@ -165,7 +165,7 @@ class GraphConceptClientTest(unittest.TestCase):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
         prov_records = prov_document.get_records()
         prov_namespaces = prov_document.get_registered_namespaces()
-        element_list = clients.GraphConceptClient.get_prov_element_list(prov_document)
+        element_list = clients.GraphConceptClient.calculate_account_data(prov_document)
         for element, relations, namespace in element_list:
             # print(element)
             # print("\twith: ",relations['with_id'])
@@ -252,7 +252,7 @@ class RoleConceptClientTest(unittest.TestCase):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
         prov_records = prov_document.get_records()
         prov_namespaces = prov_document.get_registered_namespaces()
-        element_list = clients.RoleConceptClient.get_prov_element_list(prov_document)
+        element_list = clients.RoleConceptClient.calculate_account_data(prov_document)
         for element, relations, namespace in element_list:
             # print(element)
             # print("\twith: ",relations['with_id'])

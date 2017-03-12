@@ -147,7 +147,7 @@ class GraphConceptAccountTest(unittest.TestCase):
     def setUp(self):
         self.test_prov_files = setup_test_files()
         self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
-        self.prov_element, self.prov_relations, self.prov_namespaces = clients.GraphConceptClient.get_prov_element_list(self.prov_document)[
+        self.prov_element, self.prov_relations, self.prov_namespaces = clients.GraphConceptClient.calculate_account_data(self.prov_document)[
             0]
         self.id_mapping = {}
         for rel in self.prov_relations['with_id']:
@@ -272,7 +272,7 @@ class RoleConceptAccountTest(unittest.TestCase):
     def setUp(self):
         self.test_prov_files = setup_test_files()
         self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
-        self.prov_element, self.prov_relations, self.prov_namespaces = clients.RoleConceptClient.get_prov_element_list(self.prov_document)[
+        self.prov_element, self.prov_relations, self.prov_namespaces = clients.RoleConceptClient.calculate_account_data(self.prov_document)[
             0]
         self.id_mapping = {}
         for rel in self.prov_relations['with_id']:

@@ -76,6 +76,17 @@ class BaseClient(object):
         """
         raise NotImplementedError("Abstract method")
 
+    def get_document(self, document_id: object) -> provmodel.ProvDocument:
+        """
+        Abstract method for retrieving a document
+
+        :param document_id: Document to save
+        :type document_id: object
+        :rtype: ProvDocument
+        """
+        raise NotImplementedError("Abstract method")
+
+
 
 class DocumentConceptClient(BaseClient):
     """"""
@@ -148,7 +159,7 @@ class GraphConceptClient(BaseClient):
         self.accounts = []
 
     @staticmethod
-    def get_prov_element_list(prov_document: provmodel.ProvDocument) -> list:
+    def calculate_account_data(prov_document: provmodel.ProvDocument) -> list:
         """
         Transforms a ProvDocument into a tuple including ProvElement, list of ProvRelation and list of Namespaces
 
@@ -186,7 +197,7 @@ class GraphConceptClient(BaseClient):
         log.info("Save document...")
         document_tx_ids = []
         prov_document = utils.to_prov_document(content=document)
-        elements = GraphConceptClient.get_prov_element_list(prov_document)
+        elements = GraphConceptClient.calculate_account_data(prov_document)
         id_mapping = {}
         log.info("Create and Save instances")
         for prov_element, prov_relations, namespaces in elements:
@@ -255,7 +266,7 @@ class RoleConceptClient(BaseClient):
         self.accounts = []
 
     @staticmethod
-    def get_prov_element_list(prov_document: provmodel.ProvDocument) -> list:
+    def calculate_account_data(prov_document: provmodel.ProvDocument) -> list:
         """
         Transforms a ProvDocument into a tuple including ProvElement, list of ProvRelation and list of Namespaces
 
@@ -319,7 +330,7 @@ class RoleConceptClient(BaseClient):
         log.info("Save document...")
         document_tx_ids = []
         prov_document = utils.to_prov_document(content=document)
-        account_data = RoleConceptClient.get_prov_element_list(prov_document)
+        account_data = RoleConceptClient.calculate_account_data(prov_document)
 
         id_mapping = {}
         log.info("Create and Save instances")
