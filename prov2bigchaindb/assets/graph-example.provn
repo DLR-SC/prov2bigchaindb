@@ -1,0 +1,19 @@
+document
+    // Namespaces
+    prefix ex <https://example.org/>
+    prefix prov <https://www.w3.org/ns/prov#>
+
+    entity(ex:E1)
+    entity(ex:E2)
+
+    activity(ex:A2)
+
+    agent(ex:Ag2)
+
+    // Relations
+    wasGeneratedBy(ex:E2, ex:A2, -)
+    wasAttributedTo(ex:E2, ex:Ag2)
+    wasAssociatedWith(ex:A2, ex:Ag2, -)
+    used(ex:u1; ex:A2, ex:E1, -)
+
+endDocument

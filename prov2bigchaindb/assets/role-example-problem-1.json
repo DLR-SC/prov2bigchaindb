@@ -1,37 +1,24 @@
 {
   "wasAssociatedWith": {
-    "_:wAW118": {
-      "prov:activity": "ex:A1",
-      "prov:agent": "ex:Ag1"
-    },
-    "_:wAW119": {
+    "_:wAW309": {
       "prov:activity": "ex:A2",
       "prov:agent": "ex:Ag2"
     }
   },
   "wasAttributedTo": {
-    "_:wAT758": {
-      "prov:agent": "ex:Ag1",
-      "prov:entity": "ex:E1"
-    },
-    "_:wAT759": {
+    "_:wAT923": {
       "prov:agent": "ex:Ag2",
       "prov:entity": "ex:E2"
     }
   },
   "wasGeneratedBy": {
-    "_:wGB537": {
+    "_:wGB1069": {
       "prov:activity": "ex:A2",
       "prov:entity": "ex:E2"
-    },
-    "_:wGB536": {
-      "prov:activity": "ex:A1",
-      "prov:entity": "ex:E1"
     }
   },
   "entity": {
-    "ex:E2": {},
-    "ex:E1": {}
+    "ex:E2": {}
   },
   "prefix": {
     "xsd": "http://www.w3.org/2001/XMLSchema#",
@@ -39,29 +26,18 @@
     "prov": "http://www.w3.org/ns/prov#",
     "ex": "https://example.org/"
   },
-  "used": {
-    "_:u531": {
-      "prov:activity": "ex:A2",
-      "prov:entity": "ex:E1"
-    }
-  },
   "agent": {
-    "ex:Ag0": {},
     "ex:Ag1": {},
     "ex:Ag2": {}
   },
   "actedOnBehalfOf": {
-    "_:aOBO34": {
+    "_:aOBO149": {
+      "prov:activity": "ex:A2",
       "prov:delegate": "ex:Ag2",
-      "prov:responsible": "ex:Ag0"
-    },
-    "_:aOBO33": {
-      "prov:delegate": "ex:Ag1",
-      "prov:responsible": "ex:Ag0"
+      "prov:responsible": "ex:Ag1"
     }
   },
   "activity": {
-    "ex:A1": {},
     "ex:A2": {}
   }
 }
