@@ -18,7 +18,7 @@ class DocumentConceptTest(unittest.TestCase):
 
     def tearDown(self):
         del self.account_id
-        db = local_stores.BaseStore()
+        db = local_stores.SqliteStore()
         db.clean_tables()
         del db
         del self.bdb_connection

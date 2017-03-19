@@ -14,7 +14,7 @@ class GraphConceptTest(unittest.TestCase):
         self.test_prov_files = setup_test_files()
 
     def tearDown(self):
-        db = local_stores.BaseStore()
+        db = local_stores.SqliteStore()
         db.clean_tables()
         del db
         del self.test_prov_files

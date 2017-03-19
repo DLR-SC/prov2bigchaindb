@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class BaseStore(object):
+class SqliteStore(object):
     def __init__(self, db_name: str = ':memory:'):
         """
         Instantiate LocalStore object for handling the sqlite3 database which stores all accounts (PoC!)

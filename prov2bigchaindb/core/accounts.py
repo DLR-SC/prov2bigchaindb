@@ -16,14 +16,14 @@ class BaseAccount(object):
     BigchainDB Base Account
     """
 
-    def __init__(self, account_id: str, store: local_stores.BaseStore):
+    def __init__(self, account_id: str, store: local_stores.SqliteStore):
         """
         Instantiate BaseAccount object
 
         :param account_id: Internal id of Account
         :type account_id: str
         :param store: Local database object
-        :type store: local_stores.BaseStore
+        :type store: local_stores.SqliteStore
         """
         assert account_id is not None
         assert store is not None
@@ -138,14 +138,14 @@ class DocumentConceptAccount(BaseAccount):
     BigchainDB Document Concept Account
     """
 
-    def __init__(self, account_id: str, store: local_stores.BaseStore):
+    def __init__(self, account_id: str, store: local_stores.SqliteStore):
         """
         Instantiate Document Concept Account object
 
         :param account_id: Internal id of Account
         :type account_id: str
         :param store: Local database object
-        :type store: local_stores.BaseStore
+        :type store: local_stores.SqliteStore
         """
         super().__init__(account_id, store)
 
@@ -175,7 +175,7 @@ class GraphConceptAccount(BaseAccount):
     """
 
     def __init__(self, prov_element: ProvElement, prov_relations: dict, id_mapping: dict, namespaces: list,
-                 store: local_stores.BaseStore = local_stores.BaseStore()):
+                 store: local_stores.SqliteStore = local_stores.SqliteStore()):
         """
         Instantiate Graph Concept Account object
 
@@ -186,7 +186,7 @@ class GraphConceptAccount(BaseAccount):
         :param namespaces: List of Prov Namespaces
         :type namespaces: list
         :param store: Local database object
-        :type store: local_stores.BaseStore
+        :type store: local_stores.SqliteStore
         """
         assert prov_element is not None
         assert prov_relations is not None
@@ -348,7 +348,7 @@ class RoleConceptAccount(BaseAccount):
     """
 
     def __init__(self, agent: ProvAgent, relations: list, elements: dict, id_mapping: dict, namespaces: list,
-                 store: local_stores.BaseStore = local_stores.BaseStore()):
+                 store: local_stores.SqliteStore = local_stores.SqliteStore()):
         """
         Instantiate Graph Concept Account object
 
@@ -357,7 +357,7 @@ class RoleConceptAccount(BaseAccount):
         :param namespaces: List of Prov Namespaces
         :type namespaces: list
         :param store: Local database object
-        :type store: local_stores.BaseStore
+        :type store: local_stores.SqliteStore
         """
         assert agent is not None
         assert elements is not None

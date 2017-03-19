@@ -29,7 +29,7 @@ class BaseClientTest(unittest.TestCase):
         del self.host
         del self.port
 
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
     def test_positive_init(self, mock_bdb, mock_store):
         baseclient = clients.BaseClient(self.host, self.port)
@@ -45,7 +45,7 @@ class BaseClientTest(unittest.TestCase):
     def test_test_transaction(self):
         raise NotImplementedError()
 
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
     def test_save_document(self, mock_bdb, mock_store):
         baseclient = clients.BaseClient(self.host, self.port)
@@ -76,7 +76,7 @@ class DocumentConceptClientTest(unittest.TestCase):
         del self.test_prov_files
         del self.prov_document
 
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.DocumentConceptAccount')
     def test_positive_init(self, mock_account, mock_dbd, mock_store):
@@ -91,7 +91,7 @@ class DocumentConceptClientTest(unittest.TestCase):
 
     @mock.patch('prov2bigchaindb.core.clients.utils.is_valid_tx')
     @mock.patch('prov2bigchaindb.core.clients.utils.is_block_to_tx_valid')
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.DocumentConceptAccount')
     def test_get_document(self, mock_account, mock_bdb, mock_store, mock_test_block, mock_test_tx):
@@ -108,7 +108,7 @@ class DocumentConceptClientTest(unittest.TestCase):
         doc_client._get_bigchain_connection().transactions.retrieve.assert_called_with('1')
         self.assertEqual(document, self.prov_document)
 
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.DocumentConceptAccount')
     def test_save_document(self, mock_account, mock_bdb, mock_store):
@@ -146,7 +146,7 @@ class GraphConceptClientTest(unittest.TestCase):
         del self.prov_document
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test_positive_init(self, mock_account, mock_dbd, mock_store):
@@ -158,7 +158,7 @@ class GraphConceptClientTest(unittest.TestCase):
         self.assertEqual(graph_client.node, 'http://127.0.0.1:9984')
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test__get_prov_element_list(self, mock_account, mock_bdb):
         graph_client = clients.GraphConceptClient(self.host, self.port)
@@ -175,7 +175,7 @@ class GraphConceptClientTest(unittest.TestCase):
     @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.clients.utils.is_valid_tx')
     @mock.patch('prov2bigchaindb.core.clients.utils.is_block_to_tx_valid')
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test_get_document(self, mock_account, mock_bdb, mock_store, mock_test_block, mock_test_tx):
@@ -193,7 +193,7 @@ class GraphConceptClientTest(unittest.TestCase):
         self.assertEqual(document, self.prov_document)
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.GraphConceptAccount')
     def test_save_document(self, mock_account, mock_bdb, mock_store):
@@ -204,7 +204,7 @@ class GraphConceptClientTest(unittest.TestCase):
 
         tx_id = graph_client.save_document(self.prov_document)
         graph_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
-                                                         mock_bdb)
+                                                           mock_bdb)
         self.assertIsInstance(tx_id, str)
         self.assertEqual(tx_id, '1')
 
@@ -231,7 +231,7 @@ class RoleConceptClientTest(unittest.TestCase):
         del self.prov_document
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test_positive_init(self, mock_account, mock_bdb, mock_store):
@@ -245,7 +245,7 @@ class RoleConceptClientTest(unittest.TestCase):
         # TODO Check Instance of account
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test__get_prov_element_list(self, mock_account, moch_bdb):
         role_clien = clients.RoleConceptClient(self.host, self.port)
@@ -262,7 +262,7 @@ class RoleConceptClientTest(unittest.TestCase):
     @unittest.skip("testing skipping")
     @mock.patch('prov2bigchaindb.core.clients.utils.is_valid_tx')
     @mock.patch('prov2bigchaindb.core.clients.utils.is_block_to_tx_valid')
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test_get_document(self, mock_account, mock_bdb, mock_store, mock_test_block, mock_test_tx):
@@ -280,7 +280,7 @@ class RoleConceptClientTest(unittest.TestCase):
         self.assertEqual(document, self.prov_document)
 
     @unittest.skip("testing skipping")
-    @mock.patch('prov2bigchaindb.core.clients.local_stores.BaseStore')
+    @mock.patch('prov2bigchaindb.core.clients.local_stores.SqliteStore')
     @mock.patch('prov2bigchaindb.core.clients.clients.bd.BigchainDB')
     @mock.patch('prov2bigchaindb.core.clients.accounts.RoleConceptAccount')
     def test_save_document(self, mock_account, mock_bdb, mock_store):
@@ -291,6 +291,6 @@ class RoleConceptClientTest(unittest.TestCase):
 
         tx_id = role_client.save_document(self.prov_document)
         role_client.account.save_asset.assert_called_with({'prov': self.prov_document.serialize(format='json')},
-                                                         mock_bdb)
+                                                          mock_bdb)
         self.assertIsInstance(tx_id, str)
         self.assertEqual(tx_id, '1')

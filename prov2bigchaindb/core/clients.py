@@ -19,18 +19,18 @@ class BaseClient(object):
     """ BigchainDB Base Client """
 
     def __init__(self, host: str = '0.0.0.0', port: int = 9984,
-                 num_connections: int = 5, local_store: local_stores.BaseStore = local_stores.BaseStore()):
+                 num_connections: int = 5, local_store: local_stores.SqliteStore = local_stores.SqliteStore()):
         """
         Instantiate Base Client object
 
-        :param num_connections: Amount of bigchaindb connection to setup (default: 5)
-        :type int
         :param host: BigchaindDB Hostname or IP (default: 0.0.0.0)
         :type host: str
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
+        :param num_connections: Amount of connection made to BigchainDB node
+        :type num_connections: int
         :param local_store: Local database object
-        :type local_store: BaseStore
+        :type local_store: SqliteStore
         """
         assert num_connections > 0
         self.node = 'http://{}:{}'.format(host, str(port))
@@ -87,12 +87,11 @@ class BaseClient(object):
         raise NotImplementedError("Abstract method")
 
 
-
 class DocumentConceptClient(BaseClient):
     """"""
 
     def __init__(self, account_id: str = None, host: str = '0.0.0.0', port: int = 9984, num_connections: int = 1,
-                 local_store: local_stores.BaseStore = local_stores.BaseStore()):
+                 local_store: local_stores.SqliteStore = local_stores.SqliteStore()):
         """
         Instantiate Document Client object
 
@@ -101,7 +100,7 @@ class DocumentConceptClient(BaseClient):
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
         :param local_store: Local database object
-        :type local_store: BaseStore
+        :type local_store: SqliteStore
         """
         super().__init__(host, port, num_connections, local_store)
         self.account = accounts.DocumentConceptAccount(account_id, self.store)
@@ -144,7 +143,7 @@ class GraphConceptClient(BaseClient):
     """"""
 
     def __init__(self, host: str = '0.0.0.0', port: int = 9984, num_connections: int = 5,
-                 local_store: local_stores.BaseStore = local_stores.BaseStore()):
+                 local_store: local_stores.SqliteStore = local_stores.SqliteStore()):
         """
         Instantiate Graph Client object
 
@@ -153,7 +152,7 @@ class GraphConceptClient(BaseClient):
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
         :param local_store: Local database object
-        :type local_store: BaseStore
+        :type local_store: SqliteStore
         """
         super().__init__(host, port, num_connections, local_store=local_store)
         self.accounts = []
@@ -251,7 +250,7 @@ class RoleConceptClient(BaseClient):
     """"""
 
     def __init__(self, host: str = '0.0.0.0', port: int = 9984, num_connections: int = 5,
-                 local_store: local_stores.BaseStore = local_stores.BaseStore()):
+                 local_store: local_stores.SqliteStore = local_stores.SqliteStore()):
         """
         Instantiate Role Client object
 
@@ -260,7 +259,7 @@ class RoleConceptClient(BaseClient):
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
         :param local_store: Local database object
-        :type local_store: BaseStore
+        :type local_store: SqliteStore
         """
         super().__init__(host, port, num_connections, local_store=local_store)
         self.accounts = []
@@ -294,7 +293,9 @@ class RoleConceptClient(BaseClient):
             raise Exception("Provenance not compatible with role-based concept. Has isolated Elements")
         for element in elements:
             if provmodel.ProvAgent not in [type(n) for n in g.neighbors(element)]:
-                raise Exception("Provenance not compatible with role-based concept. Element {} has not relation to any agent".format(element))
+                raise Exception(
+                    "Provenance not compatible with role-based concept. Element {} has not relation to any agent".format(
+                        element))
 
         accounts = []
         for agent in agents:
@@ -335,10 +336,10 @@ class RoleConceptClient(BaseClient):
         id_mapping = {}
         log.info("Create and Save instances")
         for agent, relations, elements, namespaces in account_data:
-                account = accounts.RoleConceptAccount(agent, relations, elements, id_mapping, namespaces, self.store)
-                self.accounts.append(account)
-                tx_id = account.save_instance_asset(self._get_bigchain_connection())
-                document_tx_ids.append(tx_id)
+            account = accounts.RoleConceptAccount(agent, relations, elements, id_mapping, namespaces, self.store)
+            self.accounts.append(account)
+            tx_id = account.save_instance_asset(self._get_bigchain_connection())
+            document_tx_ids.append(tx_id)
 
         log.info("Save elements")
         for account in self.accounts:

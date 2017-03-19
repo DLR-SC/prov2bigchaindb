@@ -16,7 +16,7 @@ class BaseAccountTest(unittest.TestCase):
         self.public_key = 'public'
         self.private_key = 'private'
 
-        self.store = mock.Mock(spec=local_stores.BaseStore,
+        self.store = mock.Mock(spec=local_stores.SqliteStore,
                                **{'get_account.return_value': (self.account_id,
                                                                self.public_key,
                                                                self.private_key,
@@ -73,7 +73,7 @@ class DocumentConceptAccountTest(unittest.TestCase):
         self.account_id = 'Document_Concept_Account_Test'
         self.public_key = 'public'
         self.private_key = 'private'
-        self.store = mock.Mock(spec=local_stores.BaseStore,
+        self.store = mock.Mock(spec=local_stores.SqliteStore,
                                **{'get_account.return_value': (
                                    self.account_id,
                                    self.public_key,
@@ -81,24 +81,24 @@ class DocumentConceptAccountTest(unittest.TestCase):
                                    None)})
 
         self.bdb_returned_transaction = {"operation": "CREATE",
-                             "outputs": [{"amount": 1,
-                                          "condition": {
-                                              "details": {
-                                                  "bitmask": 32,
-                                                  "public_key": "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD",
-                                                  "signature": None,
-                                                  "type": "fulfillment",
-                                                  "type_id": 4
-                                              },
-                                              "uri": "cc:4:20:MTmLrdyfhfxPw3WxnaYaQkPmU1GcEzg9mAj_O_Nuv5w:96"
-                                          },
-                                          "public_keys": [
-                                              "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD"
-                                          ]
-                                          }
-                                         ],
-                             'id': '1',
-                             'asset': {'data': {'prov': '1'}}}
+                                         "outputs": [{"amount": 1,
+                                                      "condition": {
+                                                          "details": {
+                                                              "bitmask": 32,
+                                                              "public_key": "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD",
+                                                              "signature": None,
+                                                              "type": "fulfillment",
+                                                              "type_id": 4
+                                                          },
+                                                          "uri": "cc:4:20:MTmLrdyfhfxPw3WxnaYaQkPmU1GcEzg9mAj_O_Nuv5w:96"
+                                                      },
+                                                      "public_keys": [
+                                                          "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD"
+                                                      ]
+                                                      }
+                                                     ],
+                                         'id': '1',
+                                         'asset': {'data': {'prov': '1'}}}
 
         self.bdb_connection = mock.Mock(spec=bigchaindb_driver.BigchainDB,
                                         **{'transactions.retrieve.return_value': self.bdb_returned_transaction,
@@ -122,7 +122,8 @@ class DocumentConceptAccountTest(unittest.TestCase):
         account = accounts.DocumentConceptAccount(self.account_id, self.store)
         tx_id = account.save_asset(asset, self.bdb_connection)
         # self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=self.public_key, asset={'data':asset}, metadata={'account_id':self.account_id})
-        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction, private_keys=self.private_key)
+        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction,
+                                                                    private_keys=self.private_key)
         self.bdb_connection.transactions.send.assert_called_with(self.bdb_returned_transaction)
         self.assertEqual(tx_id, '1')
 
@@ -139,7 +140,8 @@ class DocumentConceptAccountTest(unittest.TestCase):
         with self.assertRaises(exceptions.CreateRecordException):
             account.save_asset(asset, self.bdb_connection)
         # self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=self.public_key, asset={'data':asset}, metadata={'account_id':self.account_id})
-        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction, private_keys=self.private_key)
+        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction,
+                                                                    private_keys=self.private_key)
         self.bdb_connection.transactions.send.assert_called_with(self.bdb_returned_transaction)
 
 
@@ -147,14 +149,15 @@ class GraphConceptAccountTest(unittest.TestCase):
     def setUp(self):
         self.test_prov_files = setup_test_files()
         self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
-        self.prov_element, self.prov_relations, self.prov_namespaces = clients.GraphConceptClient.calculate_account_data(self.prov_document)[
-            0]
+        self.prov_element, self.prov_relations, self.prov_namespaces = \
+            clients.GraphConceptClient.calculate_account_data(self.prov_document)[
+                0]
         self.id_mapping = {}
         for rel in self.prov_relations['with_id']:
             self.id_mapping[rel.identifier] = ''
         self.public_key = 'public'
         self.private_key = 'private'
-        self.store = mock.Mock(spec=local_stores.BaseStore,
+        self.store = mock.Mock(spec=local_stores.SqliteStore,
                                **{'get_account.return_value': (
                                    str(self.prov_element.identifier),
                                    self.public_key,
@@ -162,24 +165,24 @@ class GraphConceptAccountTest(unittest.TestCase):
                                    None)})
 
         self.bdb_returned_transaction = {"operation": "CREATE",
-                             "outputs": [{"amount": 1,
-                                          "condition": {
-                                              "details": {
-                                                  "bitmask": 32,
-                                                  "public_key": "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD",
-                                                  "signature": None,
-                                                  "type": "fulfillment",
-                                                  "type_id": 4
-                                              },
-                                              "uri": "cc:4:20:MTmLrdyfhfxPw3WxnaYaQkPmU1GcEzg9mAj_O_Nuv5w:96"
-                                          },
-                                          "public_keys": [
-                                              "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD"
-                                          ]
-                                          }
-                                         ],
-                             'id': '1',
-                             'asset': {'data': {'prov': '1'}}
+                                         "outputs": [{"amount": 1,
+                                                      "condition": {
+                                                          "details": {
+                                                              "bitmask": 32,
+                                                              "public_key": "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD",
+                                                              "signature": None,
+                                                              "type": "fulfillment",
+                                                              "type_id": 4
+                                                          },
+                                                          "uri": "cc:4:20:MTmLrdyfhfxPw3WxnaYaQkPmU1GcEzg9mAj_O_Nuv5w:96"
+                                                      },
+                                                      "public_keys": [
+                                                          "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD"
+                                                      ]
+                                                      }
+                                                     ],
+                                         'id': '1',
+                                         'asset': {'data': {'prov': '1'}}
                                          }
         self.bdb_connection = mock.Mock(spec=bigchaindb_driver.BigchainDB,
                                         **{'transactions.retrieve.return_value': self.bdb_returned_transaction,
@@ -231,7 +234,8 @@ class GraphConceptAccountTest(unittest.TestCase):
         tx_id = account.save_instance_asset(self.bdb_connection)
         # asset = {'data': {'prov': account._create_instance_document().serialize(format='json')}}
         # self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
-        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction, private_keys=account.private_key)
+        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction,
+                                                                    private_keys=account.private_key)
         self.bdb_connection.transactions.send.assert_called_with(self.bdb_returned_transaction)
         self.assertEqual(tx_id, '1')
         self.assertEqual(account.get_tx_id(), '1')
@@ -251,7 +255,8 @@ class GraphConceptAccountTest(unittest.TestCase):
         with self.assertRaises(exceptions.CreateRecordException):
             account.save_instance_asset(self.bdb_connection)
         # self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
-        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction, private_keys=account.private_key)
+        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction,
+                                                                    private_keys=account.private_key)
         self.bdb_connection.transactions.send.assert_called_with(self.bdb_returned_transaction)
         self.assertEqual(account.tx_id, '')
 
@@ -272,14 +277,15 @@ class RoleConceptAccountTest(unittest.TestCase):
     def setUp(self):
         self.test_prov_files = setup_test_files()
         self.prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
-        self.prov_element, self.prov_relations, self.prov_namespaces = clients.RoleConceptClient.calculate_account_data(self.prov_document)[
-            0]
+        self.prov_element, self.prov_relations, self.prov_namespaces = \
+            clients.RoleConceptClient.calculate_account_data(self.prov_document)[
+                0]
         self.id_mapping = {}
         for rel in self.prov_relations['with_id']:
             self.id_mapping[rel.identifier] = ''
         self.public_key = 'public'
         self.private_key = 'private'
-        self.store = mock.Mock(spec=local_stores.BaseStore,
+        self.store = mock.Mock(spec=local_stores.SqliteStore,
                                **{'get_account.return_value': (
                                    str(self.prov_element.identifier),
                                    self.public_key,
@@ -287,24 +293,24 @@ class RoleConceptAccountTest(unittest.TestCase):
                                    None)})
 
         self.bdb_returned_transaction = {"operation": "CREATE",
-                             "outputs": [{"amount": 1,
-                                          "condition": {
-                                              "details": {
-                                                  "bitmask": 32,
-                                                  "public_key": "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD",
-                                                  "signature": None,
-                                                  "type": "fulfillment",
-                                                  "type_id": 4
-                                              },
-                                              "uri": "cc:4:20:MTmLrdyfhfxPw3WxnaYaQkPmU1GcEzg9mAj_O_Nuv5w:96"
-                                          },
-                                          "public_keys": [
-                                              "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD"
-                                          ]
-                                          }
-                                         ],
-                             'id': '1',
-                             'asset': {'data': {'prov': '1'}}
+                                         "outputs": [{"amount": 1,
+                                                      "condition": {
+                                                          "details": {
+                                                              "bitmask": 32,
+                                                              "public_key": "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD",
+                                                              "signature": None,
+                                                              "type": "fulfillment",
+                                                              "type_id": 4
+                                                          },
+                                                          "uri": "cc:4:20:MTmLrdyfhfxPw3WxnaYaQkPmU1GcEzg9mAj_O_Nuv5w:96"
+                                                      },
+                                                      "public_keys": [
+                                                          "4K9sWUMFwTgaDGPfdynrbxWqWS6sWmKbZoTjxLtVUibD"
+                                                      ]
+                                                      }
+                                                     ],
+                                         'id': '1',
+                                         'asset': {'data': {'prov': '1'}}
                                          }
         self.bdb_connection = mock.Mock(spec=bigchaindb_driver.BigchainDB,
                                         **{'transactions.retrieve.return_value': self.bdb_returned_transaction,
@@ -328,7 +334,7 @@ class RoleConceptAccountTest(unittest.TestCase):
     def test_positive_init_without_account(self):
         self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountFoundException()})
         account = accounts.RoleConceptAccount(self.prov_element, self.prov_relations, self.id_mapping,
-                                               self.prov_namespaces, self.store)
+                                              self.prov_namespaces, self.store)
         self.assertNotEqual(account.get_public_key(), self.public_key)
         self.assertEqual(account.tx_id, '')
         self.assertEqual(account.prov_namespaces, self.prov_namespaces)
@@ -338,7 +344,7 @@ class RoleConceptAccountTest(unittest.TestCase):
     @unittest.skip("testing skipping")
     def test__str__(self):
         account = accounts.RoleConceptAccount(self.prov_element, self.prov_relations, self.id_mapping,
-                                               self.prov_namespaces, self.store)
+                                              self.prov_namespaces, self.store)
         self.assertEqual(str(account), str(self.prov_element.identifier) + " : " + self.public_key +
                          "\n\t" + str(self.prov_relations['with_id']) +
                          "\n\t" + str(self.prov_relations['without_id'])
@@ -347,7 +353,7 @@ class RoleConceptAccountTest(unittest.TestCase):
     @unittest.skip("testing skipping")
     def test_get_tx_id(self):
         account = accounts.RoleConceptAccount(self.prov_element, self.prov_relations, self.id_mapping,
-                                               self.prov_namespaces, self.store)
+                                              self.prov_namespaces, self.store)
         account.tx_id = '1'
         self.assertEqual(account.get_tx_id(), '1')
 
@@ -356,11 +362,12 @@ class RoleConceptAccountTest(unittest.TestCase):
     def test_positiv_save_instance_asset(self, mock_wait):
         self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountFoundException()})
         account = accounts.RoleConceptAccount(self.prov_element, self.prov_relations, self.id_mapping,
-                                               self.prov_namespaces, self.store)
+                                              self.prov_namespaces, self.store)
         tx_id = account.save_instance_asset(self.bdb_connection)
         # asset = {'data': {'prov': account._create_instance_document().serialize(format='json')}}
         # self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
-        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction, private_keys=account.private_key)
+        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction,
+                                                                    private_keys=account.private_key)
         self.bdb_connection.transactions.send.assert_called_with(self.bdb_returned_transaction)
         self.assertEqual(tx_id, '1')
         self.assertEqual(account.get_tx_id(), '1')
@@ -370,7 +377,7 @@ class RoleConceptAccountTest(unittest.TestCase):
     def test_negativ_save_instance_asset(self, mock_wait):
         self.store.configure_mock(**{'get_account.side_effect': exceptions.NoAccountFoundException()})
         account = accounts.RoleConceptAccount(self.prov_element, self.prov_relations, self.id_mapping,
-                                               self.prov_namespaces, self.store)
+                                              self.prov_namespaces, self.store)
         negative_return = self.bdb_returned_transaction['id'] = '2'
         self.bdb_connection.configure_mock(**{'transactions.retrieve.return_value': self.bdb_returned_transaction,
                                               'transactions.prepare.return_value': self.bdb_returned_transaction,
@@ -381,7 +388,8 @@ class RoleConceptAccountTest(unittest.TestCase):
         with self.assertRaises(exceptions.CreateRecordException):
             account.save_instance_asset(self.bdb_connection)
         # self.bdb_connection.transactions.prepare.assert_called_with(operation='CREATE', signers=account.public_key, asset=asset, metadata={'account_id':str(self.prov_element.identifier)})
-        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction, private_keys=account.private_key)
+        self.bdb_connection.transactions.fulfill.assert_called_with(self.bdb_returned_transaction,
+                                                                    private_keys=account.private_key)
         self.bdb_connection.transactions.send.assert_called_with(self.bdb_returned_transaction)
         self.assertEqual(account.tx_id, '')
 
