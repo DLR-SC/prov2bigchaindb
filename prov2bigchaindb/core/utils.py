@@ -64,7 +64,10 @@ def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
                 break
         except bdb_exceptions.NotFoundError:
             trials += 1
-            log.debug("Transaction %s not found in BigchainDB after %s tries out of %s", tx_id, trials, trialsmax)
+            log.debug("Transaction %s not found in BigchainDB after %s tries out of %s trials", tx_id, trials, trialsmax)
+        except bdb_exceptions.TransportError:
+            trials += 1
+            log.debug("Transport Error after %s tries out of %s trials", trials, trialsmax)
     if trials == trialsmax:
         log.error("Transaction id %s not found affer %s tries", tx_id, trialsmax)
         raise exceptions.TransactionIdNotFound(tx_id)

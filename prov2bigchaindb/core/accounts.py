@@ -56,7 +56,7 @@ class BaseAccount(object):
         """
         if metadata is None:
             metadata = {}
-        metadata['timestamp'] = datetime.utcnow().timestamp()
+        #metadata['timestamp'] = datetime.utcnow().timestamp()
         prepared_creation_tx = bdb_connection.transactions.prepare(operation='CREATE',
                                                                    signers=self.public_key,
                                                                    asset=asset,
@@ -86,7 +86,7 @@ class BaseAccount(object):
         """
         if metadata is None:
             metadata = {}
-        metadata['timestamp'] = datetime.utcnow().timestamp()
+        #metadata['timestamp'] = datetime.utcnow().timestamp()
         transfer_asset = {'id': tx['id']}
         output_index = 0
         output = tx['outputs'][output_index]

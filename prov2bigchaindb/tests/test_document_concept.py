@@ -12,7 +12,7 @@ class DocumentConceptTest(unittest.TestCase):
     """Test BigchainDB Document Concept"""
 
     def setUp(self):
-        self.bdb_connection = BigchainDB('http://127.0.0.1:9984')
+        self.bdb_connection = BigchainDB('http://129.247.111.205:49984')
         self.test_prov_files = setup_test_files()
         self.account_id = 'Document_Concept_Client_Test'
 
@@ -27,17 +27,17 @@ class DocumentConceptTest(unittest.TestCase):
     @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
-        doc_client = clients.DocumentConceptClient(account_id=self.account_id)
+        doc_client = clients.DocumentConceptClient(account_id=self.account_id, host="129.247.111.205", port=49984)
         tx_id = doc_client.save_document(prov_document)
         utils.wait_until_valid(tx_id, self.bdb_connection)
         doc = doc_client.get_document(tx_id)
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-    # @unittest.skip("testing skipping")
+    #@unittest.skip("testing skipping")
     def test_simple2_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
-        doc_client = clients.DocumentConceptClient(account_id=self.account_id)
+        doc_client = clients.DocumentConceptClient(account_id=self.account_id, host="129.247.111.205", port=49984)
         tx_id = doc_client.save_document(prov_document)
         utils.wait_until_valid(tx_id, self.bdb_connection)
         doc = doc_client.get_document(tx_id)
@@ -47,7 +47,7 @@ class DocumentConceptTest(unittest.TestCase):
     @unittest.skip("testing skipping")
     def test_thesis_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["thesis"])
-        doc_client = clients.DocumentConceptClient(account_id=self.account_id)
+        doc_client = clients.DocumentConceptClient(account_id=self.account_id, host="129.247.111.205", port=49984)
         tx_id = doc_client.save_document(prov_document)
         utils.wait_until_valid(tx_id, self.bdb_connection)
         doc = doc_client.get_document(tx_id)
@@ -57,7 +57,7 @@ class DocumentConceptTest(unittest.TestCase):
     @unittest.skip("testing skipping")
     def test_quantified_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["quantified"])
-        doc_client = clients.DocumentConceptClient(account_id=self.account_id)
+        doc_client = clients.DocumentConceptClient(account_id=self.account_id, host="129.247.111.205", port=49984)
         tx_id = doc_client.save_document(prov_document)
         utils.wait_until_valid(tx_id, self.bdb_connection)
         doc = doc_client.get_document(tx_id)
