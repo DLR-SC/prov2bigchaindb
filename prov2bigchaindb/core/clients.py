@@ -232,6 +232,7 @@ class GraphConceptClient(BaseClient):
         log.info("Retrieve and rebuild document...")
         doc = provmodel.ProvDocument()
         for i in document_tx_ids:
+            log.info("tx id: %s",i)
             tx = self._get_bigchain_connection().transactions.get(asset_id=i)[0]
             self.test_transaction(tx)
             if 'id' in tx['asset'].keys():

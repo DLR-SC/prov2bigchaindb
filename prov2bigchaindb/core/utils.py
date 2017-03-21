@@ -2,6 +2,7 @@ import json
 import logging
 
 import requests
+import time
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver import exceptions as bdb_exceptions
 from lxml import etree
@@ -62,12 +63,15 @@ def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
             result = bdb_connection.transactions.status(tx_id)
             if result.get('status') == 'valid':  # others: backlog, undecided
                 break
+            time.sleep(1)
         except bdb_exceptions.NotFoundError:
+            time.sleep(1)
             trials += 1
             log.debug("Transaction %s not found in BigchainDB after %s tries out of %s trials", tx_id, trials, trialsmax)
-        except bdb_exceptions.TransportError:
+        except bdb_exceptions.TransportError as e:
             trials += 1
             log.debug("Transport Error after %s tries out of %s trials", trials, trialsmax)
+            log.debug("%s",e)
     if trials == trialsmax:
         log.error("Transaction id %s not found affer %s tries", tx_id, trialsmax)
         raise exceptions.TransactionIdNotFound(tx_id)
