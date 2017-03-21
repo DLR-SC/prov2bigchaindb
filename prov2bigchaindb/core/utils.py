@@ -2,19 +2,19 @@ import json
 import logging
 
 import requests
+import time
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver import exceptions as bdb_exceptions
 from lxml import etree
-from prov.graph import prov_to_graph
-import prov
-from prov2bigchaindb.core import exceptions
 from prov import model
+
+from prov2bigchaindb.core import exceptions
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-def to_prov_document(content: str or bytes or prov.model.ProvDocument) -> prov.model.ProvDocument:
+def to_prov_document(content: str or bytes or model.ProvDocument) -> model.ProvDocument:
     """
     Takes a string, bytes or ProvDocument as argument and return a ProvDocument
     The strings or bytes can contain JSON or XML representations of PROV
@@ -23,7 +23,7 @@ def to_prov_document(content: str or bytes or prov.model.ProvDocument) -> prov.m
     :return: ProvDocument
     :rtype: ProvDocument
     """
-    if isinstance(content, prov.model.ProvDocument):
+    if isinstance(content, model.ProvDocument):
         return content
 
     if isinstance(content, str):
@@ -32,11 +32,11 @@ def to_prov_document(content: str or bytes or prov.model.ProvDocument) -> prov.m
         content_bytes = content
     try:
         if content_bytes.find(b"{") > -1:
-            return prov.model.ProvDocument.deserialize(content=content, format='json').flattened()
+            return model.ProvDocument.deserialize(content=content, format='json').flattened()
         if content_bytes.find(b'<?xml') > -1:
-            return prov.model.ProvDocument.deserialize(content=content, format='xml').flattened()
+            return model.ProvDocument.deserialize(content=content, format='xml').flattened()
         elif content_bytes.find(b'document') > -1:
-            return prov.model.ProvDocument.deserialize(content=content, format='provn').flattened()
+            return model.ProvDocument.deserialize(content=content, format='provn').flattened()
         else:
             raise exceptions.ParseException("Invalid PROV Document of type {}".format(type(content)))
 
@@ -63,9 +63,15 @@ def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
             result = bdb_connection.transactions.status(tx_id)
             if result.get('status') == 'valid':  # others: backlog, undecided
                 break
+            time.sleep(1)
         except bdb_exceptions.NotFoundError:
+            time.sleep(1)
             trials += 1
-            log.debug("Transaction %s not found in BigchainDB after %s tries out of %s", tx_id, trials, trialsmax)
+            log.debug("Transaction %s not found in BigchainDB after %s tries out of %s trials", tx_id, trials, trialsmax)
+        except bdb_exceptions.TransportError as e:
+            trials += 1
+            log.debug("Transport Error after %s tries out of %s trials", trials, trialsmax)
+            log.debug("%s",e)
     if trials == trialsmax:
         log.error("Transaction id %s not found affer %s tries", tx_id, trialsmax)
         raise exceptions.TransactionIdNotFound(tx_id)
@@ -118,32 +124,4 @@ def is_block_to_tx_valid(tx_id: str, bdb_connection: BigchainDB) -> bool:
     return False
 
 
-def get_prov_element_list(prov_document: prov.model.ProvDocument) -> list:
-    """
-    Transforms a ProvDocument into a tuple including ProvElement, list of ProvRelation and list of Namespaces
 
-    :param prov_document: Document to transform
-    :type prov_document:
-    :return: List of tuples(element, relations, namespace)
-    :rtype: list
-    """
-
-    namespaces = prov_document.get_registered_namespaces()
-    g = prov_to_graph(prov_document=prov_document)
-    elements = []
-    for node, nodes in g.adjacency_iter():
-        relations = {'with_id': [], 'without_id': []}
-        # print(node)
-        for tmp_relations in nodes.values():
-            # print("\t",tmp_relations)
-            for relation in tmp_relations.values():
-                relation = relation['relation']
-                # print("\t\t", relation)
-                # print("\t\t\t", relation.identifier)
-                # print("\t\t\t", type(relation.identifier))
-                if relation.identifier:
-                    relations['with_id'].append(relation)
-                else:
-                    relations['without_id'].append(relation)
-        elements.append((node, relations, namespaces))
-    return elements

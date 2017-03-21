@@ -1,0 +1,36 @@
+{
+  "wasGeneratedBy": {
+    "ex:g1": {
+      "prov:activity": "ex:A2",
+      "prov:entity": "ex:E2"
+    }
+  },
+  "entity": {
+    "ex:E2": {},
+    "ex:E1": {}
+  },
+  "prefix": {
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "pre_0": "https://www.w3.org/ns/prov#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "ex": "https://example.org/"
+  },
+  "wasDerivedFrom": {
+    "_:wDF950": {
+      "prov:activity": "ex:A2",
+      "prov:generatedEntity": "ex:E2",
+      "prov:usage": "ex:u1",
+      "prov:generation": "ex:g1",
+      "prov:usedEntity": "ex:E1"
+    }
+  },
+  "used": {
+    "ex:u1": {
+      "prov:activity": "ex:A2",
+      "prov:entity": "ex:E1"
+    }
+  },
+  "activity": {
+    "ex:A2": {}
+  }
+}

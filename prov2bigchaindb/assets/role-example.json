@@ -1,0 +1,47 @@
+{
+  "wasAssociatedWith": {
+    "_:wAW305": {
+      "prov:activity": "ex:A2",
+      "prov:agent": "ex:Ag2"
+    }
+  },
+  "wasAttributedTo": {
+    "_:wAT919": {
+      "prov:agent": "ex:Ag2",
+      "prov:entity": "ex:E2"
+    },
+    "_:wAT918": {
+      "prov:agent": "ex:Ag1",
+      "prov:entity": "ex:E1"
+    }
+  },
+  "wasGeneratedBy": {
+    "_:wGB1065": {
+      "prov:activity": "ex:A2",
+      "prov:entity": "ex:E2"
+    }
+  },
+  "entity": {
+    "ex:E2": {},
+    "ex:E1": {}
+  },
+  "prefix": {
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "pre_0": "https://www.w3.org/ns/prov#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "ex": "https://example.org/"
+  },
+  "used": {
+    "ex:u1": {
+      "prov:activity": "ex:A2",
+      "prov:entity": "ex:E1"
+    }
+  },
+  "agent": {
+    "ex:Ag1": {},
+    "ex:Ag2": {}
+  },
+  "activity": {
+    "ex:A2": {}
+  }
+}

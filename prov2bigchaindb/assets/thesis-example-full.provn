@@ -23,10 +23,10 @@ document
       
       agent(ul:martin-stoffers, [ul:regno="3748896", ul:name="Martin Stoffers", prov:type='prov:Person' ])
       agent(ul:michael-martin, [ul:name="Michael Martin", prov:type='prov:Person' ])
-      agent(ul:university-leipzig, [prov:type='prov:Organization' ])
+      agent(ul:university-leipzig, [prov:type='prov:Organisation' ])
       agent(dlr:andreas-schreiber, [ul:name="Andreas Schreiber", prov:type='prov:Person' ])
-      agent(dlr:dlr, [prov:type='prov:Organization' ])
-      agent(ex:print-shop, [prov:type='prov:Organization' ])
+      agent(dlr:dlr, [prov:type='prov:Organisation' ])
+      agent(ex:print-shop, [prov:type='prov:Organisation' ])
       
       // Relations
       // Component 1

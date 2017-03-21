@@ -2,11 +2,8 @@ import logging
 import unittest
 from unittest import mock
 
-from bigchaindb_driver import exceptions as bdb_exceptions
 import prov
-
-from prov.graph import prov_to_graph
-from prov import model
+from bigchaindb_driver import exceptions as bdb_exceptions
 
 from prov2bigchaindb.core import utils, exceptions
 from prov2bigchaindb.tests.core import setup_test_files
@@ -102,15 +99,3 @@ class UtilityTest(unittest.TestCase):
         mock_response.status_code = 400
         with self.assertRaises(exceptions.BlockIdNotFound):
             utils.is_block_to_tx_valid('1', mock_bdb)
-
-    @unittest.skip("testing skipping")
-    def test_get_prov_element_list(self):
-        prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
-        prov_records = prov_document.get_records()
-        prov_namespaces = prov_document.get_registered_namespaces()
-        element_list = utils.get_prov_element_list(prov_document)
-        for element, relations, namespace in element_list:
-            # print(element)
-            # print("\twith: ",relations['with_id'])
-            # print("\twithout: ",relations['without_id'])
-            pass
