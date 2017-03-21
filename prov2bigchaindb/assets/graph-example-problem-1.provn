@@ -1,0 +1,17 @@
+document
+    // Namespaces
+    prefix ex <https://example.org/>
+    prefix prov <https://www.w3.org/ns/prov#>
+
+    entity(ex:E1)
+    entity(ex:E2)
+
+    activity(ex:A2)
+
+    // Relations
+    wasGeneratedBy(ex:g1; ex:E2, ex:A2, -)
+    used(ex:u1; ex:A2, ex:E1, -)
+    
+    // Probelamtic relation
+    wasDerivedFrom(ex:E2, ex:E1, ex:A2, ex:g1, ex:u1, -)
+endDocument

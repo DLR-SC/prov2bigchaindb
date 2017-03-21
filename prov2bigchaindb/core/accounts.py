@@ -3,7 +3,7 @@ from datetime import datetime
 
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
-from prov.model import ProvDocument, ProvElement
+from prov.model import ProvDocument, ProvElement, ProvAgent
 
 from prov2bigchaindb.core import utils, exceptions, local_stores
 
@@ -16,14 +16,14 @@ class BaseAccount(object):
     BigchainDB Base Account
     """
 
-    def __init__(self, account_id: str, store: local_stores.BaseStore):
+    def __init__(self, account_id: str, store: local_stores.SqliteStore):
         """
         Instantiate BaseAccount object
 
         :param account_id: Internal id of Account
         :type account_id: str
         :param store: Local database object
-        :type store: local_stores.BaseStore
+        :type store: local_stores.SqliteStore
         """
         assert account_id is not None
         assert store is not None
@@ -39,8 +39,7 @@ class BaseAccount(object):
             log.debug("New account for %s with public_key %s", self.account_id, self.public_key)
 
     def __str__(self):
-        tmp = "{} : {}".format(self.account_id, self.public_key)
-        return tmp
+        return "{} : {}".format(self.account_id, self.public_key)
 
     def _create_asset(self, bdb_connection: BigchainDB, asset: dict, metadata: dict = None) -> dict:
         """
@@ -139,14 +138,14 @@ class DocumentConceptAccount(BaseAccount):
     BigchainDB Document Concept Account
     """
 
-    def __init__(self, account_id: str, store: local_stores.BaseStore):
+    def __init__(self, account_id: str, store: local_stores.SqliteStore):
         """
         Instantiate Document Concept Account object
 
         :param account_id: Internal id of Account
         :type account_id: str
         :param store: Local database object
-        :type store: local_stores.BaseStore
+        :type store: local_stores.SqliteStore
         """
         super().__init__(account_id, store)
 
@@ -176,7 +175,7 @@ class GraphConceptAccount(BaseAccount):
     """
 
     def __init__(self, prov_element: ProvElement, prov_relations: dict, id_mapping: dict, namespaces: list,
-                 store: local_stores.BaseStore = local_stores.BaseStore()):
+                 store: local_stores.SqliteStore = local_stores.SqliteStore()):
         """
         Instantiate Graph Concept Account object
 
@@ -187,7 +186,7 @@ class GraphConceptAccount(BaseAccount):
         :param namespaces: List of Prov Namespaces
         :type namespaces: list
         :param store: Local database object
-        :type store: local_stores.BaseStore
+        :type store: local_stores.SqliteStore
         """
         assert prov_element is not None
         assert prov_relations is not None
@@ -250,7 +249,6 @@ class GraphConceptAccount(BaseAccount):
         """
         doc = ProvDocument()
         mapping = {}
-        relation = relation
         for relation_type, relation_attr in relation.formal_attributes:
             if relation_attr:
                 try:
@@ -341,4 +339,125 @@ class GraphConceptAccount(BaseAccount):
             self.store.write_tx_id(self.account_id, tx['id'])
             self.tx_id = tx['id']
             log.debug("Created instance: %s - %s", self.account_id, tx['id'])
+        return self.tx_id
+
+
+class RoleConceptAccount(BaseAccount):
+    """
+    BigchainDB Graph Concept Account
+    """
+
+    def __init__(self, agent: ProvAgent, relations: list, elements: dict, id_mapping: dict, namespaces: list,
+                 store: local_stores.SqliteStore = local_stores.SqliteStore()):
+        """
+        Instantiate Graph Concept Account object
+
+        :param agent: ProvAgent related to account
+        :type agent: ProvAgent
+        :param namespaces: List of Prov Namespaces
+        :type namespaces: list
+        :param store: Local database object
+        :type store: local_stores.SqliteStore
+        """
+        assert agent is not None
+        assert elements is not None
+        assert namespaces is not None
+        self.prov_agent = agent
+        self.prov_agent_relations = relations
+        self.prov_namespaces = namespaces
+        self.prov_elements = elements
+        self.id_mapping = id_mapping
+
+        super().__init__(str(agent.identifier), store)
+
+    def get_tx_id(self) -> str:
+        """
+        Get tx_id that describes the account in BigchainDB
+
+        :return: Transaction id of account
+        :rtype: str
+        """
+        return self.tx_id
+
+    def __str__(self):
+        return "{} : {}\n\t{}\n\t{}".format(self.account_id, self.public_key,
+                                            self.prov_agent_relations, self.prov_elements)
+
+    def __create_document(self, element, relations) -> tuple:
+        """
+        Yields ProvDocument and mapping for each relations
+
+        :return: Relation as ProvDocument and
+        :rtype: (str, ProvDocument, map)
+        """
+        doc = ProvDocument()
+        doc.add_record(element)
+        mapping = {}
+        for relation in relations:
+            for relation_type, relation_attr in relation.formal_attributes:
+                if relation_attr and relation_attr != element.identifier:
+                    try:
+                        recipient = self.store.get_account(str(relation_attr))
+                        mapping[recipient[0]] = recipient[3]
+                    except exceptions.NoAccountFoundException:
+                        try:
+                            recipient = self.id_mapping.get(str(relation_attr))
+                            mapping[str(relation_attr)] = recipient
+                        except exceptions.NoRelationFoundException:
+                            log.info("Found no tx for %s", relation_attr)
+
+            for n in self.prov_namespaces:
+                doc.add_namespace(n.prefix, n.uri)
+            doc.add_record(relation)
+        return doc, mapping
+
+    def save_elements(self, bdb_connection: BigchainDB) -> list:
+        """
+        Writes all relation assets to BigchainDB
+
+        :param bdb_connection: Connection object for BigchainDB
+        :type bdb_connection: BigchainDB
+        :return: Transactions ids of all relations
+        :rtype: list
+        """
+        if self.tx_id == '':
+            raise exceptions.AccountNotCreatedException("Account must be created before transactions")
+        tx_list = []
+        for ordered_element in self.prov_elements.values():
+            for element, relations in ordered_element.items():
+                doc, mapping = self.__create_document(element, relations)
+                asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
+                metadata = {'instance': self.account_id}
+                tx = self._create_asset(bdb_connection, asset, metadata)
+                utils.wait_until_valid(tx['id'], bdb_connection)
+                tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
+                self.store.write_account(str(element.identifier), '', '', tx['id'])
+                tx_list.append(tx['id'])
+                # for id, tx_id in mapping.items():
+                #    if not tx_id:
+                #        self.id_mapping[id] = tx['id']
+                # self.id_mapping[str(element.identifier)] = tx['id']
+                log.debug("Created element %s related to %s - %s", element.identifier, self.account_id, tx['id'])
+        return tx_list
+
+    def save_instance_asset(self, bdb_connection: BigchainDB) -> str:
+        """
+        Writes instance asset to BigchainDB
+
+        :param bdb_connection: Connection object for BigchainDB
+        :type bdb_connection: BigchainDB
+        :return: Transactions id of instance
+        :rtype: str
+        """
+        if self.tx_id == '':
+            prov_document, mapping = self.__create_document(self.prov_agent, self.prov_agent_relations)
+            asset = {'data': {'prov': prov_document.serialize(format='json'), 'map': mapping}}
+            metadata = {'instance': self.account_id}
+            tx = self._create_asset(bdb_connection, asset, metadata)
+            utils.wait_until_valid(tx['id'], bdb_connection)
+            tx = self._transfer_asset(bdb_connection, self.public_key, tx, metadata)
+            self.store.write_tx_id(self.account_id, tx['id'])
+            self.id_mapping[self.account_id] = tx['id']
+            self.tx_id = tx['id']
+            log.debug("Created agent: %s - %s", self.account_id, tx['id'])
         return self.tx_id

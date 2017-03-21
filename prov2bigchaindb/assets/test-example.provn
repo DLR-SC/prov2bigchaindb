@@ -3,11 +3,9 @@ document
     prefix ex <https://example.org/>
     prefix prov <https://www.w3.org/ns/prov#>
 
-
     entity(ex:E1)
     entity(ex:E2)
     entity(ex:P1, [ prov:type='prov:Plan' ])
-
 
     activity(ex:A1)
     activity(ex:A2)
@@ -21,6 +19,7 @@ document
     wasGeneratedBy(ex:g1; ex:E2, ex:A2, -)
 
     wasAttributedTo(ex:E1, ex:Ag1)
+    wasAttributedTo(ex:P1, ex:Ag1)
     wasAttributedTo(ex:E2, ex:Ag2)
 
     wasAssociatedWith(ex:A1, ex:Ag1, ex:P1)
