@@ -17,10 +17,10 @@ class RoleConceptTest(unittest.TestCase):
         self.test_prov_files = setup_test_files()
         self.host="0.0.0.0"
         self.port=9984
-        if os.environ['BDB_HOST']:
-            self.host = os.environ['BDB_HOST']
-        if os.environ['BDB_PORT']:
-            self.port = int(os.environ['BDB_PORT'])
+        if os.environ.get('BDB_HOST'):
+            self.host = os.environ.get('BDB_HOST')
+        if os.environ.get('BDB_PORT'):
+            self.port = int(os.environ.get('BDB_PORT'))
 
     def tearDown(self):
         del self.host
