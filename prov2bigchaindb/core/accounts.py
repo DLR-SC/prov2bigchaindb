@@ -286,7 +286,7 @@ class GraphConceptAccount(BaseAccount):
                 metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
                 tx = self._create_asset(bdb_connection, asset, metadata)
                 utils.wait_until_valid(tx['id'], bdb_connection)
-                metadata = {'relation': str(record.identifier) + " - " + '->'.join([self.account_id, recipient[0]])}
+                metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
                 tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
                 tx_list.append(tx['id'])
                 self.id_mapping[str(record.identifier)] = tx['id']
@@ -388,23 +388,23 @@ class RoleConceptAccount(BaseAccount):
         Yields ProvDocument and mapping for each relations
 
         :return: Relation as ProvDocument and
-        :rtype: (str, ProvDocument, map)
+        :rtype: (ProvDocument, map)
         """
         doc = ProvDocument()
         doc.add_record(element)
         mapping = {}
         for relation in relations:
-            for relation_type, relation_attr in relation.formal_attributes:
-                if relation_attr and relation_attr != element.identifier:
-                    try:
-                        recipient = self.store.get_account(str(relation_attr))
-                        mapping[recipient[0]] = recipient[3]
-                    except exceptions.NoAccountFoundException:
-                        try:
-                            recipient = self.id_mapping.get(str(relation_attr))
-                            mapping[str(relation_attr)] = recipient
-                        except exceptions.NoRelationFoundException:
-                            log.info("Found no tx for %s", relation_attr)
+            # for relation_type, relation_attr in relation.formal_attributes:
+            #     if relation_attr and relation_attr != element.identifier:
+            #         try:
+            #             recipient = self.store.get_account(str(relation_attr))
+            #             mapping[recipient[0]] = recipient[3]
+            #         except exceptions.NoAccountFoundException:
+            #             try:
+            #                 recipient = self.id_mapping.get(str(relation_attr))
+            #                 mapping[str(relation_attr)] = recipient
+            #             except exceptions.NoRelationFoundException:
+            #                 log.info("Found no tx for %s", relation_attr)
 
             for n in self.prov_namespaces:
                 doc.add_namespace(n.prefix, n.uri)
