@@ -210,7 +210,7 @@ class GraphConceptClient(BaseClient):
             document_tx_ids.append(tx_id)
 
         log.info("Save relations with ids")
-        for account in filter(lambda acc: acc.has_relations_without_id, self.accounts):
+        for account in filter(lambda acc: acc.has_relations_with_id, self.accounts):
             document_tx_ids += account.save_relations_with_ids(self._get_bigchain_connection())
 
         log.info("Save relations without ids")
@@ -373,3 +373,18 @@ class RoleConceptClient(BaseClient):
                 doc.add_record(record=record)
         log.info("Success")
         return doc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

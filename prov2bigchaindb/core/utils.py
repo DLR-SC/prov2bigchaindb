@@ -63,7 +63,7 @@ def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
             result = bdb_connection.transactions.status(tx_id)
             if result.get('status') == 'valid':  # others: backlog, undecided
                 break
-            time.sleep(1)
+            #time.sleep(1)
         except bdb_exceptions.NotFoundError:
             time.sleep(1)
             trials += 1

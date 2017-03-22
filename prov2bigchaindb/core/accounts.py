@@ -245,7 +245,7 @@ class GraphConceptAccount(BaseAccount):
         Yields ProvDocument and mapping for each relations
         
         :return: Relation as ProvDocument and 
-        :rtype: (str, ProvDocument, map)
+        :rtype: ( ProvDocument, dict)
         """
         doc = ProvDocument()
         mapping = {}
@@ -264,7 +264,7 @@ class GraphConceptAccount(BaseAccount):
         for n in self.prov_namespaces:
             doc.add_namespace(n.prefix, n.uri)
         doc.add_record(relation)
-        yield (doc, mapping)
+        return doc, mapping
 
     def save_relations_with_ids(self, bdb_connection: BigchainDB) -> list:
         """
@@ -279,19 +279,19 @@ class GraphConceptAccount(BaseAccount):
             raise exceptions.AccountNotCreatedException("Account must be created before transactions")
         tx_list = []
         for relation in self.prov_relations_with_id:
-            for doc, mapping in self.__create_relation(relation):
-                for record in doc.get_records():
-                    recipient = self.store.get_account(str(record.args[1]))
-                    asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
-                    metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
-                    tx = self._create_asset(bdb_connection, asset, metadata)
-                    utils.wait_until_valid(tx['id'], bdb_connection)
-                    metadata = {'relation': str(record.identifier) + " - " + '->'.join([self.account_id, recipient[0]])}
-                    tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
-                    tx_list.append(tx['id'])
-                    self.id_mapping[str(record.identifier)] = tx['id']
-                    log.debug("Created relation %s: %s -> %s - %s", record.identifier, self.account_id, recipient[0],
-                              tx['id'])
+            doc, mapping = self.__create_relation(relation)
+            for record in doc.get_records():
+                recipient = self.store.get_account(str(record.args[1]))
+                asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
+                metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
+                tx = self._create_asset(bdb_connection, asset, metadata)
+                utils.wait_until_valid(tx['id'], bdb_connection)
+                metadata = {'relation': str(record.identifier) + " - " + '->'.join([self.account_id, recipient[0]])}
+                tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
+                tx_list.append(tx['id'])
+                self.id_mapping[str(record.identifier)] = tx['id']
+                log.debug("Created relation %s: %s -> %s - %s", record.identifier, self.account_id, recipient[0],
+                          tx['id'])
         return tx_list
 
     def save_relations_without_ids(self, bdb_connection: BigchainDB) -> list:
@@ -307,17 +307,17 @@ class GraphConceptAccount(BaseAccount):
             raise exceptions.AccountNotCreatedException("Account must be created before transactions")
         tx_list = []
         for relation in self.prov_relations_without_id:
-            for doc, mapping in self.__create_relation(relation):
-                for records in doc.get_records():
-                    recipient = self.store.get_account(str(records.args[1]))
-                    asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
-                    metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
-                    tx = self._create_asset(bdb_connection, asset, metadata)
-                    utils.wait_until_valid(tx['id'], bdb_connection)
-                    metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
-                    tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
-                    tx_list.append(tx['id'])
-                    log.debug("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
+            doc, mapping = self.__create_relation(relation)
+            for records in doc.get_records():
+                recipient = self.store.get_account(str(records.args[1]))
+                asset = {'data': {'prov': doc.serialize(format='json'), 'map': mapping}}
+                metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
+                tx = self._create_asset(bdb_connection, asset, metadata)
+                utils.wait_until_valid(tx['id'], bdb_connection)
+                metadata = {'relation': '->'.join([self.account_id, recipient[0]])}
+                tx = self._transfer_asset(bdb_connection, recipient[1], tx, metadata)
+                tx_list.append(tx['id'])
+                log.debug("Created relation: %s -> %s - %s", self.account_id, recipient[0], tx['id'])
         return tx_list
 
     def save_instance_asset(self, bdb_connection: BigchainDB) -> str:
