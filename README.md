@@ -1,4 +1,4 @@
-# PROV 2 BigchainDB
+# PROV  BigchainDB
 
 ## Master branch
 
@@ -12,11 +12,10 @@
 
 # Software Requirements
 
-* Python 3.4 or Python 3.5
-* python development libraries
-* gcc and make
-* local rethinkdb server
-* python virtualenv package [recommended]
+* Python 3.5 or Python 3.6
+* Python development libraries
+* GCC and Make
+* A local rethinkdb server
 
 # User Setup
 
@@ -80,7 +79,3 @@ make docs
 # License
 
 See [LICENSE](./LICENSE) file
-
-# Class Diagram
-
-[Core model](https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb/blob/graph-concept/core.svg)

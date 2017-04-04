@@ -33,13 +33,18 @@ setup(
         'PROV-XML', 'PROV-N'
     ],
     author='Martin Stoffers',
-    author_email='martin.stoffers@studserv.uni-leipzig.de',
-    url='https://gitlab.fastreboot.de/Dr4k3/prov2bigchaindb',
+    author_email='martin.stoffers@dlr.de',
+    url='https://github.com/DLR-SC/prov2bigchaindb',
     classifiers=[
-        'Development Status :: 1 - Planning',
-        'Topic :: Software Development :: Libraries :: Application Frameworks',
-        'License :: OSI Approved :: Apache License 2.0',
-        'Programming Language :: Python 3.5',
+        'Development Status :: 4 - Beta',
+        'Topic :: Database',
+        'Topic :: Software Development :: Libraries',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'License :: OSI Approved :: Apache Software License',
+        'Intended Audience :: Developers',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
     ],
 
     packages=find_packages(),
@@ -47,9 +52,6 @@ setup(
         'prov2bigchaindb': 'prov2bigchaindb'
     },
     include_package_data=True,
-    entry_points={
-        'console_scripts': ['bigchaindbclient=prov2bigchaindb.bigchaindbclient:main'],
-    },
     zip_safe=False,
 
     install_requires=[

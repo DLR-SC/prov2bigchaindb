@@ -1,9 +1,14 @@
 # Changelog
 
-## 0.2.0 everything-is-a-document (2017-03-05)
+## 0.3.0 everything-is-a-role (2017-04-01)
 
 ### New Features
-- Graph-based Concept implemented
+- Support for Role-based Concept
+
+## 0.2.0 everything-is-a-graph (2017-03-05)
+
+### New Features
+- Support for the Graph-based Concept
 - More unit tests
 
 ## 0.1.0 everything-is-a-document (2017-02-21)
