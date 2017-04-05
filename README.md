@@ -17,7 +17,7 @@
 * GCC and Make
 * A local rethinkdb server
 
-# User Setup
+# General setup
 
 ## With pip (Yet not supported)
 
@@ -32,6 +32,62 @@ pip install prov2bigchaindb
 
 make setup
 ```
+
+# Usage
+
+## Example Document-Concept
+
+```python
+from prov2bigchaindb.tests.core import setup_test_files
+from prov2bigchaindb.core import utils, clients
+
+test_prov_files = setup_test_files()
+prov_document = utils.to_prov_document(content=test_prov_files["simple2"])
+doc_client = clients.DocumentConceptClient(account_id="ID", host="127.0.0.1", port=9984)
+
+# Store a document
+tx_id = doc_client.save_document(prov_document)
+
+# Retrieve a document
+doc = doc_client.get_document(tx_id)
+```
+
+
+## Example Graph-Client
+
+```python
+from prov2bigchaindb.tests.core import setup_test_files
+from prov2bigchaindb.core import utils, clients
+
+test_prov_files = setup_test_files()
+prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
+graph_client = clients.GraphConceptClient(host="127.0.0.1", port=9984)
+
+# Store a document
+tx_ids = graph_client.save_document(prov_document)
+
+# Retrieve a document
+doc = graph_client.get_document(tx_ids)
+
+```
+
+## Example Role-Client
+
+```python
+from prov2bigchaindb.tests.core import setup_test_files
+from prov2bigchaindb.core import utils, clients
+
+test_prov_files = setup_test_files()
+prov_document = utils.to_prov_document(content=self.test_prov_files["simple2"])
+role_client = clients.RoleConceptClient(host=self.host, port=self.port)
+
+# Store a document
+tx_ids = role_client.save_document(prov_document)
+
+# Retrieve a document
+doc = role_client.get_document(tx_ids)
+```
+
 
 
 # Development Setup
@@ -59,7 +115,6 @@ make run
 ## Run Tests
 
 ```bash
-# Test setup with running the test suite
 make test
 ```
 

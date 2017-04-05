@@ -27,7 +27,7 @@ class BaseClient(object):
         :type host: str
         :param port: BigchaindDB Port (default: 9984)
         :type port: int
-        :param num_connections: Amount of connection made to BigchainDB node
+        :param num_connections: Amount of connections made to BigchainDB node
         :type num_connections: int
         :param local_store: Local database object
         :type local_store: SqliteStore
@@ -40,7 +40,7 @@ class BaseClient(object):
 
     def test_transaction(self, tx: dict) -> bool:
         """
-        Test validity of transaction
+        Validate a transaction against BigchainDB
 
         :param tx: Transaction to test
         :type tx: dict
@@ -67,7 +67,7 @@ class BaseClient(object):
 
     def save_document(self, document: object) -> object:
         """
-        Abstract method for saving a document
+        Abstract method to store a document
 
         :param document: Document to save
         :type document: object
@@ -78,7 +78,7 @@ class BaseClient(object):
 
     def get_document(self, document_id: object) -> provmodel.ProvDocument:
         """
-        Abstract method for retrieving a document
+        Abstract method to retrieve a document
 
         :param document_id: Document to save
         :type document_id: object
@@ -107,7 +107,8 @@ class DocumentConceptClient(BaseClient):
 
     def save_document(self, document: str or bytes or provmodel.ProvDocument) -> str:
         """
-        Writes a document into BigchainDB
+        Write a document into BigchainDB
+        
         :param document: Document as JSON/XML/PROVN
         :type document: str or bytes or ProvDocument
         :return: Transaction id of document
@@ -122,7 +123,7 @@ class DocumentConceptClient(BaseClient):
 
     def get_document(self, tx_id: str) -> provmodel.ProvDocument:
         """
-        Returns a document by transaction id from BigchainDB
+        Retrieve a document by transaction id from BigchainDB
 
         :param tx_id: Transaction Id of Document
         :type tx_id: str
@@ -160,7 +161,7 @@ class GraphConceptClient(BaseClient):
     @staticmethod
     def calculate_account_data(prov_document: provmodel.ProvDocument) -> list:
         """
-        Transforms a ProvDocument into a tuple including ProvElement, list of ProvRelation and list of Namespaces
+        Transforms a ProvDocument into a tuple with ProvElement, list of ProvRelation and list of Namespaces
 
         :param prov_document: Document to transform
         :type prov_document:
@@ -186,7 +187,7 @@ class GraphConceptClient(BaseClient):
 
     def save_document(self, document: str or BufferedReader or provmodel.ProvDocument) -> list:
         """
-        Writes a document into BigchainDB
+        Write a document into BigchainDB
 
         :param document: Document as JSON/XML/PROVN
         :type document: str or BufferedReader or ProvDocument
@@ -222,7 +223,7 @@ class GraphConceptClient(BaseClient):
 
     def get_document(self, document_tx_ids: list) -> provmodel.ProvDocument:
         """
-        Returns a document by a list transaction ids from BigchainDB
+        Retrieve a document by a list transaction ids from BigchainDB
 
         :param document_tx_ids: Transaction Ids of Document
         :type document_tx_ids: list
@@ -268,11 +269,14 @@ class RoleConceptClient(BaseClient):
     @staticmethod
     def calculate_account_data(prov_document: provmodel.ProvDocument) -> list:
         """
-        Transforms a ProvDocument into a tuple including ProvElement, list of ProvRelation and list of Namespaces
+        Transforms a ProvDocument into a list of tuples including: 
+        ProvAgent, list of ProvRelations from agent,
+        list of ProvElements associated to ProvAgent,
+        list of Namespaces
 
         :param prov_document: Document to transform
         :type prov_document:
-        :return: List of tuples(element, elements, namespace)
+        :return: List of tuples(ProvAgent, list(), list(), list())
         :rtype: list
         """
 
@@ -281,11 +285,6 @@ class RoleConceptClient(BaseClient):
         sorted_nodes = topological_sort(g, reverse=True)
         agents = list(filter(lambda elem: isinstance(elem, provmodel.ProvAgent), sorted_nodes))
         elements = list(filter(lambda elem: not isinstance(elem, provmodel.ProvAgent), sorted_nodes))
-
-        # print("all: ", sorted_nodes)
-        # print("agents:", agents)
-        # print("elements:", elements)
-        # print("=================\n")
 
         # Check on compatibility
         if not is_directed_acyclic_graph(g):
@@ -300,7 +299,7 @@ class RoleConceptClient(BaseClient):
 
         accounts = []
         for agent in agents:
-            # find out going relations from agent
+            # find out-going relations from agent
             agent_relations = []
             for u, v in g.out_edges(agent):
                 # Todo check if filter does not left out some info
@@ -322,7 +321,7 @@ class RoleConceptClient(BaseClient):
 
     def save_document(self, document: str or BufferedReader or provmodel.ProvDocument) -> list:
         """
-        Writes a document into BigchainDB
+        Write a document into BigchainDB
 
         :param document: Document as JSON/XML/PROVN
         :type document: str or BufferedReader or ProvDocument
