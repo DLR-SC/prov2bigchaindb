@@ -28,7 +28,7 @@ class GraphConceptTest(unittest.TestCase):
         del db
         del self.test_prov_files
 
-    @unittest.skip("testing skipping")
+    #@unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
         graph_client = clients.GraphConceptClient(host=self.host, port=self.port)
@@ -47,7 +47,7 @@ class GraphConceptTest(unittest.TestCase):
         self.assertEqual(prov_document, doc)
         print(tx_ids)
 
-    @unittest.skip("testing skipping")
+    #@unittest.skip("testing skipping")
     def test_thesis_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["thesis"])
         graph_client = clients.GraphConceptClient(host=self.host, port=self.port)
@@ -56,7 +56,7 @@ class GraphConceptTest(unittest.TestCase):
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-    @unittest.skip("testing skipping")
+    #@unittest.skip("testing skipping")
     def test_quantified_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["quantified"])
         graph_client = clients.GraphConceptClient(host=self.host, port=self.port)
