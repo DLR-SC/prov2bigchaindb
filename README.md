@@ -1,4 +1,4 @@
-# PROV  BigchainDB
+# PROV 2 BigchainDB
 
 ## Master branch
 
