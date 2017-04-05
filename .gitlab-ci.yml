@@ -19,7 +19,6 @@ build:
   stage: build
   only:
   - master
-  - improve-ci
   - develop
   script:
   - pip install -e .[dev]
@@ -29,7 +28,6 @@ test:
   stage: test
   only:
   - master
-  - improve-ci
   - develop
   script:
   - pip install -e .[dev]

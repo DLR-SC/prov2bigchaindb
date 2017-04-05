@@ -12,22 +12,6 @@ Subpackages
 Submodules
 ----------
 
-prov2bigchaindb.alternation_test module
----------------------------------------
-
-.. automodule:: prov2bigchaindb.alternation_test
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-prov2bigchaindb.check_tx module
--------------------------------
-
-.. automodule:: prov2bigchaindb.check_tx
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 prov2bigchaindb.version module
 ------------------------------
 

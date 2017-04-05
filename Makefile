@@ -43,16 +43,12 @@ coverage:
 	coverage run --source prov2bigchaindb setup.py test
 	coverage report -m
 	coverage html
-#google-chrome htmlcov/index.html
 
 docs:
-	rm -f docs/prov.rst
 	rm -f docs/modules.rst
-	which sphinx-apidoc
-	sphinx-apidoc -o docs/source prov2bigchaindb
+	sphinx-apidoc -o docs/source prov2bigchaindb prov2bigchaindb/tests/*
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
-#google-chrome docs/build/html/index.html
 
 release: clean
 	python setup.py sdist upload

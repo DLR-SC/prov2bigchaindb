@@ -43,7 +43,7 @@ class BaseAccount(object):
 
     def _create_asset(self, bdb_connection: BigchainDB, asset: dict, metadata: dict = None) -> dict:
         """
-        Build and send new CREATE transaction
+        Create and transfer new CREATE transaction
 
         :param bdb_connection: Connection object for BigchainDB
         :type bdb_connection: BigchainDB
@@ -71,7 +71,7 @@ class BaseAccount(object):
     def _transfer_asset(self, bdb_connection: BigchainDB, recipient_pub_key: str, tx: dict,
                         metadata: dict = None) -> dict:
         """
-        Build and send new TRANSFER transaction
+        Create and transfer new TRANSFER transaction
 
         :param bdb_connection: Connection object for BigchainDB
         :type bdb_connection: BigchainDB
@@ -151,7 +151,7 @@ class DocumentConceptAccount(BaseAccount):
 
     def save_asset(self, asset: dict, bdb_connection: BigchainDB) -> str:
         """
-        Writes asset to BigchainDB
+        Write asset to BigchainDB
 
         :param asset: Dictonary with asset data
         :type asset: dict
@@ -200,7 +200,7 @@ class GraphConceptAccount(BaseAccount):
 
     def get_tx_id(self) -> str:
         """
-        Get tx_id that describes the account in BigchainDB
+        Get the tx_id that describes the account in BigchainDB
 
         :return: Transaction id of account
         :rtype: str
@@ -209,7 +209,7 @@ class GraphConceptAccount(BaseAccount):
 
     def has_relations_with_id(self) -> bool:
         """
-        Indicates whether account has relation with ids
+        Indicates whether an account has relation with ids or not
         :return: True if one or more relation does have ids
         :rtype: bool
         """
@@ -217,7 +217,7 @@ class GraphConceptAccount(BaseAccount):
 
     def has_relations_without_id(self) -> bool:
         """
-        Indicates whether account has relation with ids
+        Indicates whether an account has relation without ids or not
         :return: True if one or more relation does have ids
         :rtype: bool
         """
@@ -229,7 +229,7 @@ class GraphConceptAccount(BaseAccount):
 
     def __create_instance_document(self) -> ProvDocument:
         """
-        Builds valid ProvDocument representation of account
+        Creates a valid ProvDocument describing an account
 
         :return: Representation of account as ProvDocument
         :rtype: ProvDocument
@@ -242,7 +242,7 @@ class GraphConceptAccount(BaseAccount):
 
     def __create_relation(self, relation) -> (ProvDocument, dict):
         """
-        Yields ProvDocument and mapping for each relations
+        Returns a ProvDocument and mapping for all relations
         
         :return: Relation as ProvDocument and 
         :rtype: ( ProvDocument, dict)
@@ -268,7 +268,7 @@ class GraphConceptAccount(BaseAccount):
 
     def save_relations_with_ids(self, bdb_connection: BigchainDB) -> list:
         """
-        Writes all relation assets to BigchainDB
+        Writes all assets with relations (having ids) to BigchainDB
 
         :param bdb_connection: Connection object for BigchainDB
         :type bdb_connection: BigchainDB
@@ -296,7 +296,7 @@ class GraphConceptAccount(BaseAccount):
 
     def save_relations_without_ids(self, bdb_connection: BigchainDB) -> list:
         """
-        Writes all relation assets to BigchainDB
+        Write all assets with relations to BigchainDB
 
         :param bdb_connection: Connection object for BigchainDB
         :type bdb_connection: BigchainDB
@@ -322,7 +322,7 @@ class GraphConceptAccount(BaseAccount):
 
     def save_instance_asset(self, bdb_connection: BigchainDB) -> str:
         """
-        Writes instance asset to BigchainDB
+        Write provenance describing the account to BigchainDB
 
         :param bdb_connection: Connection object for BigchainDB
         :type bdb_connection: BigchainDB
@@ -372,7 +372,7 @@ class RoleConceptAccount(BaseAccount):
 
     def get_tx_id(self) -> str:
         """
-        Get tx_id that describes the account in BigchainDB
+        Get the tx_id that describes the account in BigchainDB
 
         :return: Transaction id of account
         :rtype: str
@@ -385,7 +385,7 @@ class RoleConceptAccount(BaseAccount):
 
     def __create_document(self, element, relations) -> tuple:
         """
-        Yields ProvDocument and mapping for each relations
+        Returns a ProvDocument and mapping for all relations
 
         :return: Relation as ProvDocument and
         :rtype: (ProvDocument, map)
@@ -394,18 +394,6 @@ class RoleConceptAccount(BaseAccount):
         doc.add_record(element)
         mapping = {}
         for relation in relations:
-            # for relation_type, relation_attr in relation.formal_attributes:
-            #     if relation_attr and relation_attr != element.identifier:
-            #         try:
-            #             recipient = self.store.get_account(str(relation_attr))
-            #             mapping[recipient[0]] = recipient[3]
-            #         except exceptions.NoAccountFoundException:
-            #             try:
-            #                 recipient = self.id_mapping.get(str(relation_attr))
-            #                 mapping[str(relation_attr)] = recipient
-            #             except exceptions.NoRelationFoundException:
-            #                 log.info("Found no tx for %s", relation_attr)
-
             for n in self.prov_namespaces:
                 doc.add_namespace(n.prefix, n.uri)
             doc.add_record(relation)
@@ -413,7 +401,7 @@ class RoleConceptAccount(BaseAccount):
 
     def save_elements(self, bdb_connection: BigchainDB) -> list:
         """
-        Writes all relation assets to BigchainDB
+        Writes all elements with assets to BigchainDB
 
         :param bdb_connection: Connection object for BigchainDB
         :type bdb_connection: BigchainDB
@@ -442,7 +430,7 @@ class RoleConceptAccount(BaseAccount):
 
     def save_instance_asset(self, bdb_connection: BigchainDB) -> str:
         """
-        Writes instance asset to BigchainDB
+        Write provenance describing the account to BigchainDB
 
         :param bdb_connection: Connection object for BigchainDB
         :type bdb_connection: BigchainDB
