@@ -1,0 +1,29 @@
+language: python
+sudo: required
+
+python:
+  - 3.5.3
+
+services:
+  - rethinkdb:latest
+
+before_install:
+  - apt-get update -qy
+  - apt-get install -y libxml2-dev libxslt1-dev lib32z1-dev libpython3-dev python3-dev python3-pip python3-setuptools libffi-dev
+  - pyvenv env
+  - source env/bin/activate
+  - pip3 install -U setuptools pip
+
+# Install packages
+install:
+  - pip install -e .[test]
+
+# Run test
+script:
+  - bigchaindb --dev-allow-temp-keypair start &
+  - coverage run --source=prov2bigchaindb setup.py test
+  - make docs-travis
+  - . ./.travis_docs.sh
+
+after_success:
+  - coveralls

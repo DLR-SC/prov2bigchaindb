@@ -48,7 +48,7 @@ def to_prov_document(content: str or bytes or model.ProvDocument) -> model.ProvD
 
 def wait_until_valid(tx_id: str, bdb_connection: BigchainDB):
     """
-    Waits until a transactionis valid in BigchainDB
+    Waits until a transaction is valid in BigchainDB
 
     :param tx_id: Id of transaction to wait on
     :type tx_id: str
