@@ -4,7 +4,7 @@ PROV 2 BigchainDB
 Introduction
 ------------
 
-This python module provides three different clients to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into a federation of `BigchainDB <https://www.bigchaindb.com/>` nodes.
+This python module provides three different clients to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into a federation of `BigchainDB <https://www.bigchaindb.com/>`_ nodes.
 All clients are implemented with respect to the proposed concepts from the masters thesis `Trustworthy Provenance Recording using a blockchain-like database <http://elib.dlr.de/111772/>`_.
 
 See full documentation at: `prov2bigchaindb.readthedocs.io <http://prov2bigchaindb.readthedocs.io>`_
@@ -26,6 +26,7 @@ PyPi
     Not supported yet
 
 Install it by running::
+
     pip install prov2bigchaindb
 
 You can view `prov2bigchaindb on PyPi's package index <https://pypi.python.org/pypi/prov2bigchaindb/>`_
