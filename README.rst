@@ -4,20 +4,24 @@ PROV 2 BigchainDB
 Introduction
 ------------
 
-.. image:: https://readthedocs.org/projects/prov2bigchaindb/badge/?version=latest
-    :target: http://prov2bigchaindb.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
 .. image:: https://badge.fury.io/py/prov2bigchaindb.svg
     :target: https://pypi.python.org/pypi/prov2bigchaindb
     :alt: PyPI version
+.. image:: https://readthedocs.org/projects/prov2bigchaindb/badge/?version=latest
+    :target: http://prov2bigchaindb.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 .. image:: https://travis-ci.org/DLR-SC/prov2bigchaindb.svg?branch=master
     :target: https://travis-ci.org/DLR-SC/prov2bigchaindb
     :alt: Build Status
 .. image:: https://coveralls.io/repos/github/DLR-SC/prov2bigchaindb/badge.svg?branch=master
     :target: https://coveralls.io/github/DLR-SC/prov2bigchaindb?branch=master
     :alt: Coverage Status
-
-
+.. image:: https://www.quantifiedcode.com/api/v1/project/00b76af4d7d747ee8dd0a6e4a5fa4ce5/badge.svg
+    :target: https://www.quantifiedcode.com/app/project/00b76af4d7d747ee8dd0a6e4a5fa4ce5
+    :alt: Code issues
+.. image:: https://pyup.io/repos/github/DLR-SC/prov2bigchaindb/shield.svg
+    :target: https://pyup.io/repos/github/DLR-SC/prov2bigchaindb/
+    :alt: Updates
 
 This python module provides three different clients to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into a federation of `BigchainDB <https://www.bigchaindb.com/>`_ nodes.
 All clients are implemented with respect to the proposed concepts from the masters thesis `Trustworthy Provenance Recording using a blockchain-like database <http://elib.dlr.de/111772/>`_.
