@@ -33,7 +33,7 @@ class DocumentConceptTest(unittest.TestCase):
         del self.bdb_connection
         del self.test_prov_files
 
-    #@unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_simple_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["simple"])
         doc_client = clients.DocumentConceptClient(account_id=self.account_id, host=self.host, port=self.port)
@@ -53,7 +53,7 @@ class DocumentConceptTest(unittest.TestCase):
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-    #@unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_thesis_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["thesis"])
         doc_client = clients.DocumentConceptClient(account_id=self.account_id, host=self.host, port=self.port)
@@ -63,7 +63,7 @@ class DocumentConceptTest(unittest.TestCase):
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
 
-    #@unittest.skip("testing skipping")
+    @unittest.skip("testing skipping")
     def test_quantified_prov_doc(self):
         prov_document = utils.to_prov_document(content=self.test_prov_files["quantified"])
         doc_client = clients.DocumentConceptClient(account_id=self.account_id, host=self.host, port=self.port)
