@@ -7,8 +7,14 @@ Welcome to PROV 2 BigchainDB's documentation!
 =============================================
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Contents:
+  :maxdepth: 2
+
+  readme.rst
+  development.rst
+  changelog.rst
+  test_howto.rst
+  prov2bigchaindb.core.rst
+  prov2bigchaindb.rst
 
 Indices and tables
 ==================

@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     prov2bigchaindb.core
-    prov2bigchaindb.tests
 
 Submodules
 ----------

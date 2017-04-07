@@ -26,7 +26,7 @@ import sphinx_rtd_theme
 
 # get version
 _version = {}
-with open('../../prov2bigchaindb/version.py') as fp:
+with open('../prov2bigchaindb/version.py') as fp:
     exec(fp.read(), _version)
 
 # -- General configuration ------------------------------------------------
@@ -62,7 +62,7 @@ source_parsers = {
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = ['.rst', '.md']
+source_suffix = ['.rst']
 #source_suffix = '.rst'
 
 # The master toctree document.

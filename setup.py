@@ -4,8 +4,15 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
+install_requires=[
+    "bigchaindb_driver",
+    "prov"
+]
+
 tests_require = [
+    "bigchaindb",
     'coverage',
+    'coveralls'
 ]
 
 docs_require = [
@@ -54,14 +61,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
 
-    install_requires=[
-        "bigchaindb",
-        "bigchaindb_driver",
-        "prov"
-    ],# + tests_require + docs_require, # This can be removed if prov-db-connector is on pypi -> than install with "pip install '.[dev]' for development
+    install_requires=install_requires,
     tests_require=tests_require,
     extras_require={
-        'test': tests_require,
+        'test': tests_require + docs_require,
         'dev': tests_require + docs_require,
         'docs': docs_require,
     },
