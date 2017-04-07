@@ -41,8 +41,6 @@ Installation
 
 PyPi
 ~~~~
-.. note::
-    Not supported yet
 
 Install it by running::
 
