@@ -21,7 +21,11 @@ install:
 # Run test
 script:
   - bigchaindb --dev-allow-temp-keypair start &
+  - mkdir .cache
+  - sleep 5
   - coverage run --source=prov2bigchaindb setup.py test
+  - coverage report -m
+  - coverage html
   - make docs-travis
   - . ./.travis_docs.sh
 
