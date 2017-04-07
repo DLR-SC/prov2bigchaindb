@@ -9,7 +9,7 @@ services:
 
 before_install:
   - sudo apt-get update -qy
-  - sudo apt-get install -y libxml2-dev libxslt1-dev lib32z1-dev libpython3-dev python3-dev python3-pip python3-setuptools libffi-dev
+  - sudo apt-get install -y libxml2-dev libxslt1-dev lib32z1-dev libffi-dev
   - pyvenv env
   - source env/bin/activate
   - pip3 install -U setuptools pip
