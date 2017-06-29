@@ -7,7 +7,7 @@ import bigchaindb_driver
 from prov2bigchaindb.core import clients, accounts, utils, exceptions, local_stores
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class BaseAccountTest(unittest.TestCase):

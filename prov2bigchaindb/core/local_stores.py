@@ -4,7 +4,7 @@ import sqlite3
 from prov2bigchaindb.core import exceptions
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 class BaseStore(object):
     def __init__(self, db_name: str = None):

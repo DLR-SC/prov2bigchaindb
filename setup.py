@@ -5,12 +5,12 @@ except ImportError:
     from distutils.core import setup, find_packages
 
 install_requires=[
-    "bigchaindb_driver",
+    "bigchaindb_driver~=0.3",
     "prov"
 ]
 
 tests_require = [
-    "bigchaindb",
+    "BigchainDB~=1.0.0rc1",
     'coverage',
     'coveralls'
 ]

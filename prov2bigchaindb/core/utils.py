@@ -1,6 +1,7 @@
 import json
 import logging
 
+import random
 import requests
 import time
 from bigchaindb_driver import BigchainDB
@@ -11,7 +12,7 @@ from prov import model
 from prov2bigchaindb.core import exceptions
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 def to_prov_document(content: str or bytes or model.ProvDocument) -> model.ProvDocument:
@@ -109,12 +110,12 @@ def is_block_to_tx_valid(tx_id: str, bdb_connection: BigchainDB) -> bool:
     :return: True if transactions is in block and block is valid
     :rtype: bool
     """
-    api_url = bdb_connection.info()['_links']['api_v1']
-    res = requests.get(api_url + 'blocks?tx_id=' + tx_id)
+    node = random.choice(bdb_connection.nodes)
+    res = requests.get(node + bdb_connection.blocks.path + '?transaction_id=' + tx_id)
     block_id = res.json()
     if len(block_id) < 1 or len(block_id) > 1:
         raise exceptions.TransactionIdNotFound(tx_id)
-    res = requests.get(api_url + 'statuses?block_id=' + block_id[0])
+    res = requests.get(node + bdb_connection.api_prefix + '/statuses?block_id=' + block_id[0])
     if res.status_code != 200:
         raise exceptions.BlockIdNotFound(block_id[0])
     status = res.json()['status']
