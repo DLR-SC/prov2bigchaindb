@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 0.4.0 (2017-06-29)
+--------------------------
+
+- Updated bigchaindb components to 1.0.0rc1
+
 Version 0.3.1 (2017-04-07)
 --------------------------
 
