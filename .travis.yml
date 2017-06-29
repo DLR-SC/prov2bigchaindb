@@ -9,7 +9,7 @@ addons:
 
 before_install:
   - sudo apt-get update -qy
-  - sudo apt-get install -y libxml2-dev lib32z1-dev
+  - sudo apt-get install -y libxml2-dev lib32z1-dev libssl-dev
   - pyvenv env
   - source env/bin/activate
   - pip3 install -U setuptools pip
@@ -20,7 +20,8 @@ install:
 
 # Run test
 script:
-  - bigchaindb --dev-allow-temp-keypair start &
+  - bigchaindb -y configure rethinkdb
+  - bigchaindb start &
   - mkdir .cache
   - sleep 5
   - coverage run --source=prov2bigchaindb setup.py test

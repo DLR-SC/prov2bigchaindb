@@ -8,7 +8,7 @@ from prov.model import ProvDocument, ProvElement, ProvAgent
 from prov2bigchaindb.core import utils, exceptions, local_stores
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class BaseAccount(object):
@@ -94,7 +94,7 @@ class BaseAccount(object):
             'fulfillment': output['condition']['details'],
             'fulfills': {
                 'output': output_index,
-                'txid': tx['id']
+                'transaction_id': tx['id']
             },
             'owners_before': output['public_keys']
         }

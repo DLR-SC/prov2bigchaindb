@@ -9,7 +9,7 @@ from prov2bigchaindb.core import utils, exceptions
 from prov2bigchaindb.tests.core import setup_test_files
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class UtilityTest(unittest.TestCase):
@@ -79,8 +79,9 @@ class UtilityTest(unittest.TestCase):
     @mock.patch('prov2bigchaindb.core.utils.BigchainDB')
     @mock.patch('prov2bigchaindb.core.utils.requests.models.Response')
     @mock.patch('prov2bigchaindb.core.utils.requests')
-    def test_is_block_to_tx_valid(self, mock_requests, mock_response, mock_bdb):
-        mock_bdb.info.return_value = {'_links': {'api_v1': 'http://127.0.0.1:9984'}}
+    @mock.patch('prov2bigchaindb.core.utils.random')
+    def test_is_block_to_tx_valid(self, mock_random, mock_requests, mock_response, mock_bdb):
+        mock_random.choice.return_value = 'http://127.0.0.1:9984'
         mock_response.json.side_effect = [['1'], {'status': 'valid'},
                                           ['1'], {'status': 'undecided'},
                                           ['1'], {'status': 'invalid'},

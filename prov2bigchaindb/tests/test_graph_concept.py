@@ -5,7 +5,7 @@ from prov2bigchaindb.tests.core import setup_test_files
 from prov2bigchaindb.core import utils, clients, local_stores
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class GraphConceptTest(unittest.TestCase):
