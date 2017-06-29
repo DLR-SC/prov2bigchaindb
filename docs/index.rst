@@ -13,8 +13,7 @@ Welcome to PROV 2 BigchainDB's documentation!
   development.rst
   changelog.rst
   test_howto.rst
-  prov2bigchaindb.core.rst
-  prov2bigchaindb.rst
+  modules.rst
 
 Indices and tables
 ==================
