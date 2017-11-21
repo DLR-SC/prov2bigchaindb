@@ -1,3 +1,3 @@
-BigchainDB==1.0.0rc1
+BigchainDB==1.3.0
 bigchaindb-driver==0.3.1
 prov==1.5.0
