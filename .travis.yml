@@ -10,8 +10,6 @@ addons:
 before_install:
   - sudo apt-get update -qy
   - sudo apt-get install -y libxml2-dev lib32z1-dev libssl-dev
-  - python -m venv env
-  - source env/bin/activate
   - pip install -U setuptools pip
 
 # Install packages
