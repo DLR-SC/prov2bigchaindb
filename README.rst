@@ -16,9 +16,6 @@ Introduction
 .. image:: https://coveralls.io/repos/github/DLR-SC/prov2bigchaindb/badge.svg?branch=master
     :target: https://coveralls.io/github/DLR-SC/prov2bigchaindb?branch=master
     :alt: Coverage Status
-.. image:: https://www.quantifiedcode.com/api/v1/project/00b76af4d7d747ee8dd0a6e4a5fa4ce5/badge.svg
-    :target: https://www.quantifiedcode.com/app/project/00b76af4d7d747ee8dd0a6e4a5fa4ce5
-    :alt: Code issues
 .. image:: https://pyup.io/repos/github/DLR-SC/prov2bigchaindb/shield.svg
     :target: https://pyup.io/repos/github/DLR-SC/prov2bigchaindb/
     :alt: Updates

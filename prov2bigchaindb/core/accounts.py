@@ -93,7 +93,7 @@ class BaseAccount(object):
         transfer_input = {
             'fulfillment': output['condition']['details'],
             'fulfills': {
-                'output': output_index,
+                'output_index': output_index,
                 'transaction_id': tx['id']
             },
             'owners_before': output['public_keys']
