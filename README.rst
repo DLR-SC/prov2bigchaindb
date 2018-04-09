@@ -22,7 +22,7 @@ Introduction
 .. image:: https://zenodo.org/badge/87302481.svg
    :target: https://zenodo.org/badge/latestdoi/87302481
 
-This python module provides three different clients to save `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into a federation of `BigchainDB <https://www.bigchaindb.com/>`_ nodes.
+This python module provides three different clients to store `W3C-PROV <https://www.w3.org/TR/prov-overview/>`_ documents into a federation of `BigchainDB <https://www.bigchaindb.com/>`_ nodes.
 All clients are implemented with respect to the proposed concepts from the masters thesis `Trustworthy Provenance Recording using a blockchain-like database <http://elib.dlr.de/111772/>`_.
 
 See full documentation at: `prov2bigchaindb.readthedocs.io <http://prov2bigchaindb.readthedocs.io>`_
@@ -57,7 +57,7 @@ Source
     cd prov2bigchaindb
 
     # Setup virtual environment
-    pyenv env
+    python -m venv env
     source env/bin/activate
 
     # Install dependencies and package into virtual enviroment
