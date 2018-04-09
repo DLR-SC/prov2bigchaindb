@@ -4,7 +4,7 @@ Changelog
 Version 0.4.1 (2018-04-09)
 --------------------------
 
-- Updated BigchainDD to 1.3.0
+- Updated BigchainDB to 1.3.0
 - Updated db-driver to 0.4.1
 - Updated networkx to 2.1
 - Updated prov to 1.5.2
