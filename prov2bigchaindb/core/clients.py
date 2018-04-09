@@ -172,10 +172,10 @@ class GraphConceptClient(BaseClient):
         namespaces = prov_document.get_registered_namespaces()
         g = provgraph.prov_to_graph(prov_document=prov_document)
         elements = []
-        for node, nodes in g.adjacency_iter():
+        for node, node_dict in g.adjacency():
             relations = {'with_id': [], 'without_id': []}
             # print(node)
-            for tmp_relations in nodes.values():
+            for tmp_relations in node_dict.values():
                 for relation in tmp_relations.values():
                     relation = relation['relation']
                     if relation.identifier:
@@ -282,14 +282,14 @@ class RoleConceptClient(BaseClient):
 
         namespaces = prov_document.get_registered_namespaces()
         g = provgraph.prov_to_graph(prov_document=prov_document)
-        sorted_nodes = topological_sort(g, reverse=True)
+        sorted_nodes = list(reversed(list(topological_sort(g))))
         agents = list(filter(lambda elem: isinstance(elem, provmodel.ProvAgent), sorted_nodes))
         elements = list(filter(lambda elem: not isinstance(elem, provmodel.ProvAgent), sorted_nodes))
 
         # Check on compatibility
         if not is_directed_acyclic_graph(g):
             raise Exception("Provenance graph is not acyclic")
-        if isolates(g):
+        if list(isolates(g)):
             raise Exception("Provenance not compatible with role-based concept. Has isolated Elements")
         for element in elements:
             if provmodel.ProvAgent not in [type(n) for n in g.neighbors(element)]:

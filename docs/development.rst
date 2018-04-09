@@ -20,7 +20,7 @@ Setup
     cd prov2bigchaindb
 
     # Setup virtual environment
-    pyvenv env
+    python -m venv env
     source env/bin/activate
 
     # Install dependencies

@@ -55,7 +55,7 @@ docs-travis:
 	./.travis_docs.sh
 
 release: clean
-	python setup.py sdist upload
+	python setup.py sdist upload -r pypi
 
 dist: clean
 	python setup.py sdist

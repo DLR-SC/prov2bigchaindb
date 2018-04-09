@@ -45,7 +45,6 @@ class GraphConceptTest(unittest.TestCase):
         doc = graph_client.get_document(tx_ids)
         self.assertEqual(len(prov_document.get_records()), len(doc.get_records()))
         self.assertEqual(prov_document, doc)
-        print(tx_ids)
 
     @unittest.skip("testing skipping")
     def test_thesis_prov_doc(self):
