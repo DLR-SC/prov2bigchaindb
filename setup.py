@@ -5,7 +5,7 @@ except ImportError:
     from distutils.core import setup, find_packages
 
 install_requires=[
-    "bigchaindb_driver~=0.4.1",
+    "bigchaindb-driver~=0.5.2",
     "networkx~=2.1",
     "prov~=1.5.2"
 ]
