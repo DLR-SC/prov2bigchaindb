@@ -2,7 +2,7 @@ language: python
 sudo: required
 
 python:
-  - 3.5
+  - 3.6
 
 addons:
   rethinkdb: '2.3.4'
